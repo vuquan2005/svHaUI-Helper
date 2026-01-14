@@ -1,56 +1,42 @@
 /**
  * Settings Manager - Quản lý cài đặt người dùng
- * Sử dụng GM_getValue/GM_setValue để lưu trữ persistent
+ * Sử dụng type-safe storage
  */
 
-import { GM_getValue, GM_setValue } from '$';
+import { storage } from './storage';
+import { createLogger, setGlobalLogLevel, type LogLevel } from './logger';
 
-export interface AppSettings {
-    // Cài đặt cho từng feature
-    features: {
-        [key: string]: boolean;
-    };
-}
+const log = createLogger('Settings');
 
-const DEFAULT_SETTINGS: AppSettings = {
-    features: {},
+const DEFAULT_SETTINGS = {
+    logLevel: 'info' as LogLevel,
+    features: {} as Record<string, boolean>,
 };
 
 class SettingsManager {
-    private settings: AppSettings;
-    private readonly STORAGE_KEY = 'svhaui_helper_settings';
+    private settings: typeof DEFAULT_SETTINGS;
 
     constructor() {
         this.settings = this.load();
+        setGlobalLogLevel(this.settings.logLevel);
     }
 
-    private load(): AppSettings {
+    private load(): typeof DEFAULT_SETTINGS {
         try {
-            const saved = GM_getValue<string | null>(this.STORAGE_KEY, null);
-            if (saved) {
-                return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-            }
+            const saved = storage.get('app_settings', DEFAULT_SETTINGS);
+            return { ...DEFAULT_SETTINGS, ...saved };
         } catch (e) {
-            console.error('[Settings] Failed to load settings:', e);
-        }
-        return { ...DEFAULT_SETTINGS };
-    }
-
-    save(): void {
-        try {
-            GM_setValue(this.STORAGE_KEY, JSON.stringify(this.settings));
-        } catch (e) {
-            console.error('[Settings] Failed to save settings:', e);
+            log.e('Failed to load settings:', e);
+            return { ...DEFAULT_SETTINGS };
         }
     }
 
-    get<K extends keyof AppSettings>(key: K): AppSettings[K] {
-        return this.settings[key];
-    }
-
-    set<K extends keyof AppSettings>(key: K, value: AppSettings[K]): void {
-        this.settings[key] = value;
-        this.save();
+    private save(): void {
+        try {
+            storage.set('app_settings', this.settings);
+        } catch (e) {
+            log.e('Failed to save settings:', e);
+        }
     }
 
     isFeatureEnabled(featureId: string): boolean {
@@ -62,9 +48,16 @@ class SettingsManager {
         this.save();
     }
 
-    getAll(): AppSettings {
-        return { ...this.settings };
+    setLogLevel(level: LogLevel): void {
+        this.settings.logLevel = level;
+        setGlobalLogLevel(level);
+        this.save();
+    }
+
+    getLogLevel(): LogLevel {
+        return this.settings.logLevel;
     }
 }
 
 export const settings = new SettingsManager();
+export type { LogLevel };

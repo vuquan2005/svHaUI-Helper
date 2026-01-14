@@ -4,6 +4,7 @@
  */
 
 import { settings } from './settings';
+import { createLogger, Logger } from './logger';
 
 export interface FeatureConfig {
     id: string;
@@ -19,11 +20,17 @@ export abstract class Feature {
     readonly description: string;
     readonly urlMatch?: RegExp | string;
 
+    /** Logger tự động có prefix từ tên feature */
+    protected readonly log: Logger;
+
     constructor(config: FeatureConfig) {
         this.id = config.id;
         this.name = config.name;
         this.description = config.description;
         this.urlMatch = config.urlMatch;
+
+        // Tự động tạo logger với prefix là tên feature
+        this.log = createLogger(config.name);
     }
 
     /**

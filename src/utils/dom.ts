@@ -12,7 +12,6 @@ export function waitForElement<T extends Element>(
     timeout = 10000
 ): Promise<T | null> {
     return new Promise((resolve) => {
-        // Kiểm tra ngay nếu element đã tồn tại
         const existing = document.querySelector<T>(selector);
         if (existing) {
             resolve(existing);
@@ -32,7 +31,6 @@ export function waitForElement<T extends Element>(
             subtree: true,
         });
 
-        // Timeout
         setTimeout(() => {
             observer.disconnect();
             resolve(null);
@@ -54,18 +52,4 @@ export function createElementFromHTML<T extends Element>(html: string): T {
  */
 export function addStyles(css: string): void {
     GM_addStyle(css);
-}
-
-/**
- * Query selector với type safety
- */
-export function $(selector: string, parent: ParentNode = document): Element | null {
-    return parent.querySelector(selector);
-}
-
-/**
- * Query selector all với type safety
- */
-export function $$(selector: string, parent: ParentNode = document): Element[] {
-    return Array.from(parent.querySelectorAll(selector));
 }

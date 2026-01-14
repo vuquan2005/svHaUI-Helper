@@ -4,192 +4,69 @@ Reference cho các APIs có sẵn trong dự án.
 
 ## 📦 Core Module
 
-### Feature
-
-Base class cho tất cả features.
-
 ```typescript
-import { Feature, FeatureConfig } from './core';
+import { Feature, featureManager, settings, storage, log, createLogger } from './core';
 ```
 
-#### FeatureConfig
+### Feature
+
+Base class cho tất cả features. Tự động có logger với prefix từ tên feature.
 
 ```typescript
 interface FeatureConfig {
-    id: string;           // ID duy nhất
-    name: string;         // Tên hiển thị
-    description: string;  // Mô tả
-    urlMatch?: RegExp | string;  // URL pattern (optional)
+    id: string;
+    name: string;
+    description: string;
+    urlMatch?: RegExp | string;
 }
-```
 
-#### Feature Class
-
-```typescript
 abstract class Feature {
     readonly id: string;
     readonly name: string;
     readonly description: string;
-    readonly urlMatch?: RegExp | string;
+    protected readonly log: Logger;  // Tự động tạo
 
     constructor(config: FeatureConfig);
-    
-    // Kiểm tra có nên chạy không
     shouldRun(): boolean;
-    
-    // Khởi tạo feature (bắt buộc override)
     abstract init(): void | Promise<void>;
-    
-    // Cleanup (optional override)
     destroy(): void;
 }
 ```
 
 ---
 
-### FeatureManager
-
-Singleton quản lý tất cả features.
+### Storage (Type-safe)
 
 ```typescript
-import { featureManager } from './core';
+import { storage } from './core';
 ```
 
-#### Methods
+Sử dụng `StorageSchema` để type-safe:
 
-| Method | Description |
-|--------|-------------|
-| `register(feature)` | Đăng ký 1 feature |
-| `registerAll(features[])` | Đăng ký nhiều features |
-| `initAll()` | Khởi chạy tất cả features phù hợp |
-| `get(id)` | Lấy feature theo ID |
-| `getAll()` | Lấy tất cả features |
-| `isInitialized(id)` | Kiểm tra đã init chưa |
+```typescript
+// 1. Định nghĩa trong src/types/index.ts
+interface StorageSchema {
+    'app_settings': AppSettings;
+    'grades': CourseGrade[];
+}
+
+// 2. Sử dụng với autocomplete
+storage.get('grades', []);      // → CourseGrade[]
+storage.set('grades', data);    // Type checked
+storage.remove('grades');
+storage.keys();                 // → ('app_settings' | 'grades')[]
+```
 
 ---
 
 ### Settings
 
-Singleton quản lý cài đặt.
-
 ```typescript
-import { settings, AppSettings } from './core';
-```
+import { settings } from './core';
 
-#### AppSettings Interface
-
-```typescript
-interface AppSettings {
-    features: { [key: string]: boolean };
-}
-```
-
-#### Methods
-
-| Method | Description |
-|--------|-------------|
-| `get<K>(key)` | Lấy setting theo key |
-| `set<K>(key, value)` | Set setting |
-| `isFeatureEnabled(id)` | Kiểm tra feature có bật không |
-| `setFeatureEnabled(id, bool)` | Bật/tắt feature |
-| `getAll()` | Lấy tất cả settings |
-| `save()` | Lưu vào storage |
-
----
-
-## 🛠️ Utils Module
-
-### DOM Utilities
-
-```typescript
-import { 
-    waitForElement,
-    createElementFromHTML,
-    addStyles,
-    $,
-    $$
-} from './utils';
-```
-
-#### waitForElement
-
-Chờ element xuất hiện trong DOM.
-
-```typescript
-function waitForElement<T extends Element>(
-    selector: string,
-    timeout?: number  // default: 10000ms
-): Promise<T | null>;
-```
-
-**Ví dụ:**
-```typescript
-const header = await waitForElement<HTMLElement>('.main-header');
-if (header) {
-    header.style.display = 'none';
-}
-```
-
----
-
-#### createElementFromHTML
-
-Tạo element từ HTML string.
-
-```typescript
-function createElementFromHTML<T extends Element>(html: string): T;
-```
-
-**Ví dụ:**
-```typescript
-const button = createElementFromHTML<HTMLButtonElement>(`
-    <button class="my-btn" id="action">
-        Click me
-    </button>
-`);
-document.body.appendChild(button);
-```
-
----
-
-#### addStyles
-
-Thêm CSS vào trang (wrapper cho GM_addStyle).
-
-```typescript
-function addStyles(css: string): void;
-```
-
-**Ví dụ:**
-```typescript
-addStyles(`
-    .my-component {
-        background: #fff;
-        padding: 16px;
-        border-radius: 8px;
-    }
-`);
-```
-
----
-
-#### $ và $$
-
-Query selector shortcuts.
-
-```typescript
-function $(selector: string, parent?: ParentNode): Element | null;
-function $$(selector: string, parent?: ParentNode): Element[];
-```
-
-**Ví dụ:**
-```typescript
-const header = $('.header');
-const items = $$('.item-list > li');
-
-// Với parent
-const container = $('.container');
-const btn = $('.btn', container);
+settings.isFeatureEnabled('feature-id');  // → boolean
+settings.setFeatureEnabled('id', true);
+settings.setLogLevel('warn');  // 'debug' | 'info' | 'warn' | 'error' | 'none'
 ```
 
 ---
@@ -197,122 +74,69 @@ const btn = $('.btn', container);
 ### Logger
 
 ```typescript
-import { log, createLogger } from './utils';
-```
+import { log, createLogger } from './core';
 
-#### Main Logger
+// Main logger
+log.i('Message');  // ℹ️ [HaUI] Message
 
-```typescript
+// Child logger
+const myLog = createLogger('Module');
+myLog.i('Message');  // ℹ️ [HaUI:Module] Message
+
+// Methods
 log.d(...args);  // Debug
 log.i(...args);  // Info
 log.w(...args);  // Warning
 log.e(...args);  // Error
 ```
 
-#### Create Child Logger
-
-```typescript
-const featureLog = createLogger('FeatureName');
-featureLog.i('Message');  // ℹ️ [HaUI:FeatureName] Message
-```
-
-#### Logger Class
-
-```typescript
-class Logger {
-    d(...args): void;      // Debug
-    i(...args): void;      // Info  
-    w(...args): void;      // Warning
-    e(...args): void;      // Error
-    child(name): Logger;   // Tạo child logger
-    setEnabled(bool): void; // Bật/tắt
-}
-```
+**Note**: Features tự động có `this.log` - không cần import.
 
 ---
 
-## 🔌 GM_* APIs (từ vite-plugin-monkey)
-
-Import từ `'$'` (client alias):
+## 🛠️ Utils Module
 
 ```typescript
-import { 
-    GM_getValue,
-    GM_setValue,
-    GM_addStyle,
-    GM_xmlhttpRequest,
-    unsafeWindow,
-    monkeyWindow
-} from '$';
+import { waitForElement, createElementFromHTML, addStyles } from './utils';
 ```
 
-### GM_getValue / GM_setValue
-
-Lưu trữ persistent data.
+### waitForElement
 
 ```typescript
-// Lưu
-GM_setValue('key', { any: 'data' });
-
-// Đọc
-const data = GM_getValue<MyType>('key', defaultValue);
+const el = await waitForElement<HTMLElement>('.selector', 10000);
 ```
 
-### GM_addStyle
-
-Thêm CSS (được wrap trong `addStyles()`).
+### createElementFromHTML
 
 ```typescript
-GM_addStyle(`
-    body { background: red; }
-`);
+const btn = createElementFromHTML<HTMLButtonElement>(`<button>Click</button>`);
 ```
 
-### GM_xmlhttpRequest
-
-HTTP request bypass CORS.
+### addStyles
 
 ```typescript
-GM_xmlhttpRequest({
-    method: 'GET',
-    url: 'https://api.example.com/data',
-    onload: (response) => {
-        console.log(response.responseText);
-    }
-});
+addStyles(`.my-class { color: red; }`);
 ```
 
-### unsafeWindow
-
-Truy cập window của trang host.
-
-```typescript
-// Gọi function của trang
-unsafeWindow.someGlobalFunction();
-
-// Truy cập variable
-const data = unsafeWindow.pageData;
-```
+**Note**: Dùng `document.querySelector()` và `document.querySelectorAll()` trực tiếp.
 
 ---
 
-## 📝 TypeScript Types
+## 🔌 GM_* APIs
 
-### Có sẵn trong `vite-env.d.ts`
+Import từ `'$'`:
 
 ```typescript
-/// <reference types="vite/client" />
-/// <reference types="vite-plugin-monkey/client" />
+import { GM_getValue, GM_setValue, GM_addStyle, GM_xmlhttpRequest } from '$';
 ```
 
-### Type cho GM_* APIs
-
-Tự động có type hints khi import từ `'$'`.
+**Khuyến nghị**: Dùng `storage` wrapper thay vì GM_getValue/GM_setValue trực tiếp.
 
 ---
 
-## 🔗 Links
+## 📝 Types
 
-- [vite-plugin-monkey API](https://github.com/lisonge/vite-plugin-monkey#gm_api-usage)
-- [Tampermonkey Documentation](https://www.tampermonkey.net/documentation.php)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+```typescript
+// src/types/index.ts
+import type { StorageSchema, AppSettings, CourseGrade } from '../types';
+```

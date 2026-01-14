@@ -3,4 +3,5 @@
  */
 
 export * from './dom';
-export * from './logger';
+
+export { log, createLogger } from '../core/logger';

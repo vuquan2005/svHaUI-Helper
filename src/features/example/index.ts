@@ -4,9 +4,7 @@
  */
 
 import { Feature } from '../../core';
-import { addStyles, createLogger } from '../../utils';
-
-const log = createLogger('Example');
+import { addStyles } from '../../utils';
 
 // CSS cho feature này
 const styles = `
@@ -40,18 +38,15 @@ export class ExampleFeature extends Feature {
             id: 'example',
             name: 'Example Feature',
             description: 'Đây là feature mẫu để tham khảo cách tạo feature mới',
-            // Chỉ chạy trên trang chủ (comment out để chạy mọi trang)
-            // urlMatch: /sv\.haui\.edu\.vn\/?$/,
         });
     }
 
     init(): void {
-        log.i('Initializing...');
+        // Dùng this.log - tự động có prefix [HaUI:Example Feature]
+        this.log.i('Initializing...');
 
-        // Thêm CSS
         addStyles(styles);
 
-        // Tạo badge element
         this.badgeElement = document.createElement('div');
         this.badgeElement.className = 'example-feature-badge';
         this.badgeElement.textContent = '🚀 SV HaUI Helper đang hoạt động!';
@@ -69,6 +64,8 @@ export class ExampleFeature extends Feature {
                 setTimeout(() => this.badgeElement?.remove(), 500);
             }
         }, 5000);
+
+        this.log.i('Ready!');
     }
 
     destroy(): void {
