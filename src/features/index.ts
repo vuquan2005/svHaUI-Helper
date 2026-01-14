@@ -4,11 +4,11 @@
  */
 
 import { Feature } from '../core';
-import { ExampleFeature } from './example';
+import { DynamicTitleFeature } from './dynamic-title';
 
 // Thêm feature mới vào đây
 export const allFeatures: Feature[] = [
-    new ExampleFeature(),
+    new DynamicTitleFeature(),
     // new HomepageShortcuts(),
     // new NotificationPopup(),
     // new GradeCalculator(),
