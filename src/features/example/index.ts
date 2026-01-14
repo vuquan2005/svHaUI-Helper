@@ -4,7 +4,9 @@
  */
 
 import { Feature } from '../../core';
-import { addStyles } from '../../utils';
+import { addStyles, createLogger } from '../../utils';
+
+const log = createLogger('Example');
 
 // CSS cho feature này
 const styles = `
@@ -44,7 +46,7 @@ export class ExampleFeature extends Feature {
     }
 
     init(): void {
-        console.log('[ExampleFeature] Initializing...');
+        log.i('Initializing...');
 
         // Thêm CSS
         addStyles(styles);

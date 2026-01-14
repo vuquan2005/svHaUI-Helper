@@ -3,6 +3,9 @@
  */
 
 import { Feature } from './feature';
+import { createLogger } from '../utils';
+
+const log = createLogger('FeatureManager');
 
 class FeatureManager {
     private features: Map<string, Feature> = new Map();
@@ -13,11 +16,11 @@ class FeatureManager {
      */
     register(feature: Feature): void {
         if (this.features.has(feature.id)) {
-            console.warn(`[FeatureManager] Feature "${feature.id}" đã được đăng ký, bỏ qua.`);
+            log.w(`Feature "${feature.id}" đã được đăng ký, bỏ qua.`);
             return;
         }
         this.features.set(feature.id, feature);
-        console.log(`[FeatureManager] Đã đăng ký feature: ${feature.name}`);
+        log.d(`Đã đăng ký: ${feature.name}`);
     }
 
     /**
@@ -31,7 +34,7 @@ class FeatureManager {
      * Khởi chạy tất cả features phù hợp với trang hiện tại
      */
     async initAll(): Promise<void> {
-        console.log('[FeatureManager] Bắt đầu khởi tạo features...');
+        log.d('Bắt đầu khởi tạo features...');
 
         for (const [id, feature] of this.features) {
             if (this.initialized.has(id)) {
@@ -39,20 +42,20 @@ class FeatureManager {
             }
 
             if (!feature.shouldRun()) {
-                console.log(`[FeatureManager] Bỏ qua feature "${feature.name}" (không match URL hoặc bị tắt)`);
+                log.d(`Bỏ qua "${feature.name}" (không match URL hoặc bị tắt)`);
                 continue;
             }
 
             try {
-                console.log(`[FeatureManager] Khởi tạo feature: ${feature.name}`);
+                log.d(`Khởi tạo: ${feature.name}`);
                 await feature.init();
                 this.initialized.add(id);
             } catch (error) {
-                console.error(`[FeatureManager] Lỗi khi khởi tạo feature "${feature.name}":`, error);
+                log.e(`Lỗi khi khởi tạo "${feature.name}":`, error);
             }
         }
 
-        console.log(`[FeatureManager] Đã khởi tạo ${this.initialized.size}/${this.features.size} features`);
+        log.i(`Đã khởi tạo ${this.initialized.size}/${this.features.size} features`);
     }
 
     /**

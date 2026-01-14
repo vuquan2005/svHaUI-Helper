@@ -3,10 +3,9 @@
  * Sử dụng GM_getValue/GM_setValue để lưu trữ persistent
  */
 
-export interface AppSettings {
-    // Cài đặt chung
-    enabled: boolean;
+import { GM_getValue, GM_setValue } from '$';
 
+export interface AppSettings {
     // Cài đặt cho từng feature
     features: {
         [key: string]: boolean;
@@ -14,7 +13,6 @@ export interface AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
-    enabled: true,
     features: {},
 };
 
@@ -28,7 +26,7 @@ class SettingsManager {
 
     private load(): AppSettings {
         try {
-            const saved = GM_getValue(this.STORAGE_KEY, null);
+            const saved = GM_getValue<string | null>(this.STORAGE_KEY, null);
             if (saved) {
                 return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
             }

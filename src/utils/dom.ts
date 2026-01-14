@@ -2,6 +2,8 @@
  * DOM Utilities - Các hàm tiện ích làm việc với DOM
  */
 
+import { GM_addStyle } from '$';
+
 /**
  * Chờ cho đến khi element xuất hiện trong DOM
  */
