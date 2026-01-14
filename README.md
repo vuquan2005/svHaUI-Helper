@@ -1,11 +1,8 @@
 <p align="center">
-  <img src="https://cdn-001.haui.edu.vn//img/logo-45x45.png" alt="Logo" width="80" height="80">
+  <img src="assets/logo.png" alt="Logo" width="80" height="80">
   <h1 align="center">SV HaUI Helper</h1>
   <p align="center">
     🎓 Nâng cao trải nghiệm cho sinh viên HaUI
-    <br />
-    <a href="#tính-năng"><strong>Khám phá tính năng »</strong></a>
-    <br />
     <br />
     <a href="https://github.com/vuquan2005/svHaUI-Helper/issues">Báo lỗi</a>
     ·
