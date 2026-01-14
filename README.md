@@ -88,10 +88,32 @@ Development server sẽ chạy tại `http://localhost:5173/`. Mở URL này tro
 ### Build production
 
 ```bash
+# Build readable (cho Greasy Fork)
 pnpm build
+
+# Build minified (nhẹ hơn, cho GitHub Releases)
+pnpm build:minify
+
+# Build cả hai
+pnpm build:all
 ```
 
-File output sẽ nằm trong thư mục `dist/`.
+| Output | Kích thước | Dùng cho |
+|--------|------------|----------|
+| `dist/svhaui-helper.user.js` | ~14 KB | Greasy Fork, development |
+| `dist/svhaui-helper.min.user.js` | ~9 KB | GitHub Releases |
+
+### Release
+
+Khi push tag `v*`, GitHub Actions sẽ tự động:
+1. Build cả 2 phiên bản
+2. Tạo GitHub Release với assets đính kèm
+
+```bash
+git tag v1.2.0
+git push origin main --tags
+```
+
 
 ## 📁 Cấu trúc dự án
 

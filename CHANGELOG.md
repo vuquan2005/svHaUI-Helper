@@ -11,6 +11,17 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
   - MutationObserver để update title khi content thay đổi
   - Format: `[Icon] [Title] | HaUI`
 
+### Changed
+- **Build system**: Thêm minified build output
+  - `pnpm build` → readable (`svhaui-helper.user.js`)
+  - `pnpm build:minify` → minified (`svhaui-helper.min.user.js`)
+  - `pnpm build:all` → cả hai
+- **Metadata**: Thêm `@license`, `@homepageURL`, `@supportURL` cho Greasy Fork
+
+### Infrastructure
+- **GitHub Actions CI**: Type-check và build tự động trên push/PR
+- **GitHub Actions Release**: Tự động tạo release khi push tag `v*`
+
 ### Documentation
 - Thêm `docs/pages/` với chi tiết selectors cho từng loại trang:
   - `haui-structure.md` - Cấu trúc tổng quan website
