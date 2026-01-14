@@ -21,7 +21,7 @@ Cảm ơn bạn đã quan tâm đến việc đóng góp cho **SV HaUI Helper**!
 
 ### Báo lỗi (Bug Report)
 
-1. Kiểm tra [Issues](https://github.com/vuquan2005/svHaUI/issues) xem lỗi đã được báo chưa
+1. Kiểm tra [Issues](https://github.com/vuquan2005/svHaUI-Helper/issues) xem lỗi đã được báo chưa
 2. Nếu chưa, tạo issue mới với template Bug Report
 3. Mô tả chi tiết: bước tái hiện, kết quả mong đợi, kết quả thực tế
 
@@ -51,8 +51,8 @@ Cảm ơn bạn đã quan tâm đến việc đóng góp cho **SV HaUI Helper**!
 
 ```bash
 # Clone repo
-git clone https://github.com/vuquan2005/svHaUI.git
-cd svHaUI
+git clone https://github.com/vuquan2005/svHaUI-Helper.git
+cd svHaUI-Helper
 
 # Cài dependencies
 pnpm install

@@ -7,21 +7,21 @@
     <a href="#tính-năng"><strong>Khám phá tính năng »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/vuquan2005/svHaUI/issues">Báo lỗi</a>
+    <a href="https://github.com/vuquan2005/svHaUI-Helper/issues">Báo lỗi</a>
     ·
-    <a href="https://github.com/vuquan2005/svHaUI/issues">Yêu cầu tính năng</a>
+    <a href="https://github.com/vuquan2005/svHaUI-Helper/issues">Yêu cầu tính năng</a>
   </p>
 </p>
 
 <p align="center">
-  <a href="https://github.com/vuquan2005/svHaUI/releases">
-    <img src="https://img.shields.io/github/v/release/vuquan2005/svHaUI?style=flat-square" alt="Release">
+  <a href="https://github.com/vuquan2005/svHaUI-Helper/releases">
+    <img src="https://img.shields.io/github/v/release/vuquan2005/svHaUI-Helper?style=flat-square" alt="Release">
   </a>
-  <a href="https://github.com/vuquan2005/svHaUI/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/vuquan2005/svHaUI?style=flat-square" alt="License">
+  <a href="https://github.com/vuquan2005/svHaUI-Helper/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/vuquan2005/svHaUI-Helper?style=flat-square" alt="License">
   </a>
-  <a href="https://github.com/vuquan2005/svHaUI/stargazers">
-    <img src="https://img.shields.io/github/stars/vuquan2005/svHaUI?style=flat-square" alt="Stars">
+  <a href="https://github.com/vuquan2005/svHaUI-Helper/stargazers">
+    <img src="https://img.shields.io/github/stars/vuquan2005/svHaUI-Helper?style=flat-square" alt="Stars">
   </a>
 </p>
 
@@ -58,9 +58,38 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 ### Cài đặt nhanh
 
 1. Cài đặt Tampermonkey hoặc Violentmonkey từ cửa hàng extension
-2. [Nhấn vào đây để cài đặt userscript](https://github.com/vuquan2005/svHaUI/releases/latest/download/svhaui-helper.user.js)
+2. [Nhấn vào đây để cài đặt userscript](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)
 3. Xác nhận cài đặt trong popup của Tampermonkey
 4. Truy cập [sv.haui.edu.vn](https://sv.haui.edu.vn) và tận hưởng!
+
+### ⚠️ Lưu ý cho Chrome (Manifest V3)
+
+Từ Chrome 127+, Google yêu cầu bật **Developer Mode** để sử dụng userscript extensions.
+
+#### Cách bật Developer Mode:
+
+1. Mở `chrome://extensions` trong thanh địa chỉ
+2. Bật **Developer mode** (góc trên bên phải)
+3. Tìm **Tampermonkey** → Click **Details** (Chi tiết)
+4. Bật **Allow access to file URLs** (nếu có)
+5. Khởi động lại trình duyệt
+6. Khi thấy popup cảnh báo "Disable developer mode extensions", chọn **Keep**
+
+#### Tại sao cần làm điều này?
+
+- Chrome Manifest V3 giới hạn khả năng của extensions
+- Tampermonkey cần Developer Mode để inject scripts
+- Đây là yêu cầu từ Google, không phải lỗi của extension
+
+#### Trình duyệt thay thế (không cần Developer Mode):
+
+| Trình duyệt | Hỗ trợ | Ghi chú |
+|-------------|--------|---------|
+| Firefox | ✅ | Khuyến nghị - không giới hạn |
+| Edge | ⚠️ | Tương tự Chrome |
+| Brave | ⚠️ | Tương tự Chrome |
+| Opera | ⚠️ | Tương tự Chrome |
+
 
 ## 🛠️ Phát triển
 
@@ -73,8 +102,8 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 
 ```bash
 # Clone repository
-git clone https://github.com/vuquan2005/svHaUI.git
-cd svHaUI
+git clone https://github.com/vuquan2005/svHaUI-Helper.git
+cd svHaUI-Helper
 
 # Cài đặt dependencies
 pnpm install
