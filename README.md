@@ -2,13 +2,18 @@
   <img src="assets/logo.png" alt="Logo" width="80" height="80">
   <h1 align="center">SV HaUI Helper</h1>
   <p align="center">
-    🎓 Nâng cao trải nghiệm cho sinh viên HaUI
+    🎓 Enhancing the experience for HaUI students
     <br />
-    <a href="https://github.com/vuquan2005/svHaUI-Helper/issues">Báo lỗi</a>
+    <a href="https://github.com/vuquan2005/svHaUI-Helper/issues">Report Bug</a>
     ·
-    <a href="https://github.com/vuquan2005/svHaUI-Helper/issues">Yêu cầu tính năng</a>
+    <a href="https://github.com/vuquan2005/svHaUI-Helper/issues">Request Feature</a>
   </p>
 </p>
+
+<p align="center">
+  <strong>English</strong> | <a href="README.vi.md">Tiếng Việt</a>
+</p>
+
 
 <p align="center">
   <a href="https://github.com/vuquan2005/svHaUI-Helper/releases">
@@ -24,118 +29,118 @@
 
 ---
 
-## 📖 Giới thiệu
+## 📖 Introduction
 
-**SV HaUI Helper** là một userscript được thiết kế để cải thiện trải nghiệm sử dụng cổng thông tin sinh viên [sv.haui.edu.vn](https://sv.haui.edu.vn) của Đại học Công nghiệp Hà Nội (HaUI).
+**SV HaUI Helper** is a userscript designed to improve the user experience on the student portal [sv.haui.edu.vn](https://sv.haui.edu.vn) of Hanoi University of Industry (HaUI).
 
-Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở rộng và bảo trì.
+The project is built with a modular architecture, making it easy to extend and maintain.
 
-## ✨ Tính năng
+## ✨ Features
 
-- 🚀 **Tích hợp sẵn sàng** - Hoạt động ngay khi cài đặt
-- ⚙️ **Cài đặt linh hoạt** - Bật/tắt từng tính năng theo ý muốn
-- 🎨 **Giao diện đẹp** - UI hiện đại, thân thiện
-- 💾 **Lưu trữ cục bộ** - Cài đặt được lưu trên trình duyệt
+- 🚀 **Ready to use** - Works immediately after installation
+- ⚙️ **Flexible settings** - Toggle individual features as needed
+- 🎨 **Beautiful UI** - Modern, user-friendly interface
+- 💾 **Local storage** - Settings are saved in your browser
 
-### Tính năng hiện có
+### Current Features
 
-| Tính năng | Mô tả | Trạng thái |
-|-----------|-------|-----------:|
-| 🏷️ Dynamic Title | Thay đổi tiêu đề tab theo trang | ✅ |
-| 🔐 Captcha Helper | Hỗ trợ nhập captcha (lowercase, bỏ dấu, auto-submit) | ✅ |
+| Feature | Description | Status |
+|---|---|---:|
+| 🏷️ Dynamic Title | Changes tab title based on the page context | ✅ |
+| 🔐 Captcha Helper | Auto-fill captcha (lowercase, remove diacritics, auto-submit) | ✅ |
 
-## 🚀 Cài đặt
+## 🚀 Installation
 
-### Yêu cầu
+### Requirements
 
-- Trình duyệt: Chrome, Firefox, Edge, hoặc Safari
-- Extension quản lý userscript:
-  - [Tampermonkey](https://www.tampermonkey.net/) (Khuyến nghị)
+- Browser: Chrome, Firefox, Edge, or Safari
+- Userscript manager extension:
+  - [Tampermonkey](https://www.tampermonkey.net/) (Recommended)
   - [Violentmonkey](https://violentmonkey.github.io/)
   - [Greasemonkey](https://www.greasespot.net/) (Firefox)
 
-### Cài đặt nhanh
+### Quick Install
 
-1. Cài đặt Tampermonkey hoặc Violentmonkey từ cửa hàng extension
-2. [Nhấn vào đây để cài đặt userscript](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)
-3. Xác nhận cài đặt trong popup của Tampermonkey
-4. Truy cập [sv.haui.edu.vn](https://sv.haui.edu.vn) và tận hưởng!
+1. Install Tampermonkey or Violentmonkey from your browser's extension store.
+2. [Click here to install the userscript](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js).
+3. Confirm the installation in the Tampermonkey popup.
+4. Visit [sv.haui.edu.vn](https://sv.haui.edu.vn) and enjoy!
 
-### ⚠️ Lưu ý cho Chrome (Manifest V3)
+### ⚠️ Note for Chrome (Manifest V3)
 
-Từ Chrome 127+, Google yêu cầu bật **Developer Mode** để sử dụng userscript extensions.
+From Chrome 127+, Google requires **Developer Mode** to be enabled to use userscript extensions.
 
-#### Cách bật Developer Mode:
+#### How to enable Developer Mode:
 
-1. Mở `chrome://extensions` trong thanh địa chỉ
-2. Bật **Developer mode** (góc trên bên phải)
-3. Tìm **Tampermonkey** → Click **Details** (Chi tiết)
-4. Bật **Allow access to file URLs** (nếu có)
-5. Khởi động lại trình duyệt
-6. Khi thấy popup cảnh báo "Disable developer mode extensions", chọn **Keep**
+1. Open `chrome://extensions` in the address bar.
+2. Enable **Developer mode** (top right corner).
+3. Find **Tampermonkey** → Click **Details**.
+4. Enable **Allow access to file URLs** (if available).
+5. Restart your browser.
+6. When you see the "Disable developer mode extensions" warning popup, choose **Keep**.
 
-#### Tại sao cần làm điều này?
+#### Why is this necessary?
 
-- Chrome Manifest V3 giới hạn khả năng của extensions
-- Tampermonkey cần Developer Mode để inject scripts
-- Đây là yêu cầu từ Google, không phải lỗi của extension
+- Chrome Manifest V3 limits the capabilities of extensions.
+- Tampermonkey needs Developer Mode to inject scripts.
+- This is a Google requirement, not a fault of the extension.
 
-#### Trình duyệt thay thế (không cần Developer Mode):
+#### Alternative Browsers (No Developer Mode needed):
 
-| Trình duyệt | Hỗ trợ | Ghi chú |
-|-------------|--------|---------|
-| Firefox | ✅ | Khuyến nghị - không giới hạn |
-| Edge | ⚠️ | Tương tự Chrome |
-| Brave | ⚠️ | Tương tự Chrome |
-| Opera | ⚠️ | Tương tự Chrome |
+| Browser | Support | Notes |
+|---|---|---|
+| Firefox | ✅ | Recommended - no restrictions |
+| Edge | ⚠️ | Similar to Chrome |
+| Brave | ⚠️ | Similar to Chrome |
+| Opera | ⚠️ | Similar to Chrome |
 
 
-## 🛠️ Phát triển
+## 🛠️ Development
 
-### Yêu cầu
+### Requirements
 
 - [Node.js](https://nodejs.org/) >= 18
-- [pnpm](https://pnpm.io/) (khuyến nghị) hoặc npm
+- [pnpm](https://pnpm.io/) (recommended) or npm
 
-### Thiết lập môi trường
+### Environment Setup
 
 ```bash
 # Clone repository
 git clone https://github.com/vuquan2005/svHaUI-Helper.git
 cd svHaUI-Helper
 
-# Cài đặt dependencies
+# Install dependencies
 pnpm install
 
-# Chạy development server
+# Run development server
 pnpm dev
 ```
 
-Development server sẽ chạy tại `http://localhost:5173/`. Mở URL này trong trình duyệt để cài đặt development version của userscript.
+The development server will run at `http://localhost:5173/`. Open this URL in your browser to install the development version of the userscript.
 
 ### Build production
 
 ```bash
-# Build readable (cho Greasy Fork)
+# Build readable (for Greasy Fork)
 pnpm build
 
-# Build minified (nhẹ hơn, cho GitHub Releases)
+# Build minified (lighter, for GitHub Releases)
 pnpm build:minify
 
-# Build cả hai
+# Build both
 pnpm build:all
 ```
 
-| Output | Kích thước | Dùng cho |
-|--------|------------|----------|
+| Output | Size | Usage |
+|---|---|---|
 | `dist/svhaui-helper.user.js` | ~14 KB | Greasy Fork, development |
 | `dist/svhaui-helper.min.user.js` | ~9 KB | GitHub Releases |
 
 ### Release
 
-Khi push tag `v*`, GitHub Actions sẽ tự động:
-1. Build cả 2 phiên bản
-2. Tạo GitHub Release với assets đính kèm
+When pushing a tag `v*`, GitHub Actions will automatically:
+1. Build both versions.
+2. Create a GitHub Release with attached assets.
 
 ```bash
 git tag v1.2.0
@@ -143,25 +148,25 @@ git push origin main --tags
 ```
 
 
-## 📁 Cấu trúc dự án
+## 📁 Project Structure
 
 ```
 svHaUI-Helper/
 ├── src/
-│   ├── main.ts              # Entry point chính
+│   ├── main.ts              # Main entry point
 │   ├── vite-env.d.ts        # Type definitions
 │   │
 │   ├── core/                # Core modules
-│   │   ├── feature.ts       # Base class cho features
+│   │   ├── feature.ts       # Base class for features
 │   │   ├── feature-manager.ts
-│   │   ├── settings.ts      # Quản lý cài đặt
+│   │   ├── settings.ts      # Settings management
 │   │   └── index.ts
 │   │
-│   │   ├── dynamic-title/   # Tiêu đề động
-│   │   ├── captcha-helper/  # Hỗ trợ captcha
+│   │   ├── dynamic-title/   # Dynamic Title
+│   │   ├── captcha-helper/  # Captcha Helper
 │   │   └── index.ts         # Registry
 │   │
-│   └── utils/               # Tiện ích
+│   └── utils/               # Utilities
 │       ├── dom.ts           # DOM helpers
 │       ├── text-utils.ts    # Text processing
 │       └── index.ts
@@ -172,9 +177,9 @@ svHaUI-Helper/
 └── package.json
 ```
 
-## 🔧 Thêm tính năng mới
+## 🔧 Adding a New Feature
 
-### 1. Tạo feature class
+### 1. Create a feature class
 
 ```typescript
 // src/features/my-feature/index.ts
@@ -186,23 +191,23 @@ export class MyFeature extends Feature {
         super({
             id: 'my-feature',
             name: 'My Feature',
-            description: 'Mô tả tính năng',
+            description: 'Feature description',
             urlMatch: /sv\.haui\.edu\.vn\/some-page/,  // Optional
         });
     }
 
     init(): void {
-        // Logic khởi tạo
+        // Initialization logic
         console.log('My Feature initialized!');
     }
 
     destroy(): void {
-        // Cleanup khi disable
+        // Cleanup when disabled
     }
 }
 ```
 
-### 2. Đăng ký feature
+### 2. Register feature
 
 ```typescript
 // src/features/index.ts
@@ -214,48 +219,48 @@ export const allFeatures: Feature[] = [
 ];
 ```
 
-### 3. Test và build
+### 3. Test and build
 
 ```bash
 pnpm dev    # Development
 pnpm build  # Production
 ```
 
-## 📚 Tài liệu
+## 📚 Documentation
 
-| Tài liệu | Mô tả |
-|----------|-------|
-| [Hướng dẫn tạo Feature](docs/creating-features.md) | Chi tiết cách tạo feature mới |
-| [API Reference](docs/api-reference.md) | Tham khảo các APIs có sẵn |
-| [Contributing](CONTRIBUTING.md) | Quy trình đóng góp |
+| Document | Description |
+|---|---|
+| [Creating Features Guide](docs/creating-features.md) | Details on how to create a new feature |
+| [API Reference](docs/api-reference.md) | Reference for available APIs |
+| [Contributing](CONTRIBUTING.md) | Contribution guidelines |
 
-## 🤝 Đóng góp
+## 🤝 Contributing
 
-Mọi đóng góp đều được hoan nghênh! Xem [CONTRIBUTING.md](CONTRIBUTING.md) để biết thêm chi tiết.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
-### Quy trình đóng góp
+### Contribution Process
 
-1. Fork repository
-2. Tạo branch mới (`git checkout -b feature/AmazingFeature`)
-3. Commit thay đổi (`git commit -m 'Add some AmazingFeature'`)
-4. Push lên branch (`git push origin feature/AmazingFeature`)
-5. Mở Pull Request
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
 ## 📝 License
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+Distributed under the GPL-3.0 License. See [LICENSE](LICENSE) for more information.
 
-## 👤 Tác giả
+## 👤 Author
 
 **VuQuan**
 
 - GitHub: [@vuquan2005](https://github.com/vuquan2005)
 
-## 🙏 Cảm ơn
+## 🙏 Acknowledgements
 
-- [vite-plugin-monkey](https://github.com/lisonge/vite-plugin-monkey) - Vite plugin để build userscript
+- [vite-plugin-monkey](https://github.com/lisonge/vite-plugin-monkey) - Vite plugin for building userscripts
 - [Tampermonkey](https://www.tampermonkey.net/) - Userscript manager
-- HaUI - Đại học Công nghiệp Hà Nội
+- HaUI - Hanoi University of Industry
 
 ---
 

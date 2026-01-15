@@ -18,7 +18,7 @@ export default defineConfig({
                 namespace: 'https://github.com/vuquan2005/svHaUI-Helper',
                 author: 'VuQuan',
                 description: 'Nâng cao trải nghiệm cho sinh viên HaUI',
-                license: 'MIT',
+                license: 'GPL-3.0-only',
                 homepageURL: 'https://github.com/vuquan2005/svHaUI-Helper',
                 supportURL: 'https://github.com/vuquan2005/svHaUI-Helper/issues',
                 icon: 'https://cdn-001.haui.edu.vn//img/logo-45x45.png',

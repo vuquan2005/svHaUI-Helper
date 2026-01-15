@@ -2,6 +2,15 @@
 
 Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại tại đây.
 
+## [1.2.1] - 2026-01-15
+
+### Changed
+- **License**: Update license to GPL-3.0
+- **Documentation**:
+  - Update README to English
+  - Preserve Vietnamese README as `README.vi.md`
+  - Add language navigation
+
 ## [1.2.0] - 2026-01-15
 
 ### Added
