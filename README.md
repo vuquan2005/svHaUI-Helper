@@ -62,8 +62,15 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 
 ### Cài đặt nhanh
 
-1. Cài đặt Tampermonkey hoặc Violentmonkey từ cửa hàng extension.
-2. [Nhấn vào đây để cài đặt userscript](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js).
+1. Cài đặt **Tampermonkey** hoặc **Violentmonkey** từ cửa hàng extension của trình duyệt.
+2. Chọn **một trong các nguồn** dưới đây để cài đặt script:
+
+| Nguồn | Link | Ghi chú |
+|-------|------|---------|
+| **Greasy Fork** | [Cài đặt](https://greasyfork.org/vi/scripts/562762-sv-haui-helper) | Khuyến nghị - Tự động cập nhật |
+| GitHub (readable) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js) | Dễ đọc, dùng cho dev |
+| GitHub (minified) | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Nhẹ hơn, tự động cập nhật |
+
 3. Xác nhận cài đặt trong popup của Tampermonkey/Violentmonkey.
 4. Truy cập [sv.haui.edu.vn](https://sv.haui.edu.vn) và tận hưởng!
 

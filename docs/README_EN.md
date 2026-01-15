@@ -63,9 +63,16 @@ The project is built with a modular architecture, making it easy to extend and m
 
 ### Quick Install
 
-1. Install Tampermonkey or Violentmonkey from your browser's extension store.
-2. [Click here to install the userscript](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js).
-3. Confirm the installation in the Tampermonkey popup.
+1. Install **Tampermonkey** or **Violentmonkey** from your browser's extension store.
+2. Choose **one of the sources** below to install the script:
+
+| Source | Link | Notes |
+|--------|------|-------|
+| **Greasy Fork** | [Install](https://greasyfork.org/scripts/562762-sv-haui-helper) | Recommended - Auto-updates |
+| GitHub (readable) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js) | Easy to read, for devs |
+| GitHub (minified) | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Smaller, auto-updates |
+
+3. Confirm the installation in the Tampermonkey/Violentmonkey popup.
 4. Visit [sv.haui.edu.vn](https://sv.haui.edu.vn) and enjoy!
 
 ### ⚠️ Note for Chrome / Edge (Manifest V3)
