@@ -25,6 +25,9 @@
   <a href="https://github.com/vuquan2005/svHaUI-Helper/stargazers">
     <img src="https://img.shields.io/github/stars/vuquan2005/svHaUI-Helper?style=flat-square" alt="Stars">
   </a>
+  <a href="https://greasyfork.org/scripts/562762-sv-haui-helper">
+    <img src="https://img.shields.io/badge/Greasy%20Fork-Script-black?style=flat-square&logo=greasyfork" alt="Greasy Fork">
+  </a>
 </p>
 
 ---
@@ -57,7 +60,6 @@ The project is built with a modular architecture, making it easy to extend and m
 - Userscript manager extension:
   - [Tampermonkey](https://www.tampermonkey.net/) (Recommended)
   - [Violentmonkey](https://violentmonkey.github.io/)
-  - [Greasemonkey](https://www.greasespot.net/) (Firefox)
 
 ### Quick Install
 
@@ -66,30 +68,23 @@ The project is built with a modular architecture, making it easy to extend and m
 3. Confirm the installation in the Tampermonkey popup.
 4. Visit [sv.haui.edu.vn](https://sv.haui.edu.vn) and enjoy!
 
-### ⚠️ Note for Chrome (Manifest V3)
+### ⚠️ Note for Chrome / Edge (Manifest V3)
 
-From Chrome 127+, Google requires **Developer Mode** to be enabled to use userscript extensions.
+Due to Google's new security policies, you **must manually grant permission** for the script to work:
 
-#### How to enable Developer Mode:
-
-1. Open `chrome://extensions` in the address bar.
-2. Enable **Developer mode** (top right corner).
-3. Find **Tampermonkey** → Click **Details**.
-4. Enable **Allow access to file URLs** (if available).
-5. Restart your browser.
-6. When you see the "Disable developer mode extensions" warning popup, choose **Keep**.
-
-#### Why is this necessary?
-
-- Chrome Manifest V3 limits the capabilities of extensions.
-- Tampermonkey needs Developer Mode to inject scripts.
-- This is a Google requirement, not a fault of the extension.
+1. Go to the Extensions Management page: type `chrome://extensions` in the address bar.
+2. Toggle **Developer mode** on in the top right corner.
+3. Find **Tampermonkey/Violentmonkey** → Click **Details**.
+4. Scroll down and enable the toggle for:
+   > **Allow user scripts**
+   > *(This setting allows the extension to run code not reviewed by Google)*
+5. If a "Disable developer mode extensions" warning appears when restarting the browser, simply choose **Keep**.
 
 #### Alternative Browsers (No Developer Mode needed):
 
 | Browser | Support | Notes |
 |---|---|---|
-| Firefox | ✅ | Recommended - no restrictions |
+| Firefox | ✅ | Recommended - better privacy |
 | Edge | ⚠️ | Similar to Chrome |
 | Brave | ⚠️ | Similar to Chrome |
 | Opera | ⚠️ | Similar to Chrome |
@@ -106,7 +101,7 @@ From Chrome 127+, Google requires **Developer Mode** to be enabled to use usersc
 
 ```bash
 # Clone repository
-git clone https://github.com/vuquan2005/svHaUI-Helper.git
+git clone [https://github.com/vuquan2005/svHaUI-Helper.git](https://github.com/vuquan2005/svHaUI-Helper.git)
 cd svHaUI-Helper
 
 # Install dependencies
@@ -114,156 +109,3 @@ pnpm install
 
 # Run development server
 pnpm dev
-```
-
-The development server will run at `http://localhost:5173/`. Open this URL in your browser to install the development version of the userscript.
-
-### Build production
-
-```bash
-# Build readable (for Greasy Fork)
-pnpm build
-
-# Build minified (lighter, for GitHub Releases)
-pnpm build:minify
-
-# Build both
-pnpm build:all
-```
-
-| Output | Size | Usage |
-|---|---|---|
-| `dist/svhaui-helper.user.js` | ~14 KB | Greasy Fork, development |
-| `dist/svhaui-helper.min.user.js` | ~9 KB | GitHub Releases |
-
-### Release
-
-When pushing a tag `v*`, GitHub Actions will automatically:
-1. Build both versions.
-2. Create a GitHub Release with attached assets.
-
-```bash
-git tag v1.2.0
-git push origin main --tags
-```
-
-
-## 📁 Project Structure
-
-```
-svHaUI-Helper/
-├── src/
-│   ├── main.ts              # Main entry point
-│   ├── vite-env.d.ts        # Type definitions
-│   │
-│   ├── core/                # Core modules
-│   │   ├── feature.ts       # Base class for features
-│   │   ├── feature-manager.ts
-│   │   ├── settings.ts      # Settings management
-│   │   └── index.ts
-│   │
-│   │   ├── dynamic-title/   # Dynamic Title
-│   │   ├── captcha-helper/  # Captcha Helper
-│   │   └── index.ts         # Registry
-│   │
-│   └── utils/               # Utilities
-│       ├── dom.ts           # DOM helpers
-│       ├── text-utils.ts    # Text processing
-│       └── index.ts
-│
-├── dist/                    # Build output
-├── vite.config.ts           # Vite + monkey config
-├── tsconfig.json
-└── package.json
-```
-
-## 🔧 Adding a New Feature
-
-### 1. Create a feature class
-
-```typescript
-// src/features/my-feature/index.ts
-import { Feature } from '../../core';
-import { addStyles } from '../../utils';
-
-export class MyFeature extends Feature {
-    constructor() {
-        super({
-            id: 'my-feature',
-            name: 'My Feature',
-            description: 'Feature description',
-            urlMatch: /sv\.haui\.edu\.vn\/some-page/,  // Optional
-        });
-    }
-
-    init(): void {
-        // Initialization logic
-        console.log('My Feature initialized!');
-    }
-
-    destroy(): void {
-        // Cleanup when disabled
-    }
-}
-```
-
-### 2. Register feature
-
-```typescript
-// src/features/index.ts
-import { MyFeature } from './my-feature';
-
-export const allFeatures: Feature[] = [
-    // ... existing features
-    new MyFeature(),
-];
-```
-
-### 3. Test and build
-
-```bash
-pnpm dev    # Development
-pnpm build  # Production
-```
-
-## 📚 Documentation
-
-| Document | Description |
-|---|---|
-| [Creating Features Guide](docs/creating-features.md) | Details on how to create a new feature |
-| [API Reference](docs/api-reference.md) | Reference for available APIs |
-| [Contributing](CONTRIBUTING.md) | Contribution guidelines |
-
-## 🤝 Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
-
-### Contribution Process
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
-
-## 📝 License
-
-Distributed under the GPL-3.0 License. See [LICENSE](LICENSE) for more information.
-
-## 👤 Author
-
-**VuQuan**
-
-- GitHub: [@vuquan2005](https://github.com/vuquan2005)
-
-## 🙏 Acknowledgements
-
-- [vite-plugin-monkey](https://github.com/lisonge/vite-plugin-monkey) - Vite plugin for building userscripts
-- [Tampermonkey](https://www.tampermonkey.net/) - Userscript manager
-- HaUI - Hanoi University of Industry
-
----
-
-<p align="center">
-  Made with ❤️ for HaUI Students
-</p>
