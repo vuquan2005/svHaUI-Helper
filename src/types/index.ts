@@ -38,8 +38,8 @@ export interface CourseGrade {
  * Thêm key mới vào đây để có autocomplete và type safety
  */
 export interface StorageSchema {
-    'app_settings': AppSettings;
-    'grades': CourseGrade[];
+    app_settings: AppSettings;
+    grades: CourseGrade[];
 }
 
 // Utility types
