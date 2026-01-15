@@ -5,10 +5,12 @@
 
 import { Feature } from '../core';
 import { DynamicTitleFeature } from './dynamic-title';
+import { CaptchaHelperFeature } from './captcha-helper';
 
 // Thêm feature mới vào đây
 export const allFeatures: Feature[] = [
     new DynamicTitleFeature(),
+    new CaptchaHelperFeature(),
     // new HomepageShortcuts(),
     // new NotificationPopup(),
     // new GradeCalculator(),

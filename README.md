@@ -40,7 +40,9 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 ### Tính năng hiện có
 
 | Tính năng | Mô tả | Trạng thái |
-|-----------|-------|------------|
+|-----------|-------|-----------:|
+| 🏷️ Dynamic Title | Thay đổi tiêu đề tab theo trang | ✅ |
+| 🔐 Captcha Helper | Hỗ trợ nhập captcha (lowercase, bỏ dấu, auto-submit) | ✅ |
 
 ## 🚀 Cài đặt
 
@@ -155,13 +157,13 @@ svHaUI-Helper/
 │   │   ├── settings.ts      # Quản lý cài đặt
 │   │   └── index.ts
 │   │
-│   ├── features/            # Các tính năng
-│   │   ├── example/         # Feature mẫu
-│   │   │   └── index.ts
+│   │   ├── dynamic-title/   # Tiêu đề động
+│   │   ├── captcha-helper/  # Hỗ trợ captcha
 │   │   └── index.ts         # Registry
 │   │
 │   └── utils/               # Tiện ích
 │       ├── dom.ts           # DOM helpers
+│       ├── text-utils.ts    # Text processing
 │       └── index.ts
 │
 ├── dist/                    # Build output

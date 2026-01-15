@@ -37,6 +37,16 @@ body > .be-wrapper
 
 ---
 
+## Authentication
+
+> 📄 Chi tiết: [captcha.md](captcha.md)
+
+| URL Pattern | Ghi chú |
+|-------------|---------|
+| `/sso?token=*` | Captcha page - xác thực SSO |
+
+---
+
 ## Page Routes
 
 ### Trang chủ

@@ -2,6 +2,31 @@
 
 Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại tại đây.
 
+## [1.2.0] - 2026-01-15
+
+### Added
+- **Captcha Helper Feature**: Hỗ trợ nhập captcha tự động
+  - Tự động chuyển chữ hoa → thường
+  - Loại bỏ dấu tiếng Việt (á → a, đ → d)
+  - Chỉ giữ ký tự a-z, 0-9
+  - Auto-submit khi nhấn Enter hoặc blur (đủ 5 ký tự)
+  - Debounce 150ms để tránh xung đột với IME tiếng Việt
+  - Hỗ trợ 2 trang: SSO login (`/sso?token=`) và Register (`/register/`)
+  - Kiến trúc mở rộng (`CaptchaPageHandler`) cho các trang khác
+
+### Added (Utilities)
+- `text-utils.ts`: Thêm các hàm xử lý text
+  - `removeDiacritics()`: Loại bỏ dấu tiếng Việt
+  - `diacriticsToTelex()`: Chuyển dấu thành phím Telex
+  - `keepAlphanumeric()`: Chỉ giữ a-z, 0-9
+  - `normalizeCaptchaInput()`: Normalize cho captcha
+
+### Documentation
+- Thêm `docs/pages/captcha.md`: DOM selectors cho các trang captcha
+- Cập nhật `docs/pages/haui-structure.md`: Thêm section Authentication
+
+---
+
 ## [1.1.0] - 2026-01-15
 
 ### Added
