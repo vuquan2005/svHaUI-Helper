@@ -1,7 +1,7 @@
 /**
  * Logger Utility - Logging nhanh và đẹp
  * Hỗ trợ log level setting và hiển thị source location (line number)
- * 
+ *
  * Sử dụng bind trick để DevTools hiển thị đúng line number nơi gọi log
  */
 
@@ -47,7 +47,7 @@ export function getGlobalLogLevel(): LogLevel {
 }
 
 // No-op function khi log bị disabled
-const noop = () => { };
+const noop = () => {};
 
 export class Logger {
     private prefix: string;

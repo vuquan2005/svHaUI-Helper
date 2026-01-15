@@ -103,8 +103,12 @@ const DOM = {
         const table = document.querySelector('table:first-child');
         if (!table) return null;
 
-        const subjectName = table.querySelector('tbody > tr:first-child > td:nth-child(2)')?.textContent?.trim();
-        const classCode = table.querySelector('tbody > tr:nth-child(3) > td:nth-child(2)')?.textContent?.trim();
+        const subjectName = table
+            .querySelector('tbody > tr:first-child > td:nth-child(2)')
+            ?.textContent?.trim();
+        const classCode = table
+            .querySelector('tbody > tr:nth-child(3) > td:nth-child(2)')
+            ?.textContent?.trim();
 
         if (!subjectName || !classCode) return null;
         return { subjectName, classCode };
@@ -115,8 +119,12 @@ const DOM = {
         const table = document.querySelector('table:first-child');
         if (!table) return null;
 
-        const name = table.querySelector('tbody > tr:first-child > td:nth-child(2)')?.textContent?.trim();
-        const className = table.querySelector('tbody > tr:nth-child(3) > td:nth-child(2)')?.textContent?.trim();
+        const name = table
+            .querySelector('tbody > tr:first-child > td:nth-child(2)')
+            ?.textContent?.trim();
+        const className = table
+            .querySelector('tbody > tr:nth-child(3) > td:nth-child(2)')
+            ?.textContent?.trim();
 
         if (!name || !className) return null;
         return { name, className };
