@@ -1,76 +1,83 @@
 /**
  * Dynamic Title Feature
- * Thay đổi document.title dựa trên URL và nội dung trang
+ * Changes document.title based on URL and page content
  */
 
 import { Feature } from '../../core';
+
+// ============================================
+// Constants
+// ============================================
+
+/** Debounce delay after DOM changes before updating title (ms) */
+const TITLE_UPDATE_DEBOUNCE_MS = 100;
 
 // ============================================
 // Title Configuration
 // ============================================
 
 interface DynamicTitleConfig {
-    /** Regex để match URL (pathname + search) */
+    /** Regex to match URL (pathname + search) */
     pattern: RegExp;
     /** Icon emoji */
     icon: string;
-    /** Function để tạo title từ DOM */
-    getTitleFn: () => string;
+    /** Function to generate title from DOM, returns null if DOM not ready */
+    getTitleFn: () => string | null;
 }
 
-// Static URL mapping (exact match với pathname)
+// Static URL mapping (exact match with pathname)
 const URL_TITLE_MAP: Record<string, string> = {
-    // Trang chủ
+    // Home page
     '/': '🏠 Trang chủ',
 
-    // Tài chính
+    // Finance
     '/student/recharge/cashinqr': '💳 Nạp tiền QR',
     '/student/recharge/cashin': '💳 Nạp tiền TK',
     '/student/recharge/inpatientpayment': '💰 Thanh toán công nợ',
     '/student/recharge/transactionhistory': '📜 Lịch sử GD',
     '/student/recharge/listeinvoice': '🧾 Hóa đơn ĐT',
 
-    // Thông tin cá nhân
+    // Personal information
     '/student/userdetail/userdetail': '👤 Thông tin SV',
     '/student/userdetail/updateuserprofile': '📝 Cập nhật hồ sơ',
     '/student/userdetail/usercerupdate': '🎓 TT in bằng',
     '/member/changepass': '🔐 Đổi mật khẩu',
     '/student/userdetail/militaryclothes': '🎖️ Quân tư trang',
 
-    // Đăng ký học phần
+    // Course registration
     '/register/dangkyhocphan': '📝 ĐK HP dự kiến',
     '/register/': '📝 Đăng ký HP',
     '/training/removeclasslist': '❌ Rút HP',
     '/training/statisticregister': '📊 Thống kê ĐKHP',
     '/training/viewprogram': '📚 ĐK 2 chương trình',
 
-    // Chương trình đào tạo
+    // Training program
     '/training/viewcourseindustry': '📚 Khung CT',
     '/training/programmodulessemester': '📅 Khung theo kỳ',
 
-    // Lịch học & TKB
+    // Schedule & Timetable
     '/timestable/calendarct': '📆 KH đầu khóa',
     '/timestable/calendarcl': '🗓️ Thời khóa biểu',
     '/timestable/timestableview': '🗓️ Lịch giảng dạy',
 
-    // Lịch thi
+    // Exam schedule
     '/student/schedulefees/examplant': '📆 Kế hoạch thi',
     '/student/schedulefees/transactionmodules': '📆 Lịch thi',
     '/student/schedulefees/testonline': '💻 Thi Online',
 
-    // Kết quả học tập - Cá nhân
+    // Academic results - Personal
     '/student/result/studyresults': '📊 KQ học tập',
     '/student/result/examresult': '📋 KQ thi',
     '/student/result/viewscorebysemester': '📈 ĐTB học kỳ',
     '/student/result/viewmodules': '📈 ĐTB tích lũy',
     '/student/result/sendreceiveapplications': '📨 Phúc tra',
 
-    // Tốt nghiệp
+    // Graduation
     '/tttn/htdn/list': '🎓 Thực tập TN',
     '/student/result/graduatecal': '🎓 Xét tốt nghiệp',
     '/student/result/degreeview': '🎓 TT in bằng',
 
-    // Tiện ích
+    // Utilities
     '/student/application/notifilist': '📢 Thông báo trường',
     '/student/application/messengeruserlist': '📬 Thông báo cá nhân',
     '/student/recharge/serviceonegate': '🚪 Dịch vụ một cửa',
@@ -80,9 +87,9 @@ const URL_TITLE_MAP: Record<string, string> = {
     '/survey': '� Khảo sát',
 };
 
-// Helper functions để lấy data từ DOM
+// Helper functions to get data from DOM
 const DOM = {
-    /** Lấy panel header text */
+    /** Get panel header text */
     panelHeader: (): string | null => {
         const el = document.querySelector('span.k-panel-header-text:first-child');
         return el?.textContent?.trim() || null;
@@ -98,7 +105,7 @@ const DOM = {
         return { name: match[1].trim(), code: match[2] };
     },
 
-    /** Lấy thông tin lớp từ table đầu tiên */
+    /** Get class info from first table */
     classInfo: (): { subjectName: string; classCode: string } | null => {
         const table = document.querySelector('table:first-child');
         if (!table) return null;
@@ -114,7 +121,7 @@ const DOM = {
         return { subjectName, classCode };
     },
 
-    /** Lấy thông tin bạn bè từ table đầu tiên */
+    /** Get friend info from first table */
     friendInfo: (): { name: string; className: string } | null => {
         const table = document.querySelector('table:first-child');
         if (!table) return null;
@@ -131,64 +138,64 @@ const DOM = {
     },
 };
 
-// Dynamic URL patterns (cần parse context từ DOM)
+// Dynamic URL patterns (need to parse context from DOM)
 const DYNAMIC_URL_PATTERNS: DynamicTitleConfig[] = [
-    // Chi tiết học phần CDIO
+    // CDIO course details
     {
         pattern: /^\/training\/viewmodulescdiosv\//,
         icon: '📖',
         getTitleFn: () => {
             const header = DOM.panelHeader();
-            if (!header) return 'Chi tiết HP';
+            if (!header) return null;
             const info = DOM.parseCourseInfo(header);
-            return info ? `${info.name} (${info.code})` : 'Chi tiết HP';
+            return info ? `${info.name} (${info.code})` : null;
         },
     },
-    // Chi tiết học phần thường
+    // Regular course details
     {
         pattern: /^\/training\/viewcourseindustry2\//,
         icon: '📖',
         getTitleFn: () => {
             const header = DOM.panelHeader();
-            if (!header) return 'Chi tiết HP';
+            if (!header) return null;
             const info = DOM.parseCourseInfo(header);
-            return info ? `${info.name} (${info.code})` : 'Chi tiết HP';
+            return info ? `${info.name} (${info.code})` : null;
         },
     },
-    // Kết quả thi lớp
+    // Class exam results
     {
         pattern: /^\/student\/result\/viewexamresultclass/,
         icon: '👥',
         getTitleFn: () => {
             const info = DOM.classInfo();
-            return info ? `KQ thi - ${info.subjectName} - ${info.classCode}` : 'KQ thi lớp';
+            return info ? `KQ thi - ${info.subjectName} - ${info.classCode}` : null;
         },
     },
-    // Kết quả học tập lớp
+    // Class academic results
     {
         pattern: /^\/student\/result\/viewstudyresultclass/,
         icon: '👥',
         getTitleFn: () => {
             const info = DOM.classInfo();
-            return info ? `KQ HT - ${info.subjectName} - ${info.classCode}` : 'KQ HT lớp';
+            return info ? `KQ HT - ${info.subjectName} - ${info.classCode}` : null;
         },
     },
-    // Kết quả học tập bạn bè
+    // Friend academic results
     {
         pattern: /^\/student\/result\/viewstudyresult\?/,
         icon: '👤',
         getTitleFn: () => {
             const info = DOM.friendInfo();
-            return info ? `KQ - ${info.name} - ${info.className}` : 'KQ bạn';
+            return info ? `KQ - ${info.name} - ${info.className}` : null;
         },
     },
-    // Kết quả thi bạn bè
+    // Friend exam results
     {
         pattern: /^\/student\/result\/viewexamresult\?/,
         icon: '👤',
         getTitleFn: () => {
             const info = DOM.friendInfo();
-            return info ? `KQ thi - ${info.name} - ${info.className}` : 'KQ thi bạn';
+            return info ? `KQ thi - ${info.name} - ${info.className}` : null;
         },
     },
 ];
@@ -200,59 +207,75 @@ const DYNAMIC_URL_PATTERNS: DynamicTitleConfig[] = [
 export class DynamicTitleFeature extends Feature {
     private originalTitle: string = '';
     private observer: MutationObserver | null = null;
+    private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
     constructor() {
         super({
             id: 'dynamic-title',
             name: 'Dynamic Title',
-            description: 'Thay đổi tiêu đề tab dựa trên trang đang xem',
+            description: 'Changes tab title based on current page',
         });
     }
 
+    /**
+     * Initialize Dynamic Title Feature
+     * Update title and start observing DOM changes
+     */
     init(): void {
         this.log.i('Initializing...');
 
-        // Lưu title gốc
+        // Save original title
         this.originalTitle = document.title;
 
-        // Update title lần đầu
-        this.updateTitle();
+        // Update title for the first time
+        const found = this.updateTitle();
 
-        // Theo dõi thay đổi DOM để update title khi content thay đổi
-        this.observeContentChanges();
+        // Only observe if title not found yet (need to wait for DOM load)
+        if (!found) {
+            this.observeContentChanges();
+        }
 
         this.log.i('Ready!');
     }
 
-    private updateTitle(): void {
+    /**
+     * Update document title based on URL and DOM
+     * @returns true if a matching title was found, false if need to wait
+     */
+    private updateTitle(): boolean {
         const url = window.location.pathname + window.location.search;
         const pathname = window.location.pathname;
 
-        // 1. Thử static mapping trước
+        // 1. Try static mapping first (always succeeds if matches)
         const staticTitle = URL_TITLE_MAP[pathname];
         if (staticTitle) {
             this.setTitle(staticTitle);
-            return;
+            return true;
         }
 
-        // 2. Thử dynamic patterns
+        // 2. Try dynamic patterns
         for (const config of DYNAMIC_URL_PATTERNS) {
             if (config.pattern.test(url)) {
                 const title = config.getTitleFn();
+                // null = DOM not ready yet, need to continue observing
+                if (title === null) {
+                    return false;
+                }
                 this.setTitle(`${config.icon} ${title}`);
-                return;
+                return true;
             }
         }
 
-        // 3. Fallback: dùng panel header nếu có
+        // 3. Fallback: use panel header if available
         const panelHeader = DOM.panelHeader();
         if (panelHeader) {
             this.setTitle(`📄 ${this.truncate(panelHeader, 30)}`);
-            return;
+            return true;
         }
 
-        // 4. Giữ nguyên title gốc nếu không match gì
+        // 4. Keep original title if nothing matches
         this.log.d('No matching pattern, keeping original title');
+        return false;
     }
 
     private setTitle(title: string): void {
@@ -274,21 +297,46 @@ export class DynamicTitleFeature extends Feature {
         if (!content) return;
 
         this.observer = new MutationObserver(() => {
-            // Debounce: wait 100ms after DOM changes
-            setTimeout(() => this.updateTitle(), 100);
+            // Clear old timeout for proper debounce
+            if (this.debounceTimer) {
+                clearTimeout(this.debounceTimer);
+            }
+
+            this.debounceTimer = setTimeout(() => {
+                this.debounceTimer = null;
+                const found = this.updateTitle();
+                // Stop observer when title is found
+                if (found) {
+                    this.log.d('Title found, stopping observer');
+                    this.observer?.disconnect();
+                    this.observer = null;
+                }
+            }, TITLE_UPDATE_DEBOUNCE_MS);
         });
 
         this.observer.observe(content, {
             childList: true,
             subtree: true,
         });
+
+        this.log.d('Started observing for dynamic content');
     }
 
+    /**
+     * Cleanup resources when feature is disabled
+     * Restore original title and stop observer
+     */
     destroy(): void {
-        // Khôi phục title gốc
+        // Restore original title
         document.title = this.originalTitle;
 
-        // Dừng observer
+        // Stop debounce timer if running
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+            this.debounceTimer = null;
+        }
+
+        // Stop observer
         this.observer?.disconnect();
         this.observer = null;
     }
