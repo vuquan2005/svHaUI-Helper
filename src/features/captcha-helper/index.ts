@@ -1,17 +1,27 @@
 /**
  * Captcha Helper Feature
- * Hỗ trợ nhập captcha: normalize input, auto-submit on blur/Enter
+ * Assists with captcha input: normalize input, auto-submit on blur/Enter
  */
 
 import { Feature, settings } from '../../core';
 import { normalizeCaptchaInput, normalizeCaptchaInputUndo } from '../../utils';
 
 // ============================================
+// Constants
+// ============================================
+
+/** Debounce delay before normalizing input (ms) */
+const DEBOUNCE_DELAY_MS = 30;
+
+/** Required captcha length */
+const CAPTCHA_LENGTH = 5;
+
+// ============================================
 // Types & Interfaces (extensibility)
 // ============================================
 
 /**
- * Interface cho captcha handler - dễ mở rộng cho trang khác
+ * Interface for captcha handler - easily extensible for other pages
  */
 interface CaptchaPageHandler {
     /** URL pattern để match */
@@ -36,7 +46,7 @@ const CAPTCHA_HANDLERS: CaptchaPageHandler[] = [
         submitSelector: '#ctl00_butLogin',
         imageSelector: '#ctl00_Image1',
     },
-    // Register page (đăng ký học phần)
+    // Register page (course registration)
     {
         urlPattern: /\/register\/?/,
         inputSelector: '#ctl02_txtimgcode',
@@ -54,9 +64,8 @@ export class CaptchaHelperFeature extends Feature {
     private submitEl: HTMLElement | null = null;
     private currentHandler: CaptchaPageHandler | null = null;
 
-    // Debounce timer
+    // Debounce timer for input normalization
     private normalizeTimer: ReturnType<typeof setTimeout> | null = null;
-    private readonly DEBOUNCE_DELAY = 30; // ms
 
     // Event listener references for cleanup
     private handleInput = this.onInput.bind(this);
@@ -72,7 +81,8 @@ export class CaptchaHelperFeature extends Feature {
     }
 
     /**
-     * Override shouldRun để chỉ chạy trên các trang có captcha
+     * Override shouldRun to only run on pages with captcha
+     * @returns true if current URL matches one of the captcha handlers
      */
     override shouldRun(): boolean {
         if (!super.shouldRun()) return false;
@@ -81,10 +91,14 @@ export class CaptchaHelperFeature extends Feature {
         return CAPTCHA_HANDLERS.some(h => h.urlPattern.test(url));
     }
 
+    /**
+     * Initialize Captcha Helper
+     * Find and attach event listeners to captcha input field
+     */
     init(): void {
         this.log.i('Initializing...');
 
-        // Tìm handler phù hợp với URL hiện tại
+        // Find handler matching current URL
         const url = window.location.pathname + window.location.search;
         this.currentHandler = CAPTCHA_HANDLERS.find(h => h.urlPattern.test(url)) || null;
 
@@ -93,7 +107,7 @@ export class CaptchaHelperFeature extends Feature {
             return;
         }
 
-        // Tìm elements
+        // Find elements
         this.inputEl = document.querySelector<HTMLInputElement>(this.currentHandler.inputSelector);
         this.submitEl = document.querySelector<HTMLElement>(this.currentHandler.submitSelector);
 
@@ -106,30 +120,30 @@ export class CaptchaHelperFeature extends Feature {
             this.log.w('Submit button not found:', this.currentHandler.submitSelector);
         }
 
-        // Attach event listeners
+        // Attach event listeners to input field
         this.inputEl.addEventListener('input', this.handleInput);
         this.inputEl.addEventListener('keydown', this.handleKeyDown);
         this.inputEl.addEventListener('blur', this.handleBlur);
 
-        // Focus input để người dùng có thể gõ ngay
+        // Focus input so user can type immediately
         this.inputEl.focus();
 
         this.log.i('Ready! Input:', this.currentHandler.inputSelector);
     }
 
     /**
-     * Xử lý input: debounce normalize
+     * Handle input event: debounce normalize
      */
     private onInput(): void {
-        // Clear timer cũ
+        // Clear existing timer
         if (this.normalizeTimer) {
             clearTimeout(this.normalizeTimer);
         }
 
-        // Set timer mới - normalize sau DEBOUNCE_DELAY ms
+        // Set new timer - normalize after DEBOUNCE_DELAY_MS
         this.normalizeTimer = setTimeout(() => {
             this.normalizeInput();
-        }, this.DEBOUNCE_DELAY);
+        }, DEBOUNCE_DELAY_MS);
     }
 
     /**
@@ -138,7 +152,7 @@ export class CaptchaHelperFeature extends Feature {
     private normalizeInput(): void {
         if (!this.inputEl) return;
 
-        // Clear timer nếu có
+        // Clear timer if exists
         if (this.normalizeTimer) {
             clearTimeout(this.normalizeTimer);
             this.normalizeTimer = null;
@@ -150,18 +164,16 @@ export class CaptchaHelperFeature extends Feature {
             ? normalizeCaptchaInputUndo(original)
             : normalizeCaptchaInput(original);
 
-        this.log.d(`Original: "${original}"`);
-
         if (original !== normalized) {
             this.inputEl.value = normalized;
-            // Đặt cursor ở cuối
+            // Set cursor to end
             this.inputEl.setSelectionRange(normalized.length, normalized.length);
             this.log.d(`Normalized: "${original}" → "${normalized}"`);
         }
     }
 
     /**
-     * Xử lý keydown: submit khi Enter
+     * Handle keydown event: submit on Enter
      */
     private onKeyDown(e: KeyboardEvent): void {
         if (e.key === 'Enter') {
@@ -172,12 +184,12 @@ export class CaptchaHelperFeature extends Feature {
     }
 
     /**
-     * Xử lý blur: normalize và submit khi out focus
+     * Handle blur event: normalize and submit when losing focus
      */
     private onBlur(): void {
         this.normalizeInput();
 
-        // Chỉ submit nếu có giá trị
+        // Only submit if input has value
         if (this.inputEl?.value.trim()) {
             this.submit();
         }
@@ -188,7 +200,6 @@ export class CaptchaHelperFeature extends Feature {
      */
     private submit(): void {
         const value = this.inputEl?.value.trim() || '';
-        const CAPTCHA_LENGTH = 5;
 
         if (value.length < CAPTCHA_LENGTH) {
             this.log.d(`Need ${CAPTCHA_LENGTH} chars, got ${value.length}`);
@@ -201,6 +212,10 @@ export class CaptchaHelperFeature extends Feature {
         }
     }
 
+    /**
+     * Cleanup resources when feature is disabled
+     * Remove event listeners and clear timers
+     */
     destroy(): void {
         // Clear timer
         if (this.normalizeTimer) {
