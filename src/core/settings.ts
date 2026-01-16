@@ -1,6 +1,6 @@
 /**
- * Settings Manager - Quản lý cài đặt người dùng
- * Sử dụng type-safe storage
+ * Settings Manager - Manages user settings
+ * Uses type-safe storage
  */
 
 import { storage } from './storage';

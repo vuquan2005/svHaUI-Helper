@@ -1,10 +1,10 @@
 /**
  * Text Utilities
- * Các tiện ích xử lý chuỗi văn bản
+ * Text string processing utilities
  */
 
 /**
- * Map combining marks (sau khi NFD) về phím Telex
+ * Map combining marks (after NFD) to Telex keys
  */
 const COMBINING_TO_TELEX: Record<string, string> = {
     '\u0301': 's', // ́ sắc
@@ -16,7 +16,7 @@ const COMBINING_TO_TELEX: Record<string, string> = {
     '\u031B': 'w', // ̛ móc (ơ, ư) - thêm 'w'
 };
 /**
- * Xác định ký tự Telex tương ứng từ chuỗi input
+ * Determine corresponding Telex character from input string
  */
 export function getTelexChar(text: string): string {
     if (text.includes('đ') || text.includes('Đ')) return 'd';
@@ -37,9 +37,9 @@ export function getTelexChar(text: string): string {
 }
 
 /**
- * Loại bỏ dấu tiếng Việt và các diacritics khác
- * Sử dụng Unicode Normalization Form D (NFD) để tách ký tự và dấu,
- * sau đó loại bỏ các combining marks (dấu)
+ * Remove Vietnamese diacritics and other diacritical marks
+ * Uses Unicode Normalization Form D (NFD) to separate characters and marks,
+ * then removes the combining marks (diacritics)
  *
  * @example
  * removeDiacritics("Đây là tiếng Việt") // "Đay la tieng Viet"
@@ -54,27 +54,27 @@ export function removeDiacritics(text: string): string {
 }
 
 /**
- * Chỉ giữ lại ký tự alphanumeric (a-z, A-Z, 0-9)
+ * Keep only alphanumeric characters (a-z, A-Z, 0-9)
  */
 export function keepAlphanumeric(text: string): string {
     return text.replace(/[^a-zA-Z0-9]/g, '');
 }
 
 /**
- * Normalize text cho captcha input:
- * - Chuyển thành chữ thường
- * - Loại bỏ dấu tiếng Việt
- * - Chỉ giữ lại a-z và 0-9
+ * Normalize text for captcha input:
+ * - Convert to lowercase
+ * - Remove Vietnamese diacritics
+ * - Keep only a-z and 0-9
  */
 export function normalizeCaptchaInput(text: string): string {
     return keepAlphanumeric(removeDiacritics(text.toLowerCase()));
 }
 
 /**
- * Normalize text cho captcha input + undo Telex:
- * - Chuyển thành chữ thường
- * - Hoàn tác các dấu khi gõ tiếng Việt bằng Telex (ví dụ: "às" → "asf")
- * - Chỉ giữ lại a-z và 0-9
+ * Normalize text for captcha input + undo Telex:
+ * - Convert to lowercase
+ * - Undo Vietnamese Telex input (e.g., "às" → "asf")
+ * - Keep only a-z and 0-9
  */
 export function normalizeCaptchaInputUndo(text: string): string {
     return keepAlphanumeric(removeDiacritics(text).toLowerCase() + getTelexChar(text));

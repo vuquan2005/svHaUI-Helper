@@ -1,5 +1,5 @@
 /**
- * Type definitions cho project
+ * Type definitions for project
  */
 
 import type { LogLevel } from '../core/logger';
@@ -9,7 +9,7 @@ import type { LogLevel } from '../core/logger';
 // ============================================
 
 /**
- * Cài đặt ứng dụng
+ * Application settings
  */
 export interface AppSettings {
     logLevel: LogLevel;
@@ -17,7 +17,7 @@ export interface AppSettings {
 }
 
 /**
- * Thông tin môn học và điểm
+ * Course and grade information
  */
 export interface CourseGrade {
     name: string;
@@ -34,8 +34,8 @@ export interface CourseGrade {
 // ============================================
 
 /**
- * Định nghĩa tất cả keys và types trong GM storage
- * Thêm key mới vào đây để có autocomplete và type safety
+ * Define all keys and types in GM storage
+ * Add new keys here for autocomplete and type safety
  */
 export interface StorageSchema {
     app_settings: AppSettings;

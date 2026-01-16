@@ -1,6 +1,6 @@
 /**
  * SV HaUI Helper - Main Entry Point
- * Nâng cao trải nghiệm cho sinh viên HaUI
+ * Enhances the experience for HaUI students
  *
  * @author VuQuan
  * @namespace https://github.com/vuquan2005/svHaUI
@@ -10,7 +10,7 @@ import { featureManager } from './core';
 import { allFeatures } from './features';
 import { log } from './utils';
 
-// Version được inject từ package.json qua vite.config.ts
+// Version is injected from package.json via vite.config.ts
 declare const __APP_VERSION__: string;
 
 // Banner console
@@ -21,18 +21,18 @@ console.log(
 );
 
 async function main(): Promise<void> {
-    log.i('Đang khởi tạo...');
+    log.i('Initializing...');
 
-    // Đăng ký tất cả features
+    // Register all features
     featureManager.registerAll(allFeatures);
 
-    // Khởi chạy các features phù hợp
+    // Initialize matching features
     await featureManager.initAll();
 
-    log.i('✅ Đã sẵn sàng!');
+    log.i('✅ Ready!');
 }
 
-// Chạy khi DOM ready
+// Run when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', main);
 } else {

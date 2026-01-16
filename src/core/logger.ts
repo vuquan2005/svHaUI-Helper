@@ -1,13 +1,13 @@
 /**
- * Logger Utility - Logging nhanh và đẹp
- * Hỗ trợ log level setting và hiển thị source location (line number)
+ * Logger Utility - Fast and beautiful logging
+ * Supports log level setting and source location display (line number)
  *
- * Sử dụng bind trick để DevTools hiển thị đúng line number nơi gọi log
+ * Uses bind trick so DevTools displays correct line number where log is called
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'none';
 
-// Thứ tự ưu tiên: debug < info < warn < error < none
+// Priority order: debug < info < warn < error < none
 const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
     debug: 0,
     info: 1,
@@ -35,7 +35,7 @@ const LEVEL_ICONS: Record<Exclude<LogLevel, 'none'>, string> = {
     error: '❌',
 };
 
-// Global log level - có thể thay đổi từ settings
+// Global log level - can be changed from settings
 let globalMinLevel: LogLevel = 'debug';
 
 export function setGlobalLogLevel(level: LogLevel): void {
@@ -46,7 +46,7 @@ export function getGlobalLogLevel(): LogLevel {
     return globalMinLevel;
 }
 
-// No-op function khi log bị disabled
+// No-op function when log is disabled
 const noop = () => { };
 
 export class Logger {
@@ -69,8 +69,8 @@ export class Logger {
 
     /**
      * Debug log - for development
-     * Sử dụng: log.d('message', data)
-     * Line number sẽ hiển thị đúng vị trí gọi trong DevTools
+     * Usage: log.d('message', data)
+     * Line number will display correctly in DevTools
      */
     get d() {
         if (!this.shouldLog('debug')) return noop;
@@ -129,7 +129,7 @@ export class Logger {
 // Main app logger
 export const log = new Logger({ prefix: 'HaUI' });
 
-// Factory để tạo logger cho từng module
+// Factory to create logger for each module
 export function createLogger(name: string): Logger {
     return log.child(name);
 }

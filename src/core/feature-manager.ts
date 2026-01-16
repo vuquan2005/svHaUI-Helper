@@ -1,5 +1,5 @@
 /**
- * Feature Manager - Quản lý và điều phối các features
+ * Feature Manager - Manages and coordinates features
  */
 
 import { Feature } from './feature';
@@ -12,29 +12,29 @@ class FeatureManager {
     private initialized: Set<string> = new Set();
 
     /**
-     * Đăng ký một feature mới
+     * Register a new feature
      */
     register(feature: Feature): void {
         if (this.features.has(feature.id)) {
-            log.w(`Feature "${feature.id}" đã được đăng ký, bỏ qua.`);
+            log.w(`Feature "${feature.id}" already registered, skipping.`);
             return;
         }
         this.features.set(feature.id, feature);
-        log.d(`Đã đăng ký: ${feature.name}`);
+        log.d(`Registered: ${feature.name}`);
     }
 
     /**
-     * Đăng ký nhiều features cùng lúc
+     * Register multiple features at once
      */
     registerAll(features: Feature[]): void {
         features.forEach((f) => this.register(f));
     }
 
     /**
-     * Khởi chạy tất cả features phù hợp với trang hiện tại
+     * Initialize all features matching the current page
      */
     async initAll(): Promise<void> {
-        log.d('Bắt đầu khởi tạo features...');
+        log.d('Starting feature initialization...');
 
         for (const [id, feature] of this.features) {
             if (this.initialized.has(id)) {
@@ -42,38 +42,38 @@ class FeatureManager {
             }
 
             if (!feature.shouldRun()) {
-                log.d(`Bỏ qua "${feature.name}" (không match URL hoặc bị tắt)`);
+                log.d(`Skipping "${feature.name}" (URL mismatch or disabled)`);
                 continue;
             }
 
             try {
-                log.d(`Khởi tạo: ${feature.name}`);
+                log.d(`Initializing: ${feature.name}`);
                 await feature.init();
                 this.initialized.add(id);
             } catch (error) {
-                log.e(`Lỗi khi khởi tạo "${feature.name}":`, error);
+                log.e(`Error initializing "${feature.name}":`, error);
             }
         }
 
-        log.i(`Đã khởi tạo ${this.initialized.size}/${this.features.size} features`);
+        log.i(`Initialized ${this.initialized.size}/${this.features.size} features`);
     }
 
     /**
-     * Lấy feature theo ID
+     * Get feature by ID
      */
     get(id: string): Feature | undefined {
         return this.features.get(id);
     }
 
     /**
-     * Lấy danh sách tất cả features
+     * Get all registered features
      */
     getAll(): Feature[] {
         return Array.from(this.features.values());
     }
 
     /**
-     * Kiểm tra feature đã được khởi tạo chưa
+     * Check if a feature has been initialized
      */
     isInitialized(id: string): boolean {
         return this.initialized.has(id);

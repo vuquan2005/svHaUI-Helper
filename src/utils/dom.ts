@@ -1,11 +1,11 @@
 /**
- * DOM Utilities - Các hàm tiện ích làm việc với DOM
+ * DOM Utilities - Utility functions for working with DOM
  */
 
 import { GM_addStyle } from '$';
 
 /**
- * Chờ cho đến khi element xuất hiện trong DOM
+ * Wait until element appears in DOM
  */
 export function waitForElement<T extends Element>(
     selector: string,
@@ -39,7 +39,7 @@ export function waitForElement<T extends Element>(
 }
 
 /**
- * Tạo element từ HTML string
+ * Create element from HTML string
  */
 export function createElementFromHTML<T extends Element>(html: string): T {
     const template = document.createElement('template');
@@ -48,7 +48,7 @@ export function createElementFromHTML<T extends Element>(html: string): T {
 }
 
 /**
- * Thêm CSS vào trang
+ * Add CSS to page
  */
 export function addStyles(css: string): void {
     GM_addStyle(css);

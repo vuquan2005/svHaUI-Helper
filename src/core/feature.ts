@@ -1,6 +1,6 @@
 /**
- * Feature Base Class - Lớp cơ sở cho tất cả các tính năng
- * Mỗi feature kế thừa từ class này để đảm bảo cấu trúc nhất quán
+ * Feature Base Class - Base class for all features
+ * Each feature inherits from this class to ensure consistent structure
  */
 
 import { settings } from './settings';
@@ -10,7 +10,7 @@ export interface FeatureConfig {
     id: string;
     name: string;
     description: string;
-    // Regex hoặc string để match URL, nếu không set thì chạy trên mọi trang
+    // Regex or string to match URL, if not set runs on all pages
     urlMatch?: RegExp | string;
 }
 
@@ -29,20 +29,20 @@ export abstract class Feature {
         this.description = config.description;
         this.urlMatch = config.urlMatch;
 
-        // Tự động tạo logger với prefix là tên feature
+        // Auto-create logger with feature name as prefix
         this.log = createLogger(config.name);
     }
 
     /**
-     * Kiểm tra xem feature có nên chạy trên URL hiện tại không
+     * Check if this feature should run on the current URL
      */
     shouldRun(): boolean {
-        // Kiểm tra feature có được bật không
+        // Check if feature is enabled
         if (!settings.isFeatureEnabled(this.id)) {
             return false;
         }
 
-        // Nếu không có urlMatch thì chạy trên mọi trang
+        // If no urlMatch, run on all pages
         if (!this.urlMatch) {
             return true;
         }
@@ -57,16 +57,16 @@ export abstract class Feature {
     }
 
     /**
-     * Khởi tạo feature - được gọi khi feature được load
-     * Override method này để thêm logic khởi tạo
+     * Initialize feature - called when feature is loaded
+     * Override this method to add initialization logic
      */
     abstract init(): void | Promise<void>;
 
     /**
-     * Dọn dẹp khi feature bị disable hoặc unload
-     * Override nếu cần cleanup
+     * Cleanup when feature is disabled or unloaded
+     * Override if cleanup is needed
      */
     destroy(): void {
-        // Default: không làm gì
+        // Default: do nothing
     }
 }
