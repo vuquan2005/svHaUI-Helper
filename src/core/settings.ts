@@ -9,8 +9,9 @@ import { createLogger, setGlobalLogLevel, type LogLevel } from './logger';
 const log = createLogger('Settings');
 
 const DEFAULT_SETTINGS = {
-    logLevel: 'info' as LogLevel,
+    logLevel: 'debug' as LogLevel,
     features: {} as Record<string, boolean>,
+    captchaUndoTelex: true,
 };
 
 class SettingsManager {
@@ -56,6 +57,15 @@ class SettingsManager {
 
     getLogLevel(): LogLevel {
         return this.settings.logLevel;
+    }
+
+    getCaptchaUndoTelex(): boolean {
+        return this.settings.captchaUndoTelex;
+    }
+
+    setCaptchaUndoTelex(enabled: boolean): void {
+        this.settings.captchaUndoTelex = enabled;
+        this.save();
     }
 }
 

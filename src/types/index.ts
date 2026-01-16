@@ -40,6 +40,7 @@ export interface CourseGrade {
 export interface StorageSchema {
     app_settings: AppSettings;
     grades: CourseGrade[];
+    captcha_undo_telex: boolean;
 }
 
 // Utility types

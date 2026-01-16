@@ -12,26 +12,28 @@ const COMBINING_TO_TELEX: Record<string, string> = {
     '\u0309': 'r', // ̉ hỏi
     '\u0303': 'x', // ̃ ngã
     '\u0323': 'j', // ̣ nặng
-    '\u0302': 'a', // ̂ mũ (â, ê, ô) - thêm 'a' sau nguyên âm
     '\u0306': 'w', // ̆ trăng (ă) - thêm 'w'
     '\u031B': 'w', // ̛ móc (ơ, ư) - thêm 'w'
 };
-
 /**
- * Chuyển text có dấu thành dạng Telex
- * @example
- * diacriticsToTelex("xin chào") // "xin chaof"
- * diacriticsToTelex("cà phê") // "caf phee"
- * diacriticsToTelex("đẹp") // "ddejp"
+ * Xác định ký tự Telex tương ứng từ chuỗi input
  */
-export function diacriticsToTelex(text: string): string {
-    return text
-        .replace(/đ/g, 'dd')
-        .replace(/Đ/g, 'DD')
-        .normalize('NFD')
-        .split('')
-        .map(char => COMBINING_TO_TELEX[char] ?? char)
-        .join('');
+export function getTelexChar(text: string): string {
+    if (text.includes('đ') || text.includes('Đ')) return 'd';
+
+    const chars = text.normalize('NFD').split('');
+
+    for (let i = 0; i < chars.length; i++) {
+        const char = chars[i];
+        if (COMBINING_TO_TELEX[char]) {
+            return COMBINING_TO_TELEX[char];
+        }
+        if (char === '\u0302') {
+            return chars[i - 1]?.toLowerCase() || '';
+        }
+    }
+
+    return '';
 }
 
 /**
@@ -68,3 +70,12 @@ export function normalizeCaptchaInput(text: string): string {
     return keepAlphanumeric(removeDiacritics(text.toLowerCase()));
 }
 
+/**
+ * Normalize text cho captcha input + undo Telex:
+ * - Chuyển thành chữ thường
+ * - Hoàn tác các dấu khi gõ tiếng Việt bằng Telex (ví dụ: "às" → "asf")
+ * - Chỉ giữ lại a-z và 0-9
+ */
+export function normalizeCaptchaInputUndo(text: string): string {
+    return keepAlphanumeric(removeDiacritics(text).toLowerCase() + getTelexChar(text));
+}

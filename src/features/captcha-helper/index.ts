@@ -3,8 +3,8 @@
  * Hỗ trợ nhập captcha: normalize input, auto-submit on blur/Enter
  */
 
-import { Feature } from '../../core';
-import { normalizeCaptchaInput } from '../../utils';
+import { Feature, settings } from '../../core';
+import { normalizeCaptchaInput, normalizeCaptchaInputUndo } from '../../utils';
 
 // ============================================
 // Types & Interfaces (extensibility)
@@ -38,7 +38,7 @@ const CAPTCHA_HANDLERS: CaptchaPageHandler[] = [
     },
     // Register page (đăng ký học phần)
     {
-        urlPattern: /\/register\//,
+        urlPattern: /\/register\/?/,
         inputSelector: '#ctl02_txtimgcode',
         submitSelector: '#ctl02_btnSubmit',
         imageSelector: '#ctl02_Image1',
@@ -56,7 +56,7 @@ export class CaptchaHelperFeature extends Feature {
 
     // Debounce timer
     private normalizeTimer: ReturnType<typeof setTimeout> | null = null;
-    private readonly DEBOUNCE_DELAY = 150; // ms
+    private readonly DEBOUNCE_DELAY = 30; // ms
 
     // Event listener references for cleanup
     private handleInput = this.onInput.bind(this);
@@ -145,7 +145,12 @@ export class CaptchaHelperFeature extends Feature {
         }
 
         const original = this.inputEl.value;
-        const normalized = normalizeCaptchaInput(original);
+        const undoTelex = settings.getCaptchaUndoTelex();
+        const normalized = undoTelex
+            ? normalizeCaptchaInputUndo(original)
+            : normalizeCaptchaInput(original);
+
+        this.log.d(`Original: "${original}"`);
 
         if (original !== normalized) {
             this.inputEl.value = normalized;
