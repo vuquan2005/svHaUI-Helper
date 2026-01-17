@@ -2,7 +2,7 @@
 
 Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại tại đây.
 
-## [1.2.2] - 2026-01-18
+## [2.0.0] - 2026-01-18
 
 ### Refactored
 - **Settings**: Tái cấu trúc hoàn toàn Settings sang class-based system
