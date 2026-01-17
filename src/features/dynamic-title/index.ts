@@ -27,57 +27,57 @@ interface DynamicTitleConfig {
 
 // Static URL mapping (exact match with pathname)
 const URL_TITLE_MAP: Record<string, string> = {
-    // Home page
+    // Trang chủ
     '/': '🏠 Trang chủ',
 
-    // Finance
+    // Tài chính
     '/student/recharge/cashinqr': '💳 Nạp tiền QR',
     '/student/recharge/cashin': '💳 Nạp tiền TK',
     '/student/recharge/inpatientpayment': '💰 Thanh toán công nợ',
     '/student/recharge/transactionhistory': '📜 Lịch sử GD',
     '/student/recharge/listeinvoice': '🧾 Hóa đơn ĐT',
 
-    // Personal information
+    // Thông tin cá nhân
     '/student/userdetail/userdetail': '👤 Thông tin SV',
     '/student/userdetail/updateuserprofile': '📝 Cập nhật hồ sơ',
     '/student/userdetail/usercerupdate': '🎓 TT in bằng',
     '/member/changepass': '🔐 Đổi mật khẩu',
     '/student/userdetail/militaryclothes': '🎖️ Quân tư trang',
 
-    // Course registration
+    // Đăng ký học phần
     '/register/dangkyhocphan': '📝 ĐK HP dự kiến',
     '/register/': '📝 Đăng ký HP',
     '/training/removeclasslist': '❌ Rút HP',
     '/training/statisticregister': '📊 Thống kê ĐKHP',
     '/training/viewprogram': '📚 ĐK 2 chương trình',
 
-    // Training program
+    // Chương trình đào tạo
     '/training/viewcourseindustry': '📚 Khung CT',
     '/training/programmodulessemester': '📅 Khung theo kỳ',
 
-    // Schedule & Timetable
+    // Lịch học & TKB
     '/timestable/calendarct': '📆 KH đầu khóa',
     '/timestable/calendarcl': '🗓️ Thời khóa biểu',
     '/timestable/timestableview': '🗓️ Lịch giảng dạy',
 
-    // Exam schedule
+    // Lịch thi
     '/student/schedulefees/examplant': '📆 Kế hoạch thi',
     '/student/schedulefees/transactionmodules': '📆 Lịch thi',
     '/student/schedulefees/testonline': '💻 Thi Online',
 
-    // Academic results - Personal
+    // Kết quả học tập - Cá nhân
     '/student/result/studyresults': '📊 KQ học tập',
     '/student/result/examresult': '📋 KQ thi',
     '/student/result/viewscorebysemester': '📈 ĐTB học kỳ',
     '/student/result/viewmodules': '📈 ĐTB tích lũy',
     '/student/result/sendreceiveapplications': '📨 Phúc tra',
 
-    // Graduation
+    // Tốt nghiệp
     '/tttn/htdn/list': '🎓 Thực tập TN',
     '/student/result/graduatecal': '🎓 Xét tốt nghiệp',
     '/student/result/degreeview': '🎓 TT in bằng',
 
-    // Utilities
+    // Tiện ích
     '/student/application/notifilist': '📢 Thông báo trường',
     '/student/application/messengeruserlist': '📬 Thông báo cá nhân',
     '/student/recharge/serviceonegate': '🚪 Dịch vụ một cửa',
@@ -213,7 +213,7 @@ export class DynamicTitleFeature extends Feature {
         super({
             id: 'dynamic-title',
             name: 'Dynamic Title',
-            description: 'Changes tab title based on current page',
+            description: 'Thay đổi tiêu đề tab dựa trên trang đang xem',
         });
     }
 

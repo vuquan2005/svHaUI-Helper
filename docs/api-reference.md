@@ -24,7 +24,7 @@ abstract class Feature {
     readonly id: string;
     readonly name: string;
     readonly description: string;
-    protected readonly log: Logger;  // Tự động tạo
+    protected readonly log: Logger;
 
     constructor(config: FeatureConfig);
     shouldRun(): boolean;

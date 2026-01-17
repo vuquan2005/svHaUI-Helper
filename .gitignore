@@ -23,6 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 .agent/
-
-# Personal notes
-NOTES.md

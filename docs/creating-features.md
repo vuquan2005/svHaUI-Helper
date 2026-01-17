@@ -138,29 +138,7 @@ class MyFeature extends Feature {
 
 ## 🛠️ Utilities
 
-### DOM Utilities
-
-```typescript
-import { waitForElement, createElementFromHTML, addStyles } from '../../utils';
-
-const header = await waitForElement<HTMLElement>('.header');
-const btn = createElementFromHTML<HTMLButtonElement>(`<button>Click</button>`);
-addStyles(`.my-class { color: red; }`);
-
-// Dùng trực tiếp Web API
-const el = document.querySelector('.my-class');
-const els = document.querySelectorAll('.items');
-```
-
-### Storage (Type-safe)
-
-```typescript
-import { storage } from '../../core';
-
-// Thêm key trong src/types/index.ts trước
-storage.get('grades', []);     // Autocomplete + type checked
-storage.set('grades', data);
-```
+Xem chi tiết các APIs: [API Reference](api-reference.md)
 
 ## 💡 Tips
 
