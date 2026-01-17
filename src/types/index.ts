@@ -2,7 +2,7 @@
  * Type definitions for project
  */
 
-import type { LogLevel } from '../core/logger';
+import type { LogLevel } from '@/core/logger';
 
 // ============================================
 // Data Interfaces

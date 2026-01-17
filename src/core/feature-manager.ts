@@ -3,7 +3,7 @@
  */
 
 import { Feature } from './feature';
-import { createLogger } from '../utils';
+import { createLogger } from './logger';
 
 const log = createLogger('FeatureManager');
 

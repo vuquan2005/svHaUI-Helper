@@ -3,7 +3,7 @@
  */
 
 import { GM_getValue, GM_setValue, GM_deleteValue, GM_listValues } from '$';
-import type { StorageSchema } from '../types';
+import type { StorageSchema } from '@/types';
 
 class StorageManager {
     get<K extends keyof StorageSchema>(key: K, defaultValue?: StorageSchema[K]): StorageSchema[K] {

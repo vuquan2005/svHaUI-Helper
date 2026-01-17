@@ -3,7 +3,7 @@
  * Changes document.title based on URL and page content
  */
 
-import { Feature } from '../../core';
+import { Feature } from '@/core';
 
 // ============================================
 // Constants

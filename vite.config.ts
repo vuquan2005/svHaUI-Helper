@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import monkey from 'vite-plugin-monkey';
+import path from 'path';
 import { version } from './package.json';
 
 const isMinify = process.env.MINIFY === 'true';
@@ -9,6 +10,11 @@ const GITHUB_RELEASE_BASE = 'https://github.com/vuquan2005/svHaUI-Helper/release
 const MINIFIED_SCRIPT_NAME = 'svhaui-helper.min.user.js';
 
 export default defineConfig({
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './src'),
+        },
+    },
     plugins: [
         monkey({
             entry: 'src/main.ts',

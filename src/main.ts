@@ -8,7 +8,7 @@
 
 import { featureManager } from './core';
 import { allFeatures } from './features';
-import { log } from './utils';
+import { log } from './core/logger';
 
 // Version is injected from package.json via vite.config.ts
 declare const __APP_VERSION__: string;

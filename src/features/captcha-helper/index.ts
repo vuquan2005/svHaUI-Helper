@@ -3,8 +3,8 @@
  * Assists with captcha input: normalize input, auto-submit on blur/Enter
  */
 
-import { Feature, settings } from '../../core';
-import { normalizeCaptchaInput, normalizeCaptchaInputUndo } from '../../utils';
+import { Feature, settings, type MatchPattern } from '@/core';
+import { normalizeCaptchaInput, normalizeCaptchaInputUndo } from '@/utils';
 
 // ============================================
 // Constants
@@ -17,43 +17,44 @@ const DEBOUNCE_DELAY_MS = 30;
 const CAPTCHA_LENGTH = 5;
 
 // ============================================
-// Types & Interfaces (extensibility)
+// Types & Interfaces
 // ============================================
 
 /**
  * Interface for captcha handler - easily extensible for other pages
  */
 interface CaptchaPageHandler {
-    /** URL pattern để match */
-    urlPattern: RegExp;
-    /** Selector cho input field */
+    /** Selector for input field */
     inputSelector: string;
-    /** Selector cho submit button */
+    /** Selector for submit button */
     submitSelector: string;
-    /** Optional: selector cho captcha image (for future auto-solve) */
+    /** Optional: selector for captcha image (for future auto-solve) */
     imageSelector?: string;
 }
 
 // ============================================
-// Page Handlers
+// Page Handlers (keyed by match pattern name)
 // ============================================
 
-const CAPTCHA_HANDLERS: CaptchaPageHandler[] = [
-    // SSO Login page
-    {
-        urlPattern: /\/sso\?token=/,
+/** URL patterns for matching */
+const URL_PATTERNS: MatchPattern[] = [
+    { name: 'sso-login', pattern: /\/sso\?token=/ },
+    { name: 'register', pattern: '/register' },
+];
+
+/** Handler config for each pattern (keyed by pattern name) */
+const HANDLERS: Record<string, CaptchaPageHandler> = {
+    'sso-login': {
         inputSelector: '#ctl00_txtimgcode',
         submitSelector: '#ctl00_butLogin',
         imageSelector: '#ctl00_Image1',
     },
-    // Register page (course registration)
-    {
-        urlPattern: /\/register\/?/,
+    register: {
         inputSelector: '#ctl02_txtimgcode',
         submitSelector: '#ctl02_btnSubmit',
         imageSelector: '#ctl02_Image1',
     },
-];
+};
 
 // ============================================
 // CaptchaHelper Feature
@@ -76,19 +77,10 @@ export class CaptchaHelperFeature extends Feature {
         super({
             id: 'captcha-helper',
             name: 'Captcha Helper',
-            description: 'Hỗ trợ nhập captcha: tự động chuyển chữ thường, loại bỏ dấu, submit khi Enter/blur',
+            description:
+                'Hỗ trợ nhập captcha: tự động chuyển chữ thường, loại bỏ dấu, submit khi Enter/blur',
+            urlMatch: URL_PATTERNS,
         });
-    }
-
-    /**
-     * Override shouldRun to only run on pages with captcha
-     * @returns true if current URL matches one of the captcha handlers
-     */
-    override shouldRun(): boolean {
-        if (!super.shouldRun()) return false;
-
-        const url = window.location.pathname + window.location.search;
-        return CAPTCHA_HANDLERS.some(h => h.urlPattern.test(url));
     }
 
     /**
@@ -98,14 +90,20 @@ export class CaptchaHelperFeature extends Feature {
     init(): void {
         this.log.i('Initializing...');
 
-        // Find handler matching current URL
-        const url = window.location.pathname + window.location.search;
-        this.currentHandler = CAPTCHA_HANDLERS.find(h => h.urlPattern.test(url)) || null;
-
-        if (!this.currentHandler) {
-            this.log.w('No matching captcha handler found');
+        // Lấy handler dựa vào pattern đã match
+        const matchName = this.matchResult?.matchName;
+        if (!matchName) {
+            this.log.w('No match result available');
             return;
         }
+
+        this.currentHandler = HANDLERS[matchName];
+        if (!this.currentHandler) {
+            this.log.w('No handler found for:', matchName);
+            return;
+        }
+
+        this.log.d(`Matched pattern: "${matchName}" at ${this.currentPath}`);
 
         // Find elements
         this.inputEl = document.querySelector<HTMLInputElement>(this.currentHandler.inputSelector);
@@ -235,4 +233,3 @@ export class CaptchaHelperFeature extends Feature {
         this.currentHandler = null;
     }
 }
-
