@@ -2,6 +2,16 @@
 
 Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại tại đây.
 
+## [1.2.2] - 2026-01-18
+
+### Refactored
+- **Settings**: Tái cấu trúc hoàn toàn Settings sang class-based system
+  - Thay thế object literals bằng các class kế thừa (`BaseSetting`, `BooleanSetting`, `SelectSetting`)
+  - Mỗi setting là một instance riêng biệt với `key`, `label`, `description`, `defaultValue`
+  - Hỗ trợ mở rộng dễ dàng cho các loại setting mới
+- **Constants**: Thêm `constants.ts` để tập trung quản lý các giá trị mặc định
+- **Settings Access**: Thay đổi cách sử dụng settings từ property access sang instance methods
+
 ## [1.2.1] - 2026-01-15
 
 ### Changed

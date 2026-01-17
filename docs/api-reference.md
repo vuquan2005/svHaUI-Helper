@@ -64,9 +64,18 @@ storage.keys();                 // → ('app_settings' | 'grades')[]
 ```typescript
 import { settings } from './core';
 
+// Feature enable/disable
 settings.isFeatureEnabled('feature-id');  // → boolean
 settings.setFeatureEnabled('id', true);
-settings.setLogLevel('warn');  // 'debug' | 'info' | 'warn' | 'error' | 'none'
+
+// Log level (class-based)
+settings.logLevel.getValue();           // → 'debug' | 'info' | 'warn' | 'error' | 'none'
+settings.logLevel.setValue('warn');
+settings.logLevel.onChange((e) => console.log(e.newValue));
+
+// Boolean settings
+settings.captchaUndoTelex.getValue();   // → boolean
+settings.captchaUndoTelex.setValue(false);
 ```
 
 ---

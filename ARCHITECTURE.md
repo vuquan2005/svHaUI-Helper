@@ -33,6 +33,7 @@ src/
 │   ├── feature.ts       # Base class cho features
 │   ├── feature-manager.ts   # Quản lý vòng đời features
 │   ├── settings.ts      # Quản lý cài đặt người dùng
+│   ├── constants.ts     # Giá trị mặc định
 │   ├── storage.ts       # Type-safe GM storage wrapper
 │   ├── logger.ts        # Hệ thống logging
 │   └── index.ts         # Re-export

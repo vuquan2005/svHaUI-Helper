@@ -37,6 +37,7 @@ class FeatureManager {
         log.d('Starting feature initialization...');
 
         for (const [id, feature] of this.features) {
+            log.d(`Checking feature: ${feature.name}`);
             if (this.initialized.has(id)) {
                 continue;
             }
@@ -53,9 +54,10 @@ class FeatureManager {
             } catch (error) {
                 log.e(`Error initializing "${feature.name}":`, error);
             }
+            log.d(`✅ Initialized: ${feature.name}`);
         }
 
-        log.i(`Initialized ${this.initialized.size}/${this.features.size} features`);
+        log.i(`✅ Initialized ${this.initialized.size}/${this.features.size} features`);
     }
 
     /**

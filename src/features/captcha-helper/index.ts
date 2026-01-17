@@ -38,7 +38,7 @@ interface CaptchaPageHandler {
 
 /** URL patterns for matching */
 const URL_PATTERNS: MatchPattern[] = [
-    { name: 'sso-login', pattern: /\/sso\?token=/ },
+    { name: 'sso-login', pattern: '/sso' },
     { name: 'register', pattern: '/register' },
 ];
 
@@ -157,7 +157,7 @@ export class CaptchaHelperFeature extends Feature {
         }
 
         const original = this.inputEl.value;
-        const undoTelex = settings.getCaptchaUndoTelex();
+        const undoTelex = settings.captchaUndoTelex.getValue();
         const normalized = undoTelex
             ? normalizeCaptchaInputUndo(original)
             : normalizeCaptchaInput(original);

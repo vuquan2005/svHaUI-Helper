@@ -176,7 +176,7 @@ export abstract class Feature {
      */
     shouldRun(): boolean {
         // Check if feature is enabled in settings
-        if (!settings.isFeatureEnabled(this.id)) {
+        if (!settings.isFeatureEnabled(this.id, this.name, this.description)) {
             return false;
         }
 
