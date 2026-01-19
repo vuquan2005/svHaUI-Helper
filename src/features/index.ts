@@ -6,6 +6,11 @@
 import { Feature } from '@/core';
 import { DynamicTitleFeature } from './dynamic-title';
 import { CaptchaHelperFeature } from './captcha-helper';
+import { QuickNavFeature } from './quick-nav';
 
 // Add new features here
-export const allFeatures: Feature[] = [new DynamicTitleFeature(), new CaptchaHelperFeature()];
+export const allFeatures: Feature[] = [
+    new DynamicTitleFeature(),
+    new CaptchaHelperFeature(),
+    new QuickNavFeature(),
+];
