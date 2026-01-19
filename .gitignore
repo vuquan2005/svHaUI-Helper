@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .agent/
+
+# Documentation
+docs/api-reference

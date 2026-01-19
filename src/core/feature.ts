@@ -3,7 +3,7 @@
  * Each feature inherits from this class to ensure consistent structure
  */
 
-import { settings } from './settings';
+import { settings } from './settings-manager';
 import { createLogger, Logger } from './logger';
 
 // ============================================

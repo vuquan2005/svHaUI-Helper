@@ -20,7 +20,7 @@
   - `flaticon`
   - `bootstrap-datetimepicker`
   - `select2`
-- **JS:** `jquery`, `bootstrap`, `perfect-scrollbar`, `moment.js`, `select2`
+- **JS:** `jquery (1.12.4)`, `bootstrap (3.3.7)`, `perfect-scrollbar`, `moment.js`, `select2`
 - **Custom:** `style.css`, `kstyle.css`
 
 ---

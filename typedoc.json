@@ -1,0 +1,23 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src"],
+  "entryPointStrategy": "expand",
+  "out": "docs/api-reference",
+  "outputFileStrategy": "modules",
+  "plugin": ["typedoc-plugin-markdown"],
+  "name": "SV HaUI Helper",
+  "readme": "none",
+  "hideGenerator": true,
+  "categoryOrder": ["Core", "Features", "Utils", "*"],
+  "sort": ["source-order"],
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "entryFileName": "index",
+  "mergeReadme": true,
+  "useCodeBlocks": true,
+  "expandObjects": true,
+  "parametersFormat": "table",
+  "propertiesFormat": "table",
+  "enumMembersFormat": "table",
+  "typeDeclarationFormat": "table"
+}

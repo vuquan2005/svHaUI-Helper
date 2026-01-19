@@ -10,7 +10,7 @@ export {
     type MatchResult,
 } from './feature';
 export { featureManager } from './feature-manager';
-export { settings } from './settings';
+export { settings } from './settings-manager';
 export {
     log,
     createLogger,
