@@ -4,6 +4,7 @@
  */
 
 import { Feature } from '@/core';
+import styles from './style.module.scss';
 
 // ============================================
 // Types
@@ -20,43 +21,7 @@ interface NavLink {
 // Constants
 // ============================================
 
-/** CSS class prefix to avoid conflicts */
-const CSS_PREFIX = 'sv-quick-nav';
-
-/** Styles for navigation links */
-const NAV_STYLES = `
-.${CSS_PREFIX} {
-    float: right;
-    display: inline-flex;
-    gap: 8px;
-    margin-top: -2px;
-}
-
-.${CSS_PREFIX}-link {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    color: #667eea;
-    background: rgba(102, 126, 234, 0.1);
-    transition: all 0.2s ease;
-}
-
-.${CSS_PREFIX}-link:hover {
-    background: #667eea;
-    color: white;
-    text-decoration: none;
-}
-
-.${CSS_PREFIX}-link.active {
-    background: #667eea;
-    color: white;
-    pointer-events: none;
-    cursor: default;
-}
-`;
+const CSS_PREFIX = styles.cssPrefix;
 
 // ============================================
 // URL Matching Patterns
@@ -79,7 +44,6 @@ const URL_PATTERNS = [
 // ============================================
 
 export class QuickNavFeature extends Feature {
-    private styleElement: HTMLStyleElement | null = null;
     private navElement: HTMLSpanElement | null = null;
 
     constructor() {
@@ -93,9 +57,6 @@ export class QuickNavFeature extends Feature {
 
     init(): void {
         this.log.i('Initializing...');
-
-        // Inject styles
-        this.injectStyles();
 
         // Generate navigation links based on current URL
         const navLinks = this.generateNavLinks();
@@ -186,23 +147,9 @@ export class QuickNavFeature extends Feature {
     }
 
     /**
-     * Inject CSS styles into the page
-     */
-    private injectStyles(): void {
-        this.styleElement = document.createElement('style');
-        this.styleElement.textContent = NAV_STYLES;
-        document.head.appendChild(this.styleElement);
-    }
-
-    /**
      * Cleanup when feature is disabled
      */
     destroy(): void {
-        // Remove style element
-        this.styleElement?.remove();
-        this.styleElement = null;
-
-        // Remove nav element
         this.navElement?.remove();
         this.navElement = null;
     }
