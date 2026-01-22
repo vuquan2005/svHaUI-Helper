@@ -84,13 +84,13 @@ src/
 
 ### Naming conventions
 
-| Loại | Convention | Ví dụ |
-|------|------------|-------|
-| File/Folder | kebab-case | `grade-calculator/` |
-| Class | PascalCase | `GradeCalculator` |
-| Function | camelCase | `calculateGpa()` |
-| Constant | UPPER_SNAKE | `MAX_RETRY_COUNT` |
-| Interface | PascalCase + I prefix (optional) | `FeatureConfig` |
+| Loại        | Convention                       | Ví dụ               |
+| ----------- | -------------------------------- | ------------------- |
+| File/Folder | kebab-case                       | `grade-calculator/` |
+| Class       | PascalCase                       | `GradeCalculator`   |
+| Function    | camelCase                        | `calculateGpa()`    |
+| Constant    | UPPER_SNAKE                      | `MAX_RETRY_COUNT`   |
+| Interface   | PascalCase + I prefix (optional) | `FeatureConfig`     |
 
 ### TypeScript
 
@@ -107,18 +107,18 @@ import { createLogger } from '../../utils';
 
 const log = createLogger('MyFeature');
 
-log.d('Debug info');  // Development only
-log.i('Info');        // General info
-log.w('Warning');     // Warnings
-log.e('Error');       // Errors
+log.d('Debug info'); // Development only
+log.i('Info'); // General info
+log.w('Warning'); // Warnings
+log.e('Error'); // Errors
 ```
 
 ## 🌿 Branching Strategy
 
 - **Branch `main`**: Chứa code stable, production-ready.
 - **Feature branches**: Đặt tên theo format `<type>/<scope-or-desc>` (ví dụ: `feat/header-ui`, `fix/login-bug`).
-  - Sử dụng các `type` tương ứng với Commit Convention (feat, fix, refactor...).
-  - Branch ngắn hạn, sẽ bị xóa sau khi merge vào `main`.
+    - Sử dụng các `type` tương ứng với Commit Convention (feat, fix, refactor...).
+    - Branch ngắn hạn, sẽ bị xóa sau khi merge vào `main`.
 
 ## 💬 Commit convention
 
@@ -134,15 +134,19 @@ Sử dụng [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Types
 
-| Type | Mô tả |
-|------|-------|
-| `feat` | Tính năng mới |
-| `fix` | Sửa lỗi |
-| `docs` | Thay đổi documentation |
-| `style` | Format, không thay đổi logic |
-| `refactor` | Refactor code |
-| `test` | Thêm/sửa test |
-| `chore` | Maintenance |
+| Type       | Mô tả                                       |
+| ---------- | ------------------------------------------- |
+| `feat`     | Tính năng mới                               |
+| `fix`      | Sửa lỗi                                     |
+| `docs`     | Thay đổi documentation                      |
+| `style`    | Format, không thay đổi logic                |
+| `refactor` | Refactor code                               |
+| `perf`     | Cải thiện hiệu năng                         |
+| `test`     | Thêm/sửa test                               |
+| `build`    | Thay đổi build system (vite, typescript...) |
+| `ci`       | Thay đổi CI config (GitHub Actions...)      |
+| `chore`    | Maintenance                                 |
+| `revert`   | Revert commit trước                         |
 
 ### Ví dụ
 
@@ -174,12 +178,12 @@ refactor(core): simplify feature manager logic
 
 - **Squash & Merge**: Các PR sẽ được squash thành **1 commit duy nhất** khi merge vào `main`. Tiêu đề commit cuối cùng phải tuân thủ đúng Conventional Commits.
 - **Rebase**: Khuyến khích sử dụng `git rebase` để giữ lịch sử phẳng.
-  ```bash
-  git fetch origin
-  git rebase origin/main
-  # Xử lý conflict nếu có
-  git push --force-with-lease
-  ```
+    ```bash
+    git fetch origin
+    git rebase origin/main
+    # Xử lý conflict nếu có
+    git push --force-with-lease
+    ```
 - **Sync**: Đảm bảo branch của bạn luôn được cập nhật trước khi request review.
 
 ## ❓ Câu hỏi?
