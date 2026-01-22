@@ -20,7 +20,9 @@
   - `flaticon`
   - `bootstrap-datetimepicker`
   - `select2`
-- **JS:** `jquery (1.12.4)`, `bootstrap (3.3.7)`, `perfect-scrollbar`, `moment.js`, `select2`
+  - `Beagle Admin Template (Foxy Themes)` (v1.2.1)
+  - `normalize.css` (v3.0.3)
+- **JS:** `jquery` (1.12.4), `bootstrap` (3.3.7), `perfect-scrollbar`, `moment.js`, `select2`
 - **Custom:** `style.css`, `kstyle.css`
 
 ---
