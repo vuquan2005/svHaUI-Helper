@@ -43,7 +43,6 @@ class FeatureManager {
                 continue;
             }
 
-            // Check if feature is enabled in settings
             if (!settings.isFeatureEnabled(feature.id, feature.name, feature.description)) {
                 log.d(`Skipping "${feature.name}" (Disabled in settings)`);
                 continue;
@@ -56,7 +55,7 @@ class FeatureManager {
 
             try {
                 log.d(`Initializing: ${feature.name}`);
-                await feature.init();
+                await feature.run();
                 this.initialized.add(id);
             } catch (error) {
                 log.e(`Error initializing "${feature.name}":`, error);

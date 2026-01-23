@@ -55,7 +55,7 @@ export class QuickNavFeature extends Feature {
         });
     }
 
-    init(): void {
+    run(): void {
         this.log.i('Initializing...');
 
         // Generate navigation links based on current URL
@@ -83,8 +83,8 @@ export class QuickNavFeature extends Feature {
      * Generate navigation links based on current URL
      */
     private generateNavLinks(): NavLink[] {
-        const pathname = this.currentPath;
-        const search = window.location.search;
+        const pathname = this.location.path;
+        const search = this.location.search;
 
         // Determine current page type
         const isStudy = pathname.includes('studyresult');
@@ -104,10 +104,16 @@ export class QuickNavFeature extends Feature {
             examUrl = pathname;
         }
         // Friend pages
-        else if (pathname.startsWith('/student/result/viewstudyresult') && !pathname.includes('class')) {
+        else if (
+            pathname.startsWith('/student/result/viewstudyresult') &&
+            !pathname.includes('class')
+        ) {
             studyUrl = pathname + search;
             examUrl = pathname.replace('viewstudyresult', 'viewexamresult') + search;
-        } else if (pathname.startsWith('/student/result/viewexamresult') && !pathname.includes('class')) {
+        } else if (
+            pathname.startsWith('/student/result/viewexamresult') &&
+            !pathname.includes('class')
+        ) {
             studyUrl = pathname.replace('viewexamresult', 'viewstudyresult') + search;
             examUrl = pathname + search;
         }
@@ -149,7 +155,7 @@ export class QuickNavFeature extends Feature {
     /**
      * Cleanup when feature is disabled
      */
-    destroy(): void {
+    cleanup(): void {
         this.navElement?.remove();
         this.navElement = null;
     }

@@ -4,6 +4,7 @@
  */
 
 import { createLogger, Logger } from './logger';
+import { browserLocation } from '../utils/window-location';
 
 // ============================================
 // URL Matching Interfaces
@@ -52,55 +53,12 @@ export interface FeatureConfig {
 // URL Normalization Utilities
 // ============================================
 
-/**
- * Normalize pathname: remove trailing slashes except for root "/"
- */
-function normalizePath(path: string): string {
-    if (path === '/') return '/';
-    return path.replace(/\/+$/, '');
-}
-
-// Pre-compute normalized URL values (computed once when module loads)
-const CURRENT_PATH = normalizePath(window.location.pathname);
-const CURRENT_URL = CURRENT_PATH + window.location.search;
-const CURRENT_HREF = window.location.origin + CURRENT_URL;
-
-// ============================================
-// Feature Base Class
-// ============================================
-
 export abstract class Feature {
-    // ============================================
-    // Static: Pre-computed URL values for all features
-    // ============================================
-
-    /** Normalized pathname (no trailing slash, except root "/") */
-    protected static readonly currentPath: string = CURRENT_PATH;
-
-    /** Normalized URL (pathname + search, no trailing slash on path) */
-    protected static readonly currentUrl: string = CURRENT_URL;
-
-    /** Full normalized href (origin + pathname + search) */
-    protected static readonly currentHref: string = CURRENT_HREF;
-
     // ============================================
     // Instance getters for static URL values
     // ============================================
 
-    /** Normalized pathname (no trailing slash, except root "/") */
-    protected get currentPath(): string {
-        return Feature.currentPath;
-    }
-
-    /** Normalized URL (pathname + search, no trailing slash on path) */
-    protected get currentUrl(): string {
-        return Feature.currentUrl;
-    }
-
-    /** Full normalized href (origin + pathname + search) */
-    protected get currentHref(): string {
-        return Feature.currentHref;
-    }
+    protected location = browserLocation;
 
     // ============================================
     // Instance properties
@@ -111,8 +69,12 @@ export abstract class Feature {
     readonly description: string;
     readonly urlMatch?: UrlMatchConfig;
 
-    /** Logger với prefix tự động từ tên feature */
-    protected readonly log: Logger;
+    private _log?: Logger;
+
+    /** Logger với prefix tự động từ tên feature (Lazy loaded) */
+    protected get log(): Logger {
+        return (this._log ??= createLogger(this.name));
+    }
 
     /** Kết quả match sau khi shouldRun() được gọi */
     protected matchResult: MatchResult | null = null;
@@ -122,9 +84,6 @@ export abstract class Feature {
         this.name = config.name;
         this.description = config.description;
         this.urlMatch = config.urlMatch;
-
-        // Auto-create logger with feature name as prefix
-        this.log = createLogger(config.name);
     }
 
     // ============================================
@@ -164,10 +123,10 @@ export abstract class Feature {
     private testPattern(pattern: RegExp | string): boolean {
         if (typeof pattern === 'string') {
             // String = exact match against pathname only
-            return this.currentPath === pattern;
+            return this.location.path === pattern;
         }
         // RegExp = test against path + search
-        return pattern.test(this.currentUrl);
+        return pattern.test(this.location.pathAndQuery);
     }
 
     /**
@@ -209,16 +168,16 @@ export abstract class Feature {
     // ============================================
 
     /**
-     * Initialize feature - called when feature is loaded
-     * Override this method to add initialization logic
+     * Run feature - called when feature is loaded
+     * Override this method to add logic
      */
-    abstract init(): void | Promise<void>;
+    abstract run(): void | Promise<void>;
 
     /**
      * Cleanup when feature is disabled or unloaded
      * Override if cleanup is needed
      */
-    destroy(): void {
+    cleanup(): void {
         // Default: do nothing
     }
 }

@@ -87,7 +87,7 @@ export class CaptchaHelperFeature extends Feature {
      * Initialize Captcha Helper
      * Find and attach event listeners to captcha input field
      */
-    init(): void {
+    run(): void {
         this.log.i('Initializing...');
 
         // Lấy handler dựa vào pattern đã match
@@ -103,7 +103,7 @@ export class CaptchaHelperFeature extends Feature {
             return;
         }
 
-        this.log.d(`Matched pattern: "${matchName}" at ${this.currentPath}`);
+        this.log.d(`Matched pattern: "${matchName}" at ${this.location.path}`);
 
         // Find elements
         this.inputEl = document.querySelector<HTMLInputElement>(this.currentHandler.inputSelector);
@@ -214,7 +214,7 @@ export class CaptchaHelperFeature extends Feature {
      * Cleanup resources when feature is disabled
      * Remove event listeners and clear timers
      */
-    destroy(): void {
+    cleanup(): void {
         // Clear timer
         if (this.normalizeTimer) {
             clearTimeout(this.normalizeTimer);

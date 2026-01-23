@@ -246,7 +246,7 @@ export class DynamicTitleFeature extends Feature {
      * Initialize Dynamic Title Feature
      * Update title and start observing DOM changes
      */
-    init(): void {
+    run(): void {
         this.log.i('Initializing...');
 
         // Save original title
@@ -268,8 +268,8 @@ export class DynamicTitleFeature extends Feature {
      * @returns true if a matching title was found, false if need to wait
      */
     private updateTitle(): boolean {
-        const url = window.location.pathname + window.location.search;
-        const pathname = window.location.pathname;
+        const pathAndQuery = this.location.pathAndQuery;
+        const pathname = this.location.path;
 
         // 1. Try static mapping first (always succeeds if matches)
         const staticTitle = URL_TITLE_MAP[pathname];
@@ -280,7 +280,7 @@ export class DynamicTitleFeature extends Feature {
 
         // 2. Try dynamic patterns
         for (const config of DYNAMIC_URL_PATTERNS) {
-            if (config.pattern.test(url)) {
+            if (config.pattern.test(pathAndQuery)) {
                 const title = config.getTitleFn();
                 // null = DOM not ready yet, need to continue observing
                 if (title === null) {
@@ -351,7 +351,7 @@ export class DynamicTitleFeature extends Feature {
      * Cleanup resources when feature is disabled
      * Restore original title and stop observer
      */
-    destroy(): void {
+    cleanup(): void {
         // Restore original title
         document.title = this.originalTitle;
 
