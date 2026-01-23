@@ -45,6 +45,8 @@ export interface FeatureConfig {
     id: string;
     name: string;
     description: string;
+    /** Priority - higher runs first, default 0 */
+    priority?: number;
     /** Regex, string, MatchPattern, or array of MatchPattern to match URL */
     urlMatch?: UrlMatchConfig;
 }
@@ -67,6 +69,7 @@ export abstract class Feature {
     readonly id: string;
     readonly name: string;
     readonly description: string;
+    readonly priority: number;
     readonly urlMatch?: UrlMatchConfig;
 
     private _log?: Logger;
@@ -83,6 +86,7 @@ export abstract class Feature {
         this.id = config.id;
         this.name = config.name;
         this.description = config.description;
+        this.priority = config.priority ?? 0;
         this.urlMatch = config.urlMatch;
     }
 

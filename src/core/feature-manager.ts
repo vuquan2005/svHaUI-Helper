@@ -37,8 +37,12 @@ class FeatureManager {
     async initAll(): Promise<void> {
         log.d('Starting feature initialization...');
 
-        for (const [id, feature] of this.features) {
-            log.d(`Checking feature: ${feature.name}`);
+        const sortedFeatures = [...this.features.entries()].sort(
+            ([, a], [, b]) => b.priority - a.priority
+        );
+
+        for (const [id, feature] of sortedFeatures) {
+            log.d(`Checking feature: ${feature.name} (priority: ${feature.priority})`);
             if (this.initialized.has(id)) {
                 continue;
             }
