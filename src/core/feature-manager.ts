@@ -10,7 +10,9 @@ const log = createLogger('FeatureManager');
 
 class FeatureManager {
     private features: Map<string, Feature> = new Map();
-    private initialized: Set<string> = new Set();
+    private running: Set<string> = new Set();
+    private isApplying = false;
+    private pendingApply = false;
 
     /**
      * Register a new feature
@@ -32,42 +34,82 @@ class FeatureManager {
     }
 
     /**
-     * Initialize all features matching the current page
+     * Apply features matching the current page
+     * Can be called multiple times (e.g., on SPA route changes)
      */
-    async initAll(): Promise<void> {
-        log.d('Starting feature initialization...');
-
-        const sortedFeatures = [...this.features.entries()].sort(
-            ([, a], [, b]) => b.priority - a.priority
-        );
-
-        for (const [id, feature] of sortedFeatures) {
-            log.d(`Checking feature: ${feature.name} (priority: ${feature.priority})`);
-            if (this.initialized.has(id)) {
-                continue;
-            }
-
-            if (!settings.isFeatureEnabled(feature.id, feature.name, feature.description)) {
-                log.d(`Skipping "${feature.name}" (Disabled in settings)`);
-                continue;
-            }
-
-            if (!feature.shouldRun()) {
-                log.d(`Skipping "${feature.name}" (URL mismatch)`);
-                continue;
-            }
-
-            try {
-                log.d(`Initializing: ${feature.name}`);
-                await feature.run();
-                this.initialized.add(id);
-            } catch (error) {
-                log.e(`Error initializing "${feature.name}":`, error);
-            }
-            log.d(`✅ Initialized: ${feature.name}`);
+    async applyFeatures(): Promise<void> {
+        if (this.isApplying) {
+            log.d('applyFeatures already in progress, queuing...');
+            this.pendingApply = true;
+            return;
         }
 
-        log.i(`✅ Initialized ${this.initialized.size}/${this.features.size} features`);
+        this.isApplying = true;
+        log.d('Applying features...');
+
+        try {
+            // Sort by priority descending
+            const sortedFeatures = [...this.features.entries()].sort(
+                ([, a], [, b]) => b.priority - a.priority
+            );
+
+            // Phase 1: Stop features that should no longer run
+            for (const [id, feature] of sortedFeatures) {
+                if (!this.running.has(id)) continue;
+
+                const isEnabled = settings.isFeatureEnabled(
+                    feature.id,
+                    feature.name,
+                    feature.description
+                );
+                const shouldRun = feature.shouldRun();
+
+                if (!isEnabled || !shouldRun) {
+                    try {
+                        feature.cleanup();
+                        this.running.delete(id);
+                        log.d(
+                            `🛑 Stopped: ${feature.name} (${!isEnabled ? 'Disabled' : 'URL mismatch'})`
+                        );
+                    } catch (error) {
+                        log.e(`Error stopping "${feature.name}":`, error);
+                    }
+                }
+            }
+
+            // Phase 2: Start features that should run
+            for (const [id, feature] of sortedFeatures) {
+                if (this.running.has(id)) continue;
+
+                if (!settings.isFeatureEnabled(feature.id, feature.name, feature.description)) {
+                    continue;
+                }
+
+                if (!feature.shouldRun()) {
+                    continue;
+                }
+
+                try {
+                    log.d(`Starting: ${feature.name} (priority: ${feature.priority})`);
+                    await feature.run();
+                    this.running.add(id);
+                    log.d(`✅ Started: ${feature.name}`);
+                } catch (error) {
+                    log.e(`Error starting "${feature.name}":`, error);
+                }
+            }
+
+            log.i(`✅ Running ${this.running.size}/${this.features.size} features`);
+        } finally {
+            this.isApplying = false;
+
+            // If another apply was requested while we were running, run it now
+            if (this.pendingApply) {
+                this.pendingApply = false;
+                log.d('Running pending applyFeatures...');
+                await this.applyFeatures();
+            }
+        }
     }
 
     /**
@@ -85,10 +127,66 @@ class FeatureManager {
     }
 
     /**
-     * Check if a feature has been initialized
+     * Check if a feature is currently running
      */
-    isInitialized(id: string): boolean {
-        return this.initialized.has(id);
+    isRunning(id: string): boolean {
+        return this.running.has(id);
+    }
+
+    /**
+     * Start a specific feature by ID
+     * @returns true if feature was started, false if not found or already running
+     */
+    async startFeature(id: string): Promise<boolean> {
+        const feature = this.features.get(id);
+        if (!feature) {
+            log.w(`Feature "${id}" not found`);
+            return false;
+        }
+
+        if (this.running.has(id)) {
+            log.d(`Feature "${feature.name}" is already running`);
+            return false;
+        }
+
+        try {
+            log.d(`Starting feature: ${feature.name}`);
+            await feature.run();
+            this.running.add(id);
+            log.i(`✅ Started: ${feature.name}`);
+            return true;
+        } catch (error) {
+            log.e(`Error starting "${feature.name}":`, error);
+            return false;
+        }
+    }
+
+    /**
+     * Stop a specific feature by ID
+     * @returns true if feature was stopped, false if not found or not running
+     */
+    stopFeature(id: string): boolean {
+        const feature = this.features.get(id);
+        if (!feature) {
+            log.w(`Feature "${id}" not found`);
+            return false;
+        }
+
+        if (!this.running.has(id)) {
+            log.d(`Feature "${feature.name}" is not running`);
+            return false;
+        }
+
+        try {
+            log.d(`Stopping feature: ${feature.name}`);
+            feature.cleanup();
+            this.running.delete(id);
+            log.i(`🛑 Stopped: ${feature.name}`);
+            return true;
+        } catch (error) {
+            log.e(`Error stopping "${feature.name}":`, error);
+            return false;
+        }
     }
 }
 

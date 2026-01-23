@@ -27,7 +27,7 @@ async function main(): Promise<void> {
     featureManager.registerAll(allFeatures);
 
     // Initialize matching features
-    await featureManager.initAll();
+    await featureManager.applyFeatures();
 
     log.i('✅ Ready!');
 }
