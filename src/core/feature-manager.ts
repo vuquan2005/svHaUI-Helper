@@ -3,6 +3,7 @@
  */
 
 import { Feature } from './feature';
+import { settings } from './settings-manager';
 import { createLogger } from './logger';
 
 const log = createLogger('FeatureManager');
@@ -42,8 +43,14 @@ class FeatureManager {
                 continue;
             }
 
+            // Check if feature is enabled in settings
+            if (!settings.isFeatureEnabled(feature.id, feature.name, feature.description)) {
+                log.d(`Skipping "${feature.name}" (Disabled in settings)`);
+                continue;
+            }
+
             if (!feature.shouldRun()) {
-                log.d(`Skipping "${feature.name}" (URL mismatch or disabled)`);
+                log.d(`Skipping "${feature.name}" (URL mismatch)`);
                 continue;
             }
 

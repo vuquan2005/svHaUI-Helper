@@ -3,7 +3,6 @@
  * Each feature inherits from this class to ensure consistent structure
  */
 
-import { settings } from './settings-manager';
 import { createLogger, Logger } from './logger';
 
 // ============================================
@@ -175,11 +174,6 @@ export abstract class Feature {
      * Check if this feature should run on the current URL
      */
     shouldRun(): boolean {
-        // Check if feature is enabled in settings
-        if (!settings.isFeatureEnabled(this.id, this.name, this.description)) {
-            return false;
-        }
-
         // Reset match result
         this.matchResult = { matched: false };
 
