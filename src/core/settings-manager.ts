@@ -12,6 +12,8 @@ import {
     type SettingChangeEvent,
 } from './settings/index';
 
+import { SettingManager } from './settings/setting-manager';
+
 const log = createLogger('SettingsManager');
 
 /**
@@ -45,6 +47,13 @@ class SettingsManager {
     constructor() {
         // Always show initialization message (before log level is applied)
         console.log('🔧 [HaUI:SettingsManager] Initializing settings...');
+
+        // Initialize storage manager
+        SettingManager.getInstance()
+            .init()
+            .catch((err) => {
+                console.error('Failed to initialize settings storage:', err);
+            });
 
         // Initialize log level setting FIRST
         this.logLevel = new SelectSetting<LogLevel>({

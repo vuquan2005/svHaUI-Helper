@@ -3,7 +3,7 @@
  * Provides core functionality for settings management
  */
 
-import { storage } from '../storage';
+import { SettingManager } from './setting-manager';
 import { createLogger } from '../logger';
 import type {
     SettingOptionType,
@@ -36,7 +36,7 @@ export abstract class BaseSetting<T> implements SerializableSetting<T> {
     protected _value: T;
 
     /** Default value */
-    protected readonly defaultValue: T;
+    readonly defaultValue: T;
 
     /** Event listeners */
     protected readonly listeners: Set<SettingChangeHandler<T>> = new Set();
@@ -46,7 +46,10 @@ export abstract class BaseSetting<T> implements SerializableSetting<T> {
         this.displayLabel = config.displayLabel;
         this.displayDescription = config.displayDescription;
         this.defaultValue = config.defaultValue;
-        this._value = this.load();
+        this._value = config.defaultValue;
+
+        // Register with SettingManager
+        SettingManager.getInstance().register(this);
     }
 
     // ============================================
@@ -80,6 +83,18 @@ export abstract class BaseSetting<T> implements SerializableSetting<T> {
         this.save();
         this.emit(oldValue, value);
         return true;
+    }
+
+    /**
+     * Update value from storage (internal use)
+     * Does not trigger save()
+     */
+    updateValue(value: T): void {
+        const oldValue = this._value;
+        if (!this.isEqual(oldValue, value)) {
+            this._value = value;
+            this.emit(oldValue, value);
+        }
     }
 
     /**
@@ -135,39 +150,14 @@ export abstract class BaseSetting<T> implements SerializableSetting<T> {
     // ============================================
 
     /**
-     * Storage key prefix for settings
-     */
-    protected get storageKey(): string {
-        return `setting_${this.key}`;
-    }
-
-    /**
-     * Load value from storage
-     */
-    protected load(): T {
-        try {
-            const stored = storage.getRaw<T>(this.storageKey);
-            if (stored === undefined) {
-                // Initialize storage with default value
-                storage.setRaw(this.storageKey, this.defaultValue);
-                return this.defaultValue;
-            }
-            return stored;
-        } catch (e) {
-            log.e(`Failed to load setting "${this.key}":`, e);
-            return this.defaultValue;
-        }
-    }
-
-    /**
-     * Save value to storage
+     * Save value to storage via SettingManager
      */
     protected save(): void {
-        try {
-            storage.setRaw(this.storageKey, this._value);
-        } catch (e) {
-            log.e(`Failed to save setting "${this.key}":`, e);
-        }
+        SettingManager.getInstance()
+            .saveSetting(this.key, this._value)
+            .catch((e: unknown) => {
+                log.e(`Failed to save setting "${this.key}":`, e);
+            });
     }
 
     // ============================================

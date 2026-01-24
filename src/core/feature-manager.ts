@@ -133,6 +133,18 @@ class FeatureManager {
         return this.running.has(id);
     }
 
+    getAllIds(): string[] {
+        return Array.from(this.features.keys());
+    }
+
+    getAllRunningIds(): string[] {
+        return Array.from(this.running.values());
+    }
+
+    getAllNotRunningIds(): string[] {
+        return Array.from(this.features.keys()).filter((id) => !this.running.has(id));
+    }
+
     /**
      * Start a specific feature by ID
      * @returns true if feature was started, false if not found or already running
