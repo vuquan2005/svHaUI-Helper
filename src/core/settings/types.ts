@@ -82,7 +82,9 @@ export interface SelectSettingConfig<T extends string | number> extends BaseSett
 /**
  * Configuration for multi-select settings
  */
-export interface MultiSelectSettingConfig<T extends string | number> extends BaseSettingConfig<T[]> {
+export interface MultiSelectSettingConfig<T extends string | number> extends BaseSettingConfig<
+    T[]
+> {
     /** Available options */
     options: SelectOption<T>[];
 }

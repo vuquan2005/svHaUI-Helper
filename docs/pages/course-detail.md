@@ -7,12 +7,14 @@
 **Selector:** `span.k-panel-header-text:first-child`
 
 **Format:**
+
 ```
 CHI TIẾT HỌC PHẦN CDIO: {TÊN MÔN} ( {MÃ} )
 CHI TIẾT HỌC PHẦN: {TÊN MÔN} ( {MÃ} )
 ```
 
 **Ví dụ:**
+
 ```
 CHI TIẾT HỌC PHẦN CDIO: KỸ NĂNG SỬ DỤNG CÔNG NGHỆ THÔNG TIN CƠ BẢN ( IC6005 )
 CHI TIẾT HỌC PHẦN: KỸ NĂNG SỬ DỤNG CÔNG NGHỆ THÔNG TIN CƠ BẢN ( IC6005 )
@@ -30,10 +32,12 @@ const match = header.match(/CHI TIẾT HỌC PHẦN[^:]*:\s*(.+?)\s*\(\s*([A-Z]{
 ## Mã học phần
 
 Có 2 dạng mã:
+
 - `HP7527` - Mã số (xuất hiện trong URL query `id=`)
 - `IC6005` - Mã ngành (dễ đọc hơn, xuất hiện trong panel header)
 
 Prefix phổ biến:
+
 - `IC` - Công nghệ thông tin
 - `FE` - Tiếng Anh
 - `ME` - Cơ khí

@@ -73,18 +73,19 @@ Abstract class định nghĩa interface cho mọi feature:
 
 ```typescript
 abstract class Feature {
-    id: string;           // Unique identifier
-    name: string;         // Display name
-    description: string;  // Mô tả
-    urlMatch?: RegExp;    // Pattern URL để chạy
-    
-    shouldRun(): boolean;       // Kiểm tra có nên chạy
-    abstract init(): void;      // Khởi tạo feature
-    destroy(): void;            // Cleanup
+  id: string; // Unique identifier
+  name: string; // Display name
+  description: string; // Mô tả
+  urlMatch?: RegExp; // Pattern URL để chạy
+
+  shouldRun(): boolean; // Kiểm tra có nên chạy
+  abstract init(): void; // Khởi tạo feature
+  destroy(): void; // Cleanup
 }
 ```
 
 **Đặc điểm:**
+
 - Tự động tạo logger với prefix từ tên feature
 - Hỗ trợ URL matching (regex hoặc string)
 - Kiểm tra enabled/disabled từ settings
@@ -125,7 +126,7 @@ Quản lý cài đặt người dùng:
 
 ### 5. Storage (`core/storage.ts`)
 
-Type-safe wrapper cho GM_* APIs:
+Type-safe wrapper cho GM\_\* APIs:
 
 ```typescript
 storage.get('app_settings', defaultValue);
@@ -136,6 +137,7 @@ storage.remove('app_settings');
 ### 6. Logger (`core/logger.ts`)
 
 Hệ thống logging với:
+
 - **Log levels**: debug < info < warn < error < none
 - **Prefix & Icons**: Hiển thị nguồn log với emoji
 - **Bind trick**: Line number chính xác trong DevTools
@@ -155,12 +157,14 @@ flowchart LR
 ```
 
 **Build commands:**
+
 - `pnpm dev`: Development với hot reload
 - `pnpm build`: Build readable version
 - `pnpm build:minify`: Build minified version
 - `pnpm build:all`: Build cả hai versions
 
 **Output:**
+
 - `dist/svhaui-helper.user.js` (readable)
 - `dist/svhaui-helper.min.user.js` (minified)
 
@@ -194,13 +198,13 @@ sequenceDiagram
 
 ## 📦 Dependencies
 
-| Package | Mục đích |
-|---------|----------|
-| `vite` | Build tool |
+| Package              | Mục đích           |
+| -------------------- | ------------------ |
+| `vite`               | Build tool         |
 | `vite-plugin-monkey` | Userscript bundler |
-| `typescript` | Type safety |
-| `eslint` | Linting |
-| `prettier` | Code formatting |
+| `typescript`         | Type safety        |
+| `eslint`             | Linting            |
+| `prettier`           | Code formatting    |
 
 ---
 

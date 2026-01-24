@@ -14,22 +14,22 @@ Base class cho tất cả features. Tự động có logger với prefix từ t�
 
 ```typescript
 interface FeatureConfig {
-    id: string;
-    name: string;
-    description: string;
-    urlMatch?: RegExp | string;
+  id: string;
+  name: string;
+  description: string;
+  urlMatch?: RegExp | string;
 }
 
 abstract class Feature {
-    readonly id: string;
-    readonly name: string;
-    readonly description: string;
-    protected readonly log: Logger;
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  protected readonly log: Logger;
 
-    constructor(config: FeatureConfig);
-    shouldRun(): boolean;
-    abstract init(): void | Promise<void>;
-    destroy(): void;
+  constructor(config: FeatureConfig);
+  shouldRun(): boolean;
+  abstract init(): void | Promise<void>;
+  destroy(): void;
 }
 ```
 
@@ -46,15 +46,15 @@ Sử dụng `StorageSchema` để type-safe:
 ```typescript
 // 1. Định nghĩa trong src/types/index.ts
 interface StorageSchema {
-    'app_settings': AppSettings;
-    'grades': CourseGrade[];
+  app_settings: AppSettings;
+  grades: CourseGrade[];
 }
 
 // 2. Sử dụng với autocomplete
-storage.get('grades', []);      // → CourseGrade[]
-storage.set('grades', data);    // Type checked
+storage.get('grades', []); // → CourseGrade[]
+storage.set('grades', data); // Type checked
 storage.remove('grades');
-storage.keys();                 // → ('app_settings' | 'grades')[]
+storage.keys(); // → ('app_settings' | 'grades')[]
 ```
 
 ---
@@ -65,16 +65,16 @@ storage.keys();                 // → ('app_settings' | 'grades')[]
 import { settings } from './core';
 
 // Feature enable/disable
-settings.isFeatureEnabled('feature-id');  // → boolean
+settings.isFeatureEnabled('feature-id'); // → boolean
 settings.setFeatureEnabled('id', true);
 
 // Log level (class-based)
-settings.logLevel.getValue();           // → 'debug' | 'info' | 'warn' | 'error' | 'none'
+settings.logLevel.getValue(); // → 'debug' | 'info' | 'warn' | 'error' | 'none'
 settings.logLevel.setValue('warn');
 settings.logLevel.onChange((e) => console.log(e.newValue));
 
 // Boolean settings
-settings.captchaUndoTelex.getValue();   // → boolean
+settings.captchaUndoTelex.getValue(); // → boolean
 settings.captchaUndoTelex.setValue(false);
 ```
 
@@ -86,17 +86,17 @@ settings.captchaUndoTelex.setValue(false);
 import { log, createLogger } from './core';
 
 // Main logger
-log.i('Message');  // ℹ️ [HaUI] Message
+log.i('Message'); // ℹ️ [HaUI] Message
 
 // Child logger
 const myLog = createLogger('Module');
-myLog.i('Message');  // ℹ️ [HaUI:Module] Message
+myLog.i('Message'); // ℹ️ [HaUI:Module] Message
 
 // Methods
-log.d(...args);  // Debug
-log.i(...args);  // Info
-log.w(...args);  // Warning
-log.e(...args);  // Error
+log.d(...args); // Debug
+log.i(...args); // Info
+log.w(...args); // Warning
+log.e(...args); // Error
 ```
 
 **Note**: Features tự động có `this.log` - không cần import.
@@ -131,7 +131,7 @@ addStyles(`.my-class { color: red; }`);
 
 ---
 
-## 🔌 GM_* APIs
+## 🔌 GM\_\* APIs
 
 Import từ `'$'`:
 

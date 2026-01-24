@@ -8,11 +8,11 @@
 
 **URL:** `/sso?token=*`
 
-| Element | Selector |
-|---------|----------|
-| Captcha Image | `#ctl00_Image1` |
-| Text Input | `#ctl00_txtimgcode` |
-| Submit Button | `#ctl00_butLogin` |
+| Element       | Selector            |
+| ------------- | ------------------- |
+| Captcha Image | `#ctl00_Image1`     |
+| Text Input    | `#ctl00_txtimgcode` |
+| Submit Button | `#ctl00_butLogin`   |
 
 ---
 
@@ -20,11 +20,11 @@
 
 **URL:** `/register/`
 
-| Element | Selector |
-|---------|----------|
-| Captcha Image | `#ctl02_Image1` |
-| Text Input | `#ctl02_txtimgcode` |
-| Submit Button | `#ctl02_btnSubmit` |
+| Element       | Selector            |
+| ------------- | ------------------- |
+| Captcha Image | `#ctl02_Image1`     |
+| Text Input    | `#ctl02_txtimgcode` |
+| Submit Button | `#ctl02_btnSubmit`  |
 
 ---
 

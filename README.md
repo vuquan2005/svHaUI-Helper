@@ -46,10 +46,10 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 
 ### Tính năng hiện có
 
-| Tính năng | Mô tả | Trạng thái |
-|-----------|-------|-----------:|
-| 🏷️ Dynamic Title | Thay đổi tiêu đề tab theo trang | ✅ |
-| 🔐 Captcha Helper | Hỗ trợ nhập captcha (lowercase, bỏ dấu, auto-submit) | ✅ |
+| Tính năng         | Mô tả                                                | Trạng thái |
+| ----------------- | ---------------------------------------------------- | ---------: |
+| 🏷️ Dynamic Title  | Thay đổi tiêu đề tab theo trang                      |         ✅ |
+| 🔐 Captcha Helper | Hỗ trợ nhập captcha (lowercase, bỏ dấu, auto-submit) |         ✅ |
 
 ## 🚀 Cài đặt
 
@@ -65,11 +65,11 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 1. Cài đặt **Tampermonkey** hoặc **Violentmonkey** từ cửa hàng extension của trình duyệt.
 2. Chọn **một trong các nguồn** dưới đây để cài đặt script:
 
-| Nguồn | Link | Ghi chú |
-|-------|------|---------|
-| **Greasy Fork** | [Cài đặt](https://greasyfork.org/vi/scripts/562762-sv-haui-helper) | Khuyến nghị - Tự động cập nhật |
-| GitHub (readable) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js) | Dễ đọc, dùng cho dev |
-| GitHub (minified) | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Nhẹ hơn, tự động cập nhật |
+| Nguồn             | Link                                                                                                                        | Ghi chú                        |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| **Greasy Fork**   | [Cài đặt](https://greasyfork.org/vi/scripts/562762-sv-haui-helper)                                                          | Khuyến nghị - Tự động cập nhật |
+| GitHub (readable) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)         | Dễ đọc, dùng cho dev           |
+| GitHub (minified) | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Nhẹ hơn, tự động cập nhật      |
 
 3. Xác nhận cài đặt trong popup của Tampermonkey/Violentmonkey.
 4. Truy cập [sv.haui.edu.vn](https://sv.haui.edu.vn) và tận hưởng!
@@ -83,17 +83,17 @@ Do chính sách bảo mật mới của Google, bạn **bắt buộc** phải c�
 3. Tìm **Tampermonkey/Violentmonkey** → Click nút **Details** (Chi tiết).
 4. Kéo xuống tìm và bật công tắc tại dòng:
    > **Cho phép tập lệnh của người dùng** (Allow user scripts)
-   > *(Dòng này có chú thích: "Tiện ích này sẽ có thể chạy mã chưa được Google xem xét...")*
+   > _(Dòng này có chú thích: "Tiện ích này sẽ có thể chạy mã chưa được Google xem xét...")_
 5. Nếu thấy popup cảnh báo "Disable developer mode extensions" khi khởi động lại trình duyệt, hãy chọn **Keep (Giữ lại)**.
 
 #### Trình duyệt thay thế (không cần bật Developer Mode):
 
-| Trình duyệt | Hỗ trợ | Ghi chú |
-|-------------|--------|---------|
-| Firefox | ✅ | Khuyến nghị - Quyền riêng tư tốt hơn |
-| Edge | ⚠️ | Tương tự Chrome |
-| Brave | ⚠️ | Tương tự Chrome |
-| Opera | ⚠️ | Tương tự Chrome |
+| Trình duyệt | Hỗ trợ | Ghi chú                              |
+| ----------- | ------ | ------------------------------------ |
+| Firefox     | ✅     | Khuyến nghị - Quyền riêng tư tốt hơn |
+| Edge        | ⚠️     | Tương tự Chrome                      |
+| Brave       | ⚠️     | Tương tự Chrome                      |
+| Opera       | ⚠️     | Tương tự Chrome                      |
 
 ## 🛠️ Phát triển
 
@@ -114,3 +114,4 @@ pnpm install
 
 # Chạy development server
 pnpm dev
+```

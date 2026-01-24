@@ -47,7 +47,7 @@ export function getGlobalLogLevel(): LogLevel {
 }
 
 // No-op function when log is disabled
-const noop = () => { };
+const noop = () => {};
 
 export class Logger {
     private prefix: string;

@@ -117,8 +117,8 @@ log.e('Error'); // Errors
 
 - **Branch `main`**: Chứa code stable, production-ready.
 - **Feature branches**: Đặt tên theo format `<type>/<scope-or-desc>` (ví dụ: `feat/header-ui`, `fix/login-bug`).
-    - Sử dụng các `type` tương ứng với Commit Convention (feat, fix, refactor...).
-    - Branch ngắn hạn, sẽ bị xóa sau khi merge vào `main`.
+  - Sử dụng các `type` tương ứng với Commit Convention (feat, fix, refactor...).
+  - Branch ngắn hạn, sẽ bị xóa sau khi merge vào `main`.
 
 ## 💬 Commit convention
 
@@ -178,12 +178,12 @@ refactor(core): simplify feature manager logic
 
 - **Squash & Merge**: Các PR sẽ được squash thành **1 commit duy nhất** khi merge vào `main`. Tiêu đề commit cuối cùng phải tuân thủ đúng Conventional Commits.
 - **Rebase**: Khuyến khích sử dụng `git rebase` để giữ lịch sử phẳng.
-    ```bash
-    git fetch origin
-    git rebase origin/main
-    # Xử lý conflict nếu có
-    git push --force-with-lease
-    ```
+  ```bash
+  git fetch origin
+  git rebase origin/main
+  # Xử lý conflict nếu có
+  git push --force-with-lease
+  ```
 - **Sync**: Đảm bảo branch của bạn luôn được cập nhật trước khi request review.
 
 ## ❓ Câu hỏi?

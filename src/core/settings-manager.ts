@@ -170,7 +170,12 @@ class SettingsManager {
      * @param name Feature display name (for UI)
      * @param description Feature description (for UI)
      */
-    setFeatureEnabled(featureId: string, enabled: boolean, name?: string, description?: string): void {
+    setFeatureEnabled(
+        featureId: string,
+        enabled: boolean,
+        name?: string,
+        description?: string
+    ): void {
         let setting = this.featureSettings.get(featureId);
 
         if (!setting) {

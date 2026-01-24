@@ -5,6 +5,7 @@ Hướng dẫn chi tiết cách tạo một feature mới trong SV HaUI Helper.
 ## 📋 Tổng quan
 
 Mỗi feature trong dự án:
+
 - Là một class kế thừa từ `Feature`
 - Nằm trong folder riêng: `src/features/<feature-name>/`
 - Được đăng ký trong `src/features/index.ts`
@@ -35,26 +36,26 @@ const styles = `
 `;
 
 export class MyFeature extends Feature {
-    constructor() {
-        super({
-            id: 'my-feature',
-            name: 'My Feature',
-            description: 'Mô tả ngắn',
-            urlMatch: /pattern/,  // Optional
-        });
-    }
+  constructor() {
+    super({
+      id: 'my-feature',
+      name: 'My Feature',
+      description: 'Mô tả ngắn',
+      urlMatch: /pattern/, // Optional
+    });
+  }
 
-    init(): void {
-        // this.log tự động có prefix [HaUI:My Feature]
-        this.log.i('Đang khởi tạo...');
-        addStyles(styles);
-        
-        // Logic của bạn ở đây
-    }
+  init(): void {
+    // this.log tự động có prefix [HaUI:My Feature]
+    this.log.i('Đang khởi tạo...');
+    addStyles(styles);
 
-    destroy(): void {
-        // Cleanup khi disable (optional)
-    }
+    // Logic của bạn ở đây
+  }
+
+  destroy(): void {
+    // Cleanup khi disable (optional)
+  }
 }
 ```
 
@@ -64,9 +65,7 @@ export class MyFeature extends Feature {
 // src/features/index.ts
 import { MyFeature } from './my-feature';
 
-export const allFeatures: Feature[] = [
-    new MyFeature(),
-];
+export const allFeatures: Feature[] = [new MyFeature()];
 ```
 
 ### 4. Test
@@ -82,10 +81,10 @@ pnpm dev
 
 ```typescript
 interface FeatureConfig {
-    id: string;          // ID duy nhất, dùng cho settings
-    name: string;        // Tên hiển thị + prefix cho logger
-    description: string; // Mô tả tính năng
-    urlMatch?: RegExp | string;  // URL pattern để chạy
+  id: string; // ID duy nhất, dùng cho settings
+  name: string; // Tên hiển thị + prefix cho logger
+  description: string; // Mô tả tính năng
+  urlMatch?: RegExp | string; // URL pattern để chạy
 }
 ```
 
@@ -95,12 +94,12 @@ Mỗi feature đã có sẵn `this.log`:
 
 ```typescript
 class MyFeature extends Feature {
-    init(): void {
-        this.log.d('Debug');   // 🔍 [HaUI:My Feature] Debug
-        this.log.i('Info');    // ℹ️ [HaUI:My Feature] Info
-        this.log.w('Warning'); // ⚠️ [HaUI:My Feature] Warning
-        this.log.e('Error');   // ❌ [HaUI:My Feature] Error
-    }
+  init(): void {
+    this.log.d('Debug'); // 🔍 [HaUI:My Feature] Debug
+    this.log.i('Info'); // ℹ️ [HaUI:My Feature] Info
+    this.log.w('Warning'); // ⚠️ [HaUI:My Feature] Warning
+    this.log.e('Error'); // ❌ [HaUI:My Feature] Error
+  }
 }
 ```
 
@@ -108,13 +107,13 @@ class MyFeature extends Feature {
 
 ```typescript
 // Match trang chủ
-urlMatch: /sv\.haui\.edu\.vn\/?$/
+urlMatch: /sv\.haui\.edu\.vn\/?$/;
 
 // Match trang điểm
-urlMatch: /sv\.haui\.edu\.vn\/diem/
+urlMatch: /sv\.haui\.edu\.vn\/diem/;
 
 // Match bằng string (contains)
-urlMatch: '/diem'
+urlMatch: '/diem';
 
 // Không set = chạy mọi trang
 ```
@@ -123,16 +122,16 @@ urlMatch: '/diem'
 
 ```typescript
 class MyFeature extends Feature {
-    // BẮT BUỘC: Khởi tạo feature
-    init(): void | Promise<void> { }
+  // BẮT BUỘC: Khởi tạo feature
+  init(): void | Promise<void> {}
 
-    // TÙY CHỌN: Cleanup
-    destroy(): void { }
+  // TÙY CHỌN: Cleanup
+  destroy(): void {}
 
-    // TÙY CHỌN: Override kiểm tra
-    shouldRun(): boolean {
-        return super.shouldRun() && this.customCondition();
-    }
+  // TÙY CHỌN: Override kiểm tra
+  shouldRun(): boolean {
+    return super.shouldRun() && this.customCondition();
+  }
 }
 ```
 

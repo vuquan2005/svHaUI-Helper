@@ -7,53 +7,53 @@ $bg-color-hover: $color-primary;
 $text-color-hover: white;
 
 :export {
-    cssPrefix: $prefix;
+  cssPrefix: $prefix;
 }
 
 :global {
-    .#{$prefix} {
-        float: right;
+  .#{$prefix} {
+    float: right;
 
-        display: inline-flex;
-        gap: 8px;
-        align-items: center;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
 
-        margin-top: -2px;
-        position: relative;
-        z-index: 9;
+    margin-top: -2px;
+    position: relative;
+    z-index: 9;
 
-        &-link {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
+    &-link {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
 
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            color: $color-text;
-            background: rgba($color-primary, 0.15);
-            border: 1px solid rgba($color-primary, 0.25);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: $color-text;
+      background: rgba($color-primary, 0.15);
+      border: 1px solid rgba($color-primary, 0.25);
 
-            transition: all 0.2s ease;
+      transition: all 0.2s ease;
 
-            i {
-                margin-right: 4px;
-            }
+      i {
+        margin-right: 4px;
+      }
 
-            &:hover {
-                background: $bg-color-hover;
-                color: $text-color-hover;
-                border-color: $bg-color-hover;
-                text-decoration: none;
-            }
+      &:hover {
+        background: $bg-color-hover;
+        color: $text-color-hover;
+        border-color: $bg-color-hover;
+        text-decoration: none;
+      }
 
-            &.active {
-                background: $bg-color-hover;
-                color: $text-color-hover;
-                border-color: $bg-color-hover;
-                pointer-events: none;
-                cursor: default;
-            }
-        }
+      &.active {
+        background: $bg-color-hover;
+        color: $text-color-hover;
+        border-color: $bg-color-hover;
+        pointer-events: none;
+        cursor: default;
+      }
     }
+  }
 }

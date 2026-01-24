@@ -5,6 +5,7 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
 ## [2.0.0] - 2026-01-18
 
 ### Refactored
+
 - **Settings**: Tái cấu trúc hoàn toàn Settings sang class-based system
   - Thay thế object literals bằng các class kế thừa (`BaseSetting`, `BooleanSetting`, `SelectSetting`)
   - Mỗi setting là một instance riêng biệt với `key`, `label`, `description`, `defaultValue`
@@ -15,6 +16,7 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
 ## [1.2.1] - 2026-01-15
 
 ### Changed
+
 - **License**: Update license to GPL-3.0
 - **Documentation**:
   - Update README to English
@@ -24,6 +26,7 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
 ## [1.2.0] - 2026-01-15
 
 ### Added
+
 - **Captcha Helper Feature**: Hỗ trợ nhập captcha tự động
   - Tự động chuyển chữ hoa → thường
   - Loại bỏ dấu tiếng Việt (á → a, đ → d)
@@ -34,6 +37,7 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
   - Kiến trúc mở rộng (`CaptchaPageHandler`) cho các trang khác
 
 ### Added (Utilities)
+
 - `text-utils.ts`: Thêm các hàm xử lý text
   - `removeDiacritics()`: Loại bỏ dấu tiếng Việt
   - `diacriticsToTelex()`: Chuyển dấu thành phím Telex
@@ -41,6 +45,7 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
   - `normalizeCaptchaInput()`: Normalize cho captcha
 
 ### Documentation
+
 - Thêm `docs/pages/captcha.md`: DOM selectors cho các trang captcha
 - Cập nhật `docs/pages/haui-structure.md`: Thêm section Authentication
 
@@ -49,6 +54,7 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
 ## [1.1.0] - 2026-01-15
 
 ### Added
+
 - **Dynamic Title Feature**: Thay đổi `document.title` dựa trên trang đang xem
   - 30+ URL mappings cho các trang menu
   - 6 dynamic patterns cho trang cần context (chi tiết HP, KQ lớp, KQ bạn)
@@ -56,6 +62,7 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
   - Format: `[Icon] [Title] | HaUI`
 
 ### Changed
+
 - **Build system**: Thêm minified build output
   - `pnpm build` → readable (`svhaui-helper.user.js`)
   - `pnpm build:minify` → minified (`svhaui-helper.min.user.js`)
@@ -63,10 +70,12 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
 - **Metadata**: Thêm `@license`, `@homepageURL`, `@supportURL` cho Greasy Fork
 
 ### Infrastructure
+
 - **GitHub Actions CI**: Type-check và build tự động trên push/PR
 - **GitHub Actions Release**: Tự động tạo release khi push tag `v*`
 
 ### Documentation
+
 - Thêm `docs/pages/` với chi tiết selectors cho từng loại trang:
   - `haui-structure.md` - Cấu trúc tổng quan website
   - `course-detail.md` - Selectors trang chi tiết học phần
@@ -76,6 +85,7 @@ Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại t�
 ## [1.0.0] - 2026-01-14
 
 ### Added
+
 - Initial release
 - Core architecture: Feature base class, Logger, Settings, Storage
 - Example Feature template
