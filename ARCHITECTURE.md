@@ -59,12 +59,13 @@ src/
 flowchart TD
     A[DOM Ready] --> B[main]
     B --> C[Register Features]
-    C --> D[Init All Features]
+    B --> C[Register Features]
+    C --> D[Apply Features]
     D --> E[Ready!]
 ```
 
 - Đăng ký tất cả features với `FeatureManager`
-- Khởi tạo các features phù hợp với URL hiện tại
+- Khởi tạo các features phù hợp với URL hiện tại (có sắp xếp theo priority)
 - Hiển thị banner console
 
 ### 2. Feature Base Class (`core/feature.ts`)
@@ -79,8 +80,8 @@ abstract class Feature {
   urlMatch?: RegExp; // Pattern URL để chạy
 
   shouldRun(): boolean; // Kiểm tra có nên chạy
-  abstract init(): void; // Khởi tạo feature
-  destroy(): void; // Cleanup
+  abstract run(): void; // Khởi tạo feature
+  cleanup(): void; // Cleanup
 }
 ```
 
@@ -97,15 +98,16 @@ Singleton quản lý vòng đời features:
 ```mermaid
 flowchart LR
     A[register] --> B[features Map]
-    B --> C[initAll]
+    B --> C[applyFeatures]
     C --> D{shouldRun?}
-    D -->|Yes| E[init]
-    D -->|No| F[Skip]
+    D -->|Yes| E[run]
+    D -->|No| F[Skip/Cleanup]
 ```
 
 - **`register(feature)`**: Đăng ký feature
 - **`registerAll(features)`**: Đăng ký nhiều features
-- **`initAll()`**: Khởi tạo các features matching URL
+- **`applyFeatures()`**: Áp dụng features matching URL (chạy feature mới, dọn dẹp feature cũ)
+- **`startFeature(id)` / `stopFeature(id)`**: Bật/Tắt thủ công
 - **`get(id)`**: Lấy feature theo ID
 
 ### 4. Settings Manager (`core/settings.ts`)
@@ -183,14 +185,14 @@ sequenceDiagram
 
     U->>M: Load page
     M->>FM: registerAll(features)
-    M->>FM: initAll()
+    M->>FM: applyFeatures()
     FM->>F: shouldRun()
     F->>S: isFeatureEnabled(id)
     S->>ST: get('app_settings')
     ST-->>S: settings
     S-->>F: enabled
     F-->>FM: true/false
-    FM->>F: init()
+    FM->>F: run()
     F->>U: Feature active
 ```
 

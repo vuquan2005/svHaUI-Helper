@@ -45,7 +45,7 @@ export class MyFeature extends Feature {
     });
   }
 
-  init(): void {
+  run(): void {
     // this.log tự động có prefix [HaUI:My Feature]
     this.log.i('Đang khởi tạo...');
     addStyles(styles);
@@ -53,7 +53,7 @@ export class MyFeature extends Feature {
     // Logic của bạn ở đây
   }
 
-  destroy(): void {
+  cleanup(): void {
     // Cleanup khi disable (optional)
   }
 }
@@ -84,7 +84,8 @@ interface FeatureConfig {
   id: string; // ID duy nhất, dùng cho settings
   name: string; // Tên hiển thị + prefix cho logger
   description: string; // Mô tả tính năng
-  urlMatch?: RegExp | string; // URL pattern để chạy
+  priority?: number; // Độ ưu tiên (cao chạy trước, mặc định 0)
+  urlMatch?: RegExp | string | MatchPattern | MatchPattern[]; // URL pattern để chạy
 }
 ```
 
@@ -94,7 +95,7 @@ Mỗi feature đã có sẵn `this.log`:
 
 ```typescript
 class MyFeature extends Feature {
-  init(): void {
+  run(): void {
     this.log.d('Debug'); // 🔍 [HaUI:My Feature] Debug
     this.log.i('Info'); // ℹ️ [HaUI:My Feature] Info
     this.log.w('Warning'); // ⚠️ [HaUI:My Feature] Warning
@@ -123,10 +124,10 @@ urlMatch: '/diem';
 ```typescript
 class MyFeature extends Feature {
   // BẮT BUỘC: Khởi tạo feature
-  init(): void | Promise<void> {}
+  run(): void | Promise<void> {}
 
   // TÙY CHỌN: Cleanup
-  destroy(): void {}
+  cleanup(): void {}
 
   // TÙY CHỌN: Override kiểm tra
   shouldRun(): boolean {
@@ -143,4 +144,4 @@ Xem chi tiết các APIs: [API Reference](api-reference.md)
 
 - **CSS prefix**: Dùng prefix như `.svhaui-` để tránh xung đột
 - **Error handling**: Luôn try-catch khi làm việc với DOM
-- **Async/await**: `init()` có thể là async
+- **Async/await**: `run()` có thể là async

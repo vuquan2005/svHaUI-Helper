@@ -103,7 +103,7 @@ src/
 Sử dụng logger thay vì `console.log`:
 
 ```typescript
-import { createLogger } from '../../utils';
+import { createLogger } from '../../core';
 
 const log = createLogger('MyFeature');
 

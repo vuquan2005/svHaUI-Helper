@@ -2,6 +2,21 @@
 
 Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại tại đây.
 
+## [2.1.0] - 2026-01-24
+
+### Refactored
+
+- **Feature Manager**:
+  - Implement Priority System for features (features with higher priority run first)
+  - Rename `initAll()` to `applyFeatures()`
+  - Rename `init()`/`destroy()` to `run()`/`cleanup()` in Feature base class
+  - Add `startFeature()` and `stopFeature()` methods for dynamic control
+
+### Documentation
+
+- Update `docs/api-reference` with new TypeDoc structure
+- Update Feature Creation Guide to match new API
+
 ## [2.0.0] - 2026-01-18
 
 ### Refactored

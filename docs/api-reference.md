@@ -1,6 +1,6 @@
 # Tài liệu API
 
-Reference cho các APIs có sẵn trong dự án.
+Reference chi tiết cho các APIs có sẵn trong dự án.
 
 ## 📦 Core Module
 
@@ -8,28 +8,65 @@ Reference cho các APIs có sẵn trong dự án.
 import { Feature, featureManager, settings, storage, log, createLogger } from './core';
 ```
 
-### Feature
+### Feature Manager
 
-Base class cho tất cả features. Tự động có logger với prefix từ tên feature.
+Quản lý vòng đời của các features trong ứng dụng.
+
+```typescript
+// Đăng ký feature (thường dùng trong main.ts)
+featureManager.register(new MyFeature());
+featureManager.registerAll([feature1, feature2]);
+
+// Áp dụng các feature dựa trên URL hiện tại (chạy feature mới, dọn dẹp feature cũ)
+await featureManager.applyFeatures();
+
+// Kiểm tra trạng thái
+featureManager.isRunning('feature-id'); // → boolean
+
+// Điều khiển thủ công (nếu cần)
+await featureManager.startFeature('feature-id');
+featureManager.stopFeature('feature-id');
+
+// Lấy instance feature
+const feature = featureManager.get('feature-id');
+```
+
+---
+
+### Feature Base Class
+
+Base class cho tất cả features. Hỗ trợ priority, auto-logger, và lifecycle management.
 
 ```typescript
 interface FeatureConfig {
-  id: string;
-  name: string;
-  description: string;
-  urlMatch?: RegExp | string;
+  id: string; // ID duy nhất
+  name: string; // Tên hiển thị
+  description: string; // Mô tả
+  priority?: number; // Độ ưu tiên (cao chạy trước, mặc định 0)
+  urlMatch?: RegExp | string | MatchPattern[]; // Pattern URL
 }
 
 abstract class Feature {
   readonly id: string;
   readonly name: string;
   readonly description: string;
+  readonly priority: number;
+
+  // Logger tự động (Lazy loaded)
   protected readonly log: Logger;
 
   constructor(config: FeatureConfig);
+
+  // Lifecycle methods
+
+  // 1. Kiểm tra URL (Override nếu cần custom logic)
   shouldRun(): boolean;
-  abstract init(): void | Promise<void>;
-  destroy(): void;
+
+  // 2. Chạy feature (Bắt buộc implement)
+  abstract run(): void | Promise<void>;
+
+  // 3. Dọn dẹp resource (Tùy chọn)
+  cleanup(): void;
 }
 ```
 
@@ -41,19 +78,19 @@ abstract class Feature {
 import { storage } from './core';
 ```
 
-Sử dụng `StorageSchema` để type-safe:
+Wrapper type-safe cho `GM_getValue` / `GM_setValue` / `localStorage`.
 
 ```typescript
-// 1. Định nghĩa trong src/types/index.ts
+// 1. Định nghĩa Schema trong src/types/index.ts
 interface StorageSchema {
   app_settings: AppSettings;
   grades: CourseGrade[];
 }
 
-// 2. Sử dụng với autocomplete
+// 2. Sử dụng (Type checked)
 storage.get('grades', []); // → CourseGrade[]
-storage.set('grades', data); // Type checked
-storage.remove('grades');
+storage.set('grades', data); // Lưu dữ liệu
+storage.remove('grades'); // Xóa
 storage.keys(); // → ('app_settings' | 'grades')[]
 ```
 
@@ -63,19 +100,18 @@ storage.keys(); // → ('app_settings' | 'grades')[]
 
 ```typescript
 import { settings } from './core';
+```
 
-// Feature enable/disable
-settings.isFeatureEnabled('feature-id'); // → boolean
-settings.setFeatureEnabled('id', true);
+Quản lý cấu hình người dùng (Features toggle & Application settings).
 
-// Log level (class-based)
+```typescript
+// Feature Enable/Disable
+const enabled = settings.isFeatureEnabled('feature-id');
+settings.setFeatureEnabled('feature-id', true);
+
+// Log Level Configuration
 settings.logLevel.getValue(); // → 'debug' | 'info' | 'warn' | 'error' | 'none'
 settings.logLevel.setValue('warn');
-settings.logLevel.onChange((e) => console.log(e.newValue));
-
-// Boolean settings
-settings.captchaUndoTelex.getValue(); // → boolean
-settings.captchaUndoTelex.setValue(false);
 ```
 
 ---
@@ -84,26 +120,32 @@ settings.captchaUndoTelex.setValue(false);
 
 ```typescript
 import { log, createLogger } from './core';
-
-// Main logger
-log.i('Message'); // ℹ️ [HaUI] Message
-
-// Child logger
-const myLog = createLogger('Module');
-myLog.i('Message'); // ℹ️ [HaUI:Module] Message
-
-// Methods
-log.d(...args); // Debug
-log.i(...args); // Info
-log.w(...args); // Warning
-log.e(...args); // Error
 ```
 
-**Note**: Features tự động có `this.log` - không cần import.
+Hệ thống logging với prefix và log levels.
+
+```typescript
+// Global logger
+log.i('App started'); // ℹ️ [HaUI] App started
+
+// Custom logger cho module riêng
+const myLog = createLogger('MyModule');
+myLog.d('Debug info'); // 🔍 [HaUI:MyModule] Debug info
+
+// Log Levels
+log.d(obj); // Debug (chỉ hiện khi LogLevel <= Debug)
+log.i(msg); // Info
+log.w(msg); // Warning
+log.e(err); // Error
+```
+
+**Note**: Trong class kế thừa `Feature`, hãy dùng `this.log` có sẵn.
 
 ---
 
 ## 🛠️ Utils Module
+
+Các tiện ích hỗ trợ thao tác DOM và xử lý dữ liệu.
 
 ```typescript
 import { waitForElement, createElementFromHTML, addStyles } from './utils';
@@ -111,39 +153,39 @@ import { waitForElement, createElementFromHTML, addStyles } from './utils';
 
 ### waitForElement
 
+Đợi một element xuất hiện trong DOM (hữu ích cho SPA/Dynamic content).
+
 ```typescript
-const el = await waitForElement<HTMLElement>('.selector', 10000);
+// Đợi tối đa 10s cho .target-element
+const el = await waitForElement<HTMLElement>('.target-element', 10000);
 ```
 
 ### createElementFromHTML
 
+Tạo DOM element từ chuỗi HTML.
+
 ```typescript
-const btn = createElementFromHTML<HTMLButtonElement>(`<button>Click</button>`);
+const btn = createElementFromHTML<HTMLButtonElement>(`<button class="btn">Click me</button>`);
 ```
 
 ### addStyles
 
-```typescript
-addStyles(`.my-class { color: red; }`);
-```
-
-**Note**: Dùng `document.querySelector()` và `document.querySelectorAll()` trực tiếp.
-
----
-
-## 🔌 GM\_\* APIs
-
-Import từ `'$'`:
+Inject CSS vào trang.
 
 ```typescript
-import { GM_getValue, GM_setValue, GM_addStyle, GM_xmlhttpRequest } from '$';
+addStyles(`
+  .custom-class { 
+    color: red; 
+    background: #fff;
+  }
+`);
 ```
-
-**Khuyến nghị**: Dùng `storage` wrapper thay vì GM_getValue/GM_setValue trực tiếp.
 
 ---
 
 ## 📝 Types
+
+Các định nghĩa TypeScript quan trọng.
 
 ```typescript
 // src/types/index.ts
