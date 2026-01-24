@@ -22,7 +22,7 @@ interface LoggerOptions {
 }
 
 const LEVEL_STYLES: Record<Exclude<LogLevel, 'none'>, string> = {
-    debug: 'color: #615474',
+    debug: 'color: #7a6a96ff',
     info: 'color: #418aff',
     warn: 'color: #f5a317; font-weight: 500',
     error: 'color: #EF4444; font-weight: bold',
@@ -133,8 +133,3 @@ export const log = new Logger({ prefix: 'HaUI' });
 export function createLogger(name: string): Logger {
     return log.child(name);
 }
-
-log.d('Debug test!');
-log.i('Info test!');
-log.w('Warn test!');
-log.e('Error test!');
