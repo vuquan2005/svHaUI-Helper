@@ -15,6 +15,7 @@ interface NavLink {
     icon: string;
     url: string;
     isActive: boolean;
+    description: string;
 }
 
 // ============================================
@@ -125,8 +126,20 @@ export class QuickNavFeature extends Feature {
         }
 
         return [
-            { label: 'Điểm TX', icon: '📊', url: studyUrl, isActive: isStudy },
-            { label: 'Điểm thi', icon: '📋', url: examUrl, isActive: isExam },
+            {
+                label: 'Điểm TX',
+                icon: '📊',
+                url: studyUrl,
+                isActive: isStudy,
+                description: 'Xem kết quả học tập',
+            },
+            {
+                label: 'Điểm thi',
+                icon: '📋',
+                url: examUrl,
+                isActive: isExam,
+                description: 'Xem kết quả thi',
+            },
         ];
     }
 
@@ -140,8 +153,19 @@ export class QuickNavFeature extends Feature {
         for (const link of links) {
             const a = document.createElement('a');
             a.href = link.url;
+            a.title = link.description;
             a.className = `${CSS_PREFIX}-link${link.isActive ? ' active' : ''}`;
-            a.textContent = `${link.icon} ${link.label}`;
+
+            const icon = document.createElement('span');
+            icon.className = `${CSS_PREFIX}-link-icon`;
+            icon.textContent = link.icon;
+
+            const label = document.createElement('span');
+            label.className = `${CSS_PREFIX}-link-label`;
+            label.textContent = link.label;
+
+            a.appendChild(icon);
+            a.appendChild(label);
             container.appendChild(a);
         }
 

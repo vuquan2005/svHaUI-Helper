@@ -23,7 +23,9 @@ $text-color-hover: white;
     z-index: 9;
 
     &-link {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding: 4px 12px;
       border-radius: 4px;
 
@@ -36,8 +38,10 @@ $text-color-hover: white;
 
       transition: all 0.2s ease;
 
-      i {
-        margin-right: 4px;
+      &-label {
+        @media (max-width: 520px) {
+          display: none;
+        }
       }
 
       &:hover {
