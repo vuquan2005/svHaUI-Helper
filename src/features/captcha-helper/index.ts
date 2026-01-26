@@ -3,7 +3,7 @@
  * Assists with captcha input: normalize input, auto-submit on blur/Enter
  */
 
-import { Feature, settings, type MatchPattern } from '@/core';
+import { Feature, type MatchPattern, type StorageListenerId } from '@/core';
 import { normalizeCaptchaInput, normalizeCaptchaInputUndo } from '@/utils';
 
 // ============================================
@@ -56,14 +56,22 @@ const HANDLERS: Record<string, CaptchaPageHandler> = {
     },
 };
 
+/** Storage schema */
+type StorageSchema = {
+    undoTelex: boolean;
+};
+
 // ============================================
 // CaptchaHelper Feature
 // ============================================
 
-export class CaptchaHelperFeature extends Feature {
+export class CaptchaHelperFeature extends Feature<StorageSchema> {
     private inputEl: HTMLInputElement | null = null;
     private submitEl: HTMLElement | null = null;
     private currentHandler: CaptchaPageHandler | null = null;
+
+    private isUndoTelex: StorageSchema['undoTelex'] | undefined;
+    private undoTelexListenerId: StorageListenerId | null = null;
 
     // Debounce timer for input normalization
     private normalizeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -87,8 +95,18 @@ export class CaptchaHelperFeature extends Feature {
      * Initialize Captcha Helper
      * Find and attach event listeners to captcha input field
      */
-    run(): void {
+    async run(): Promise<void> {
         this.log.i('Initializing...');
+
+        // Load settings
+        this.isUndoTelex = await this.storage.get('undoTelex', false);
+        this.undoTelexListenerId = await this.storage.onValueChange(
+            'undoTelex',
+            (_key, _old, newVal) => {
+                this.isUndoTelex = !!newVal;
+                this.log.d('Settings updated:', { isUndoTelex: this.isUndoTelex });
+            }
+        );
 
         // Lấy handler dựa vào pattern đã match
         const matchName = this.matchResult?.matchName;
@@ -157,8 +175,7 @@ export class CaptchaHelperFeature extends Feature {
         }
 
         const original = this.inputEl.value;
-        const undoTelex = settings.captchaUndoTelex.getValue();
-        const normalized = undoTelex
+        const normalized = this.isUndoTelex
             ? normalizeCaptchaInputUndo(original)
             : normalizeCaptchaInput(original);
 
@@ -215,6 +232,12 @@ export class CaptchaHelperFeature extends Feature {
      * Remove event listeners and clear timers
      */
     cleanup(): void {
+        // Remove storage listener
+        if (this.undoTelexListenerId !== null) {
+            this.storage.removeValueChangeListener(this.undoTelexListenerId);
+            this.undoTelexListenerId = null;
+        }
+
         // Clear timer
         if (this.normalizeTimer) {
             clearTimeout(this.normalizeTimer);

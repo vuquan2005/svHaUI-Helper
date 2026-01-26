@@ -87,8 +87,10 @@ const StorageAPI = {
      * Falls back to Promise.all with individual getValue calls if batch API unavailable.
      * @param keysOrDefaults - Array of keys or object with key-default pairs
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async getValues<T extends Record<string, any>>(
         keysOrDefaults: string[] | T
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<Record<string, any>> {
         // Try GM4 batch API
         if (GM?.getValues) {
@@ -426,6 +428,7 @@ export class ScopedStorage<T extends Record<string, any>> {
     async has<K extends keyof T>(key: K & string): Promise<boolean> {
         const sentinel =
             'aHR0cHM6Ly9pbWcudmlldHFyLmlvL2ltYWdlL1RQQi0wNzYwMjk4NzAwMC1xcl9vbmx5LnBuZz9hZGRJbmZvPUVhc3RlciUyMEVnZw==';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const value = await StorageAPI.getValue<any>(this.getFullKey(key), sentinel);
         return value !== sentinel;
     }
@@ -502,7 +505,4 @@ export const storage = {
     addValueChangeListener: StorageAPI.addValueChangeListener,
     /** Removes a value change listener */
     removeValueChangeListener: StorageAPI.removeValueChangeListener,
-    /** Creates a new scoped storage instance */
-    createScope: <T extends Record<string, any>>(scopeName: string) =>
-        new ScopedStorage<T>(scopeName),
 };

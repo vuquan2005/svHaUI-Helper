@@ -3,7 +3,6 @@
  */
 
 import { Feature } from './feature';
-import { settings } from './settings-manager';
 import { createLogger } from './logger';
 
 const log = createLogger('FeatureManager');
@@ -57,19 +56,19 @@ class FeatureManager {
             for (const [id, feature] of sortedFeatures) {
                 if (!this.running.has(id)) continue;
 
-                const isEnabled = settings.isFeatureEnabled(
-                    feature.id,
-                    feature.name,
-                    feature.description
-                );
+                // const isEnabled = settings.isFeatureEnabled(
+                //     feature.id,
+                //     feature.name,
+                //     feature.description
+                // );
                 const shouldRun = feature.shouldRun();
 
-                if (!isEnabled || !shouldRun) {
+                if (/*!isEnabled ||*/ !shouldRun) {
                     try {
                         feature.cleanup();
                         this.running.delete(id);
                         log.d(
-                            `🛑 Stopped: ${feature.name} (${!isEnabled ? 'Disabled' : 'URL mismatch'})`
+                            `🛑 Stopped: ${feature.name} (${!shouldRun ? 'URL mismatch' : 'Disabled'})`
                         );
                     } catch (error) {
                         log.e(`Error stopping "${feature.name}":`, error);
@@ -81,9 +80,9 @@ class FeatureManager {
             for (const [id, feature] of sortedFeatures) {
                 if (this.running.has(id)) continue;
 
-                if (!settings.isFeatureEnabled(feature.id, feature.name, feature.description)) {
-                    continue;
-                }
+                // if (!settings.isFeatureEnabled(feature.id, feature.name, feature.description)) {
+                //     continue;
+                // }
 
                 if (!feature.shouldRun()) {
                     continue;

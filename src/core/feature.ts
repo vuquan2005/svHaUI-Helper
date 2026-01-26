@@ -5,6 +5,7 @@
 
 import { createLogger, Logger } from './logger';
 import { browserLocation } from '../utils/window-location';
+import { ScopedStorage } from './storage';
 
 // ============================================
 // URL Matching Interfaces
@@ -55,7 +56,8 @@ export interface FeatureConfig {
 // URL Normalization Utilities
 // ============================================
 
-export abstract class Feature {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export abstract class Feature<TStorage extends Record<string, unknown> = Record<string, any>> {
     // ============================================
     // Instance getters for static URL values
     // ============================================
@@ -73,10 +75,15 @@ export abstract class Feature {
     readonly urlMatch?: UrlMatchConfig;
 
     private _log?: Logger;
+    private _storage?: ScopedStorage<TStorage>;
 
     /** Logger với prefix tự động từ tên feature (Lazy loaded) */
     protected get log(): Logger {
         return (this._log ??= createLogger(this.name));
+    }
+
+    protected get storage(): ScopedStorage<TStorage> {
+        return (this._storage ??= new ScopedStorage<TStorage>(this.id));
     }
 
     /** Kết quả match sau khi shouldRun() được gọi */

@@ -9,7 +9,7 @@ import { CaptchaHelperFeature } from './captcha-helper';
 import { QuickNavFeature } from './quick-nav';
 
 // Add new features here
-export const allFeatures: Feature[] = [
+export const allFeatures: Feature<any>[] = [
     new DynamicTitleFeature(),
     new CaptchaHelperFeature(),
     new QuickNavFeature(),

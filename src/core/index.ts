@@ -10,7 +10,6 @@ export {
     type MatchResult,
 } from './feature';
 export { featureManager } from './feature-manager';
-export { settings } from './settings-manager';
 export {
     log,
     createLogger,
@@ -19,5 +18,5 @@ export {
     Logger,
     type LogLevel,
 } from './logger';
-export { storage } from './storage';
+export { storage, ScopedStorage, StorageEntry, type StorageListenerId } from './storage';
 export type { StorageSchema } from '@/types';
