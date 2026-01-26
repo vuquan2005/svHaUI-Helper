@@ -32,11 +32,11 @@ const URL_PATTERNS = [
     { name: 'personal-study', pattern: /^\/student\/result\/studyresults$/ },
     { name: 'personal-exam', pattern: /^\/student\/result\/examresult$/ },
     // Friend
-    { name: 'friend-study', pattern: /^\/student\/result\/viewstudyresult\?/ },
-    { name: 'friend-exam', pattern: /^\/student\/result\/viewexamresult\?/ },
+    { name: 'friend-study', pattern: /^\/student\/result\/viewstudyresult/ },
+    { name: 'friend-exam', pattern: /^\/student\/result\/viewexamresult/ },
     // Class
-    { name: 'class-study', pattern: /^\/student\/result\/viewstudyresultclass\?/ },
-    { name: 'class-exam', pattern: /^\/student\/result\/viewexamresultclass\?/ },
+    { name: 'class-study', pattern: /^\/student\/result\/viewstudyresultclass/ },
+    { name: 'class-exam', pattern: /^\/student\/result\/viewexamresultclass/ },
 ];
 
 // ============================================
@@ -56,8 +56,6 @@ export class QuickNavFeature extends Feature {
     }
 
     run(): void {
-        this.log.i('Initializing...');
-
         // Generate navigation links based on current URL
         const navLinks = this.generateNavLinks();
         if (navLinks.length === 0) {
@@ -75,8 +73,6 @@ export class QuickNavFeature extends Feature {
         // Create and inject nav element at the beginning (float right will position it)
         this.navElement = this.createNavElement(navLinks);
         panelHeading.insertBefore(this.navElement, panelHeading.firstChild);
-
-        this.log.i('Ready! Nav links injected.');
     }
 
     /**

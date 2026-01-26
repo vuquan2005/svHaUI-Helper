@@ -247,8 +247,6 @@ export class DynamicTitleFeature extends Feature {
      * Update title and start observing DOM changes
      */
     run(): void {
-        this.log.i('Initializing...');
-
         // Save original title
         this.originalTitle = document.title;
 
@@ -259,8 +257,6 @@ export class DynamicTitleFeature extends Feature {
         if (!found) {
             this.observeContentChanges();
         }
-
-        this.log.i('Ready!');
     }
 
     /**

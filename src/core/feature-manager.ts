@@ -33,6 +33,37 @@ class FeatureManager {
     }
 
     /**
+     * Internal method to execute feature start
+     */
+    private async _executeStart(feature: Feature): Promise<boolean> {
+        try {
+            log.d(`Starting: ${feature.name}`);
+            await feature.run();
+            this.running.add(feature.id);
+            log.i(`✅ Started: ${feature.name}`);
+            return true;
+        } catch (error) {
+            log.e(`Error starting "${feature.name}":`, error);
+            return false;
+        }
+    }
+
+    /**
+     * Internal method to execute feature stop
+     */
+    private _executeStop(feature: Feature): boolean {
+        try {
+            feature.cleanup();
+            this.running.delete(feature.id);
+            log.i(`🛑 Stopped: ${feature.name}`);
+            return true;
+        } catch (error) {
+            log.e(`Error stopping "${feature.name}":`, error);
+            return false;
+        }
+    }
+
+    /**
      * Apply features matching the current page
      * Can be called multiple times (e.g., on SPA route changes)
      */
@@ -64,15 +95,9 @@ class FeatureManager {
                 const shouldRun = feature.shouldRun();
 
                 if (/*!isEnabled ||*/ !shouldRun) {
-                    try {
-                        feature.cleanup();
-                        this.running.delete(id);
-                        log.d(
-                            `🛑 Stopped: ${feature.name} (${!shouldRun ? 'URL mismatch' : 'Disabled'})`
-                        );
-                    } catch (error) {
-                        log.e(`Error stopping "${feature.name}":`, error);
-                    }
+                    const reason = !shouldRun ? 'URL mismatch' : 'Disabled';
+                    log.d(`Stopping ${feature.name} (Reason: ${reason})`);
+                    this._executeStop(feature);
                 }
             }
 
@@ -88,14 +113,7 @@ class FeatureManager {
                     continue;
                 }
 
-                try {
-                    log.d(`Starting: ${feature.name} (priority: ${feature.priority})`);
-                    await feature.run();
-                    this.running.add(id);
-                    log.d(`✅ Started: ${feature.name}`);
-                } catch (error) {
-                    log.e(`Error starting "${feature.name}":`, error);
-                }
+                await this._executeStart(feature);
             }
 
             log.i(`✅ Running ${this.running.size}/${this.features.size} features`);
@@ -149,6 +167,11 @@ class FeatureManager {
      * @returns true if feature was started, false if not found or already running
      */
     async startFeature(id: string): Promise<boolean> {
+        if (this.isApplying) {
+            log.w('Cannot manually start feature while features are being applied');
+            return false;
+        }
+
         const feature = this.features.get(id);
         if (!feature) {
             log.w(`Feature "${id}" not found`);
@@ -160,16 +183,7 @@ class FeatureManager {
             return false;
         }
 
-        try {
-            log.d(`Starting feature: ${feature.name}`);
-            await feature.run();
-            this.running.add(id);
-            log.i(`✅ Started: ${feature.name}`);
-            return true;
-        } catch (error) {
-            log.e(`Error starting "${feature.name}":`, error);
-            return false;
-        }
+        return this._executeStart(feature);
     }
 
     /**
@@ -177,6 +191,11 @@ class FeatureManager {
      * @returns true if feature was stopped, false if not found or not running
      */
     stopFeature(id: string): boolean {
+        if (this.isApplying) {
+            log.w('Cannot manually stop feature while features are being applied');
+            return false;
+        }
+
         const feature = this.features.get(id);
         if (!feature) {
             log.w(`Feature "${id}" not found`);
@@ -188,16 +207,7 @@ class FeatureManager {
             return false;
         }
 
-        try {
-            log.d(`Stopping feature: ${feature.name}`);
-            feature.cleanup();
-            this.running.delete(id);
-            log.i(`🛑 Stopped: ${feature.name}`);
-            return true;
-        } catch (error) {
-            log.e(`Error stopping "${feature.name}":`, error);
-            return false;
-        }
+        return this._executeStop(feature);
     }
 }
 

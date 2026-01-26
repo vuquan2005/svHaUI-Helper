@@ -45,14 +45,14 @@ const URL_PATTERNS: MatchPattern[] = [
 /** Handler config for each pattern (keyed by pattern name) */
 const HANDLERS: Record<string, CaptchaPageHandler> = {
     'sso-login': {
-        inputSelector: '#ctl00_txtimgcode',
-        submitSelector: '#ctl00_butLogin',
-        imageSelector: '#ctl00_Image1',
+        inputSelector: '[id^="ctl"][id$="_txtimgcode"]',
+        submitSelector: '[id^="ctl"][id$="_butLogin"]',
+        imageSelector: '[id^="ctl"][id$="_Image1"]',
     },
     register: {
-        inputSelector: '#ctl02_txtimgcode',
-        submitSelector: '#ctl02_btnSubmit',
-        imageSelector: '#ctl02_Image1',
+        inputSelector: '[id^="ctl"][id$="_txtimgcode"]',
+        submitSelector: '[id^="ctl"][id$="_btnSubmit"]',
+        imageSelector: '[id^="ctl"][id$="_Image1"]',
     },
 };
 
@@ -96,8 +96,6 @@ export class CaptchaHelperFeature extends Feature<StorageSchema> {
      * Find and attach event listeners to captcha input field
      */
     async run(): Promise<void> {
-        this.log.i('Initializing...');
-
         // Load settings
         this.isUndoTelex = await this.storage.get('undoTelex', false);
         this.undoTelexListenerId = await this.storage.onValueChange(
@@ -130,11 +128,12 @@ export class CaptchaHelperFeature extends Feature<StorageSchema> {
         if (!this.inputEl) {
             this.log.w('Captcha input not found:', this.currentHandler.inputSelector);
             return;
-        }
+        } else this.log.d('Captcha input found:', this.inputEl.getAttribute('id'));
 
         if (!this.submitEl) {
             this.log.w('Submit button not found:', this.currentHandler.submitSelector);
-        }
+            return;
+        } else this.log.d('Submit button found:', this.submitEl.getAttribute('id'));
 
         // Attach event listeners to input field
         this.inputEl.addEventListener('input', this.handleInput);
@@ -143,8 +142,6 @@ export class CaptchaHelperFeature extends Feature<StorageSchema> {
 
         // Focus input so user can type immediately
         this.inputEl.focus();
-
-        this.log.i('Ready! Input:', this.currentHandler.inputSelector);
     }
 
     /**

@@ -31,8 +31,8 @@ const LEVEL_STYLES: Record<Exclude<LogLevel, 'none'>, string> = {
 const LEVEL_ICONS: Record<Exclude<LogLevel, 'none'>, string> = {
     debug: '👾',
     info: 'ℹ️',
-    warn: '⚠️',
-    error: '❌',
+    warn: '',
+    error: '',
 };
 
 // Global log level - can be changed from settings
@@ -133,3 +133,9 @@ export const log = new Logger({ prefix: 'HaUI' });
 export function createLogger(name: string): Logger {
     return log.child(name);
 }
+
+// Test logging
+// log.d('This is a debug log');
+// log.i('This is an info log');
+// log.w('This is a warning log');
+// log.e('This is an error log');

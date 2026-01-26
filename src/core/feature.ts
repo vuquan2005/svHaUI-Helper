@@ -83,7 +83,7 @@ export abstract class Feature<TStorage extends Record<string, unknown> = Record<
     }
 
     protected get storage(): ScopedStorage<TStorage> {
-        return (this._storage ??= new ScopedStorage<TStorage>(this.id));
+        return (this._storage ??= new ScopedStorage<TStorage>('feat:' + this.id));
     }
 
     /** Kết quả match sau khi shouldRun() được gọi */
