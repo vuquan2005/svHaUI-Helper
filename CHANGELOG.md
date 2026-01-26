@@ -2,6 +2,23 @@
 
 Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại tại đây.
 
+## [2.2.0] - 2026-01-26
+
+### Added
+
+- **Quick Navigation**:
+  - Thêm mô tả chi tiết cho từng link trong menu nhanh
+  - Cải thiện giao diện hiển thị danh sách link
+- **Settings**:
+  - "Undo Telex" tự động cập nhật settings khi có thay đổi từ storage
+- **Core**: Thêm thông tin `buildTime` vào log banner khi script khởi chạy
+
+### Refactored
+
+- **Dynamic Title**: Tách `URL_TITLE_MAP` ra module riêng và loại bỏ việc cắt ngắn title
+- **Quick Navigation**: Tối ưu logic `generateNavLinks`
+- **Storage**: Cập nhật cơ chế storage với fallback (GM4/GM3)
+
 ## [2.1.0] - 2026-01-24
 
 ### Refactored
