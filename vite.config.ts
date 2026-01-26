@@ -9,6 +9,11 @@ const isMinify = process.env.MINIFY === 'true';
 const GITHUB_RELEASE_BASE = 'https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download';
 const MINIFIED_SCRIPT_NAME = 'svhaui-helper.min.user.js';
 
+const buildTime: string = new Date()
+    .toLocaleString('sv-SE', { hour12: false })
+    .replace(/[^\d]/g, '')
+    .slice(2);
+
 export default defineConfig({
     resolve: {
         alias: {
@@ -49,5 +54,6 @@ export default defineConfig({
     },
     define: {
         __APP_VERSION__: JSON.stringify(version),
+        __BUILD_TIME__: JSON.stringify(buildTime),
     },
 });
