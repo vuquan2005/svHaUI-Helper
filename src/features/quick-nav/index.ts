@@ -78,65 +78,53 @@ export class QuickNavFeature extends Feature {
 
     /**
      * Generate navigation links based on current URL
+     * Refactored for maintainability and scalability
      */
     private generateNavLinks(): NavLink[] {
         const pathname = this.location.path;
         const search = this.location.search;
 
-        // Determine current page type
-        const isStudy = pathname.includes('studyresult');
-        const isExam = pathname.includes('examresult');
+        const mappings = [
+            // Class pages (must first by overlap with Friend)
+            {
+                type: 'class',
+                study: 'viewstudyresultclass',
+                exam: 'viewexamresultclass',
+                useParams: true,
+            },
+            // Friend pages
+            { type: 'friend', study: 'viewstudyresult', exam: 'viewexamresult', useParams: true },
+            // Personal pages
+            { type: 'personal', study: 'studyresults', exam: 'examresult', useParams: false },
+        ];
 
-        if (!isStudy && !isExam) return [];
+        const config = mappings.find(
+            (m) => pathname.includes(m.study) || pathname.includes(m.exam)
+        );
 
-        let studyUrl: string;
-        let examUrl: string;
+        if (!config) return [];
 
-        // Personal pages (no query params needed)
-        if (pathname === '/student/result/studyresults') {
-            studyUrl = pathname;
-            examUrl = '/student/result/examresult';
-        } else if (pathname === '/student/result/examresult') {
-            studyUrl = '/student/result/studyresults';
-            examUrl = pathname;
-        }
-        // Friend pages
-        else if (
-            pathname.startsWith('/student/result/viewstudyresult') &&
-            !pathname.includes('class')
-        ) {
-            studyUrl = pathname + search;
-            examUrl = pathname.replace('viewstudyresult', 'viewexamresult') + search;
-        } else if (
-            pathname.startsWith('/student/result/viewexamresult') &&
-            !pathname.includes('class')
-        ) {
-            studyUrl = pathname.replace('viewexamresult', 'viewstudyresult') + search;
-            examUrl = pathname + search;
-        }
-        // Class pages
-        else if (pathname.includes('viewstudyresultclass')) {
-            studyUrl = pathname + search;
-            examUrl = pathname.replace('viewstudyresultclass', 'viewexamresultclass') + search;
-        } else if (pathname.includes('viewexamresultclass')) {
-            studyUrl = pathname.replace('viewexamresultclass', 'viewstudyresultclass') + search;
-            examUrl = pathname + search;
-        } else {
-            return [];
-        }
+        const isStudy = pathname.includes(config.study);
+        const isExam = !isStudy;
+
+        const targetPath = isStudy
+            ? pathname.replace(config.study, config.exam)
+            : pathname.replace(config.exam, config.study);
+
+        const query = config.useParams ? search : '';
 
         return [
             {
                 label: 'Điểm TX',
                 icon: '📊',
-                url: studyUrl,
+                url: (isStudy ? pathname : targetPath) + query,
                 isActive: isStudy,
                 description: 'Xem kết quả học tập',
             },
             {
                 label: 'Điểm thi',
                 icon: '📋',
-                url: examUrl,
+                url: (isExam ? pathname : targetPath) + query,
                 isActive: isExam,
                 description: 'Xem kết quả thi',
             },
