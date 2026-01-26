@@ -10,6 +10,7 @@ Cảm ơn bạn đã quan tâm đến việc đóng góp cho **SV HaUI Helper**!
 - [Quy ước code](#quy-ước-code)
 - [Commit convention](#commit-convention)
 - [Pull Request](#pull-request)
+- [Quy trình CI/CD & Release](#quy-trình-cicd--release)
 
 ## 📜 Quy tắc ứng xử
 
@@ -124,6 +125,8 @@ log.e('Error'); // Errors
 
 Sử dụng [Conventional Commits](https://www.conventionalcommits.org/):
 
+> **Lưu ý:** Project có sử dụng `husky` và `commitlint` để tự động kiểm tra commit message. Nếu sai format, việc commit sẽ bị chặn.
+
 ```
 <type>(<scope>): <description>
 
@@ -185,6 +188,39 @@ refactor(core): simplify feature manager logic
   git push --force-with-lease
   ```
 - **Sync**: Đảm bảo branch của bạn luôn được cập nhật trước khi request review.
+
+## 🔄 Quy trình CI/CD & Release
+
+### CI (Continuous Integration)
+
+Mọi Pull Request và Commit vào branch `main` sẽ tự động kích hoạt workflow CI để kiểm tra:
+
+1. **Lint**: Eslint check (`pnpm lint`)
+2. **Type Check**: TypeScript check (`tsc --noEmit`)
+3. **Build**: Build thử nghiệm (`pnpm build:all`)
+
+### Automated Release
+
+Hệ thống sẽ tự động tạo Release khi có tag mới được push lên (bắt đầu bằng `v`, ví dụ `v1.0.0`).
+Action sẽ:
+
+1. Build script (`dist/svhaui-helper.user.js` và bản minify).
+2. Tạo GitHub Release mới.
+3. Upload các file built vào assets của release.
+
+### Hướng dẫn Release (Dành cho Maintainers)
+
+1. Cập nhật version trong `package.json`.
+2. Commit thay đổi: `chore(release): bump version to x.y.z`.
+3. Tạo git tag:
+   ```bash
+   git tag v2.2.0
+   ```
+4. Push tag lên GitHub:
+   ```bash
+   git push --follow-tags
+   ```
+5. Đợi GitHub Action hoàn tất quy trình release.
 
 ## ❓ Câu hỏi?
 

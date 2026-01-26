@@ -38,12 +38,17 @@ const feature = featureManager.get('feature-id');
 Base class cho tất cả features. Hỗ trợ priority, auto-logger, và lifecycle management.
 
 ```typescript
+interface MatchPattern {
+  pattern: string | RegExp;
+  name?: string; // Tên định danh (VD: "login")
+}
+
 interface FeatureConfig {
   id: string; // ID duy nhất
   name: string; // Tên hiển thị
   description: string; // Mô tả
   priority?: number; // Độ ưu tiên (cao chạy trước, mặc định 0)
-  urlMatch?: RegExp | string | MatchPattern[]; // Pattern URL
+  urlMatch?: RegExp | string | MatchPattern | MatchPattern[]; // Pattern URL
 }
 
 abstract class Feature {
@@ -51,6 +56,9 @@ abstract class Feature {
   readonly name: string;
   readonly description: string;
   readonly priority: number;
+
+  // Location wrapper (Normalized)
+  protected readonly location: WindowLocationWrapper;
 
   // Logger tự động (Lazy loaded)
   protected readonly log: Logger;
@@ -85,6 +93,7 @@ Wrapper type-safe cho `GM_getValue` / `GM_setValue` / `localStorage`.
 interface StorageSchema {
   app_settings: AppSettings;
   grades: CourseGrade[];
+  captcha_undo_telex: boolean;
 }
 
 // 2. Sử dụng (Type checked)
@@ -148,7 +157,14 @@ log.e(err); // Error
 Các tiện ích hỗ trợ thao tác DOM và xử lý dữ liệu.
 
 ```typescript
-import { waitForElement, createElementFromHTML, addStyles } from './utils';
+import {
+  waitForElement,
+  createElementFromHTML,
+  addStyles,
+  removeDiacritics,
+  normalizeCaptchaInput,
+  browserLocation,
+} from './utils';
 ```
 
 ### waitForElement
@@ -181,6 +197,33 @@ addStyles(`
 `);
 ```
 
+### Text Utils
+
+Xử lý văn bản tiếng Việt và Captcha.
+
+```typescript
+// Xóa dấu tiếng Việt
+removeDiacritics('Tiếng Việt'); // "Tieng Viet"
+
+// Chuẩn hóa input Captcha (lowercase + xóa dấu + bỏ ký tự lạ)
+normalizeCaptchaInput('ĐâylàCaptcha123'); // "daylacaptcha123"
+
+// Hoàn tác Telex cho Captcha (VD: "as" -> "á" -> undo -> "as")
+normalizeCaptchaInputUndo('tias'); // "tias" (giữ nguyên input gốc thay vì thành "tía")
+```
+
+### Window Location
+
+Wrapper giúp xử lý URL nhất quán (bỏ trailing slash, chuẩn hóa).
+
+```typescript
+// Feature có sẵn this.location hoặc dùng browserLocation
+const path = browserLocation.path; // "/dashboard" (không có / ở cuối)
+const query = browserLocation.search; // "?q=1"
+```
+
+````
+
 ---
 
 ## 📝 Types
@@ -190,4 +233,4 @@ Các định nghĩa TypeScript quan trọng.
 ```typescript
 // src/types/index.ts
 import type { StorageSchema, AppSettings, CourseGrade } from '../types';
-```
+````

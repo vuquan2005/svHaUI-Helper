@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" alt="Logo" width="80" height="80">
+  <img src="../assets/logo.png" alt="Logo" width="80" height="80">
   <h1 align="center">SV HaUI Helper</h1>
   <p align="center">
     🎓 Enhancing the experience for HaUI students
@@ -50,6 +50,7 @@ The project is built with a modular architecture, making it easy to extend and m
 | ----------------- | ------------------------------------------------------------- | -----: |
 | 🏷️ Dynamic Title  | Changes tab title based on the page context                   |     ✅ |
 | 🔐 Captcha Helper | Auto-fill captcha (lowercase, remove diacritics, auto-submit) |     ✅ |
+| 🚀 Quick Nav      | Quick switch between Study Results and Exam Results pages     |     ✅ |
 
 ## 🚀 Installation
 
@@ -86,15 +87,6 @@ Due to Google's new security policies, you **must manually grant permission** fo
    > _(This setting allows the extension to run code not reviewed by Google)_
 5. If a "Disable developer mode extensions" warning appears when restarting the browser, simply choose **Keep**.
 
-#### Alternative Browsers (No Developer Mode needed):
-
-| Browser | Support | Notes                        |
-| ------- | ------- | ---------------------------- |
-| Firefox | ✅      | Recommended - better privacy |
-| Edge    | ⚠️      | Similar to Chrome            |
-| Brave   | ⚠️      | Similar to Chrome            |
-| Opera   | ⚠️      | Similar to Chrome            |
-
 ## 🛠️ Development
 
 ### Requirements
@@ -106,7 +98,7 @@ Due to Google's new security policies, you **must manually grant permission** fo
 
 ```bash
 # Clone repository
-git clone [https://github.com/vuquan2005/svHaUI-Helper.git](https://github.com/vuquan2005/svHaUI-Helper.git)
+git clone https://github.com/vuquan2005/svHaUI-Helper.git
 cd svHaUI-Helper
 
 # Install dependencies

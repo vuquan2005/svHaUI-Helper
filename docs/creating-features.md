@@ -11,6 +11,7 @@ Mỗi feature trong dự án:
 - Được đăng ký trong `src/features/index.ts`
 - Có thể bật/tắt độc lập qua Settings
 - **Tự động có logger** với prefix từ tên feature
+- **Tự động có storage** scope theo feature ID
 
 ## 🚀 Bắt đầu nhanh
 
@@ -80,58 +81,101 @@ pnpm dev
 ### FeatureConfig
 
 ```typescript
+import { MatchPattern } from '../../core';
+
+type UrlMatchConfig = RegExp | string | MatchPattern | MatchPattern[];
+
 interface FeatureConfig {
   id: string; // ID duy nhất, dùng cho settings
   name: string; // Tên hiển thị + prefix cho logger
   description: string; // Mô tả tính năng
   priority?: number; // Độ ưu tiên (cao chạy trước, mặc định 0)
-  urlMatch?: RegExp | string | MatchPattern | MatchPattern[]; // URL pattern để chạy
+  urlMatch?: UrlMatchConfig; // URL pattern để chạy
 }
 ```
 
-### Logger tự động
+### Built-in Properties
 
-Mỗi feature đã có sẵn `this.log`:
+Mỗi feature được kế thừa các properties hữu ích:
 
 ```typescript
-class MyFeature extends Feature {
+class MyFeature extends Feature<MySettings> {
   run(): void {
-    this.log.d('Debug'); // 🔍 [HaUI:My Feature] Debug
-    this.log.i('Info'); // ℹ️ [HaUI:My Feature] Info
-    this.log.w('Warning'); // ⚠️ [HaUI:My Feature] Warning
-    this.log.e('Error'); // ❌ [HaUI:My Feature] Error
+    // 1. Logger (prefix tự động)
+    this.log.i('Info message');
+
+    // 2. Storage (persist settings)
+    const value = this.storage.get('key');
+    this.storage.set('key', 'value');
+
+    // 3. Location info
+    console.log(this.location.path); // /path/only
+    console.log(this.location.pathAndQuery); // /path?query=1
+
+    // 4. Match Result (kết quả URL matching)
+    if (this.matchResult?.matched) {
+      console.log('Matched pattern:', this.matchResult.matchName);
+    }
   }
 }
 ```
 
 ### URL Matching
 
+Hỗ trợ nhiều kiểu match linh hoạt:
+
 ```typescript
-// Match trang chủ
-urlMatch: /sv\.haui\.edu\.vn\/?$/;
+// 1. String: Match chính xác pathname (bỏ qua query param)
+urlMatch: '/sv/diem';
 
-// Match trang điểm
-urlMatch: /sv\.haui\.edu\.vn\/diem/;
+// 2. RegExp: Match trên toàn bộ path + query
+urlMatch: /\/sv\.haui\.edu\.vn\/diem.*?view=print/;
 
-// Match bằng string (contains)
-urlMatch: '/diem';
+// 3. MatchPattern Object (kèm tên để phân loại)
+urlMatch: {
+  name: 'print-view',
+  pattern: /view=print/
+};
 
-// Không set = chạy mọi trang
+// 4. Array (Nhiều pattern)
+urlMatch: [
+  { name: 'list', pattern: '/sv/khao-sat' },
+  { name: 'detail', pattern: /\/sv\/khao-sat\/.*?/ }
+];
+
+// 5. Không set = Chạy mọi trang
 ```
 
-### Lifecycle Methods
+Khi dùng Array hoặc RegExp, bạn có thể kiểm tra `this.matchResult` trong `run()` để biết pattern nào đã khớp.
+
+### Lifecycle & Feature Manager
+
+`FeatureManager` quản lý việc bật tắt feature dựa trên URL và settings:
+
+1.  **Priority**: Feature có `priority` cao hơn sẽ được xử lý trước.
+2.  **Apply Loop** (`applyFeatures`):
+    - **Phase 1 (Stop)**: Dừng các feature đang chạy nhưng không còn hợp lệ (do đổi URL hoặc bị tắt). Gọi `cleanup()`.
+    - **Phase 2 (Start)**: Khởi chạy các feature chưa chạy nhưng hợp lệ. Gọi `run()`.
 
 ```typescript
 class MyFeature extends Feature {
-  // BẮT BUỘC: Khởi tạo feature
-  run(): void | Promise<void> {}
+  // BẮT BUỘC: Chạy logic chính
+  // Có thể là async
+  async run(): Promise<void> {
+    await this.loadData();
+    this.render();
+  }
 
-  // TÙY CHỌN: Cleanup
-  cleanup(): void {}
+  // TÙY CHỌN: Dọn dẹp
+  // Gọi khi URL thay đổi không còn match hoặc user tắt feature
+  cleanup(): void {
+    document.querySelector('.my-component')?.remove();
+  }
 
-  // TÙY CHỌN: Override kiểm tra
+  // TÙY CHỌN: Logic điều kiện nâng cao
+  // Mặc định đã check URL match
   shouldRun(): boolean {
-    return super.shouldRun() && this.customCondition();
+    return super.shouldRun() && this.someCustomCondition();
   }
 }
 ```

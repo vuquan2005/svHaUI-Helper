@@ -50,6 +50,7 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 | ----------------- | ---------------------------------------------------- | ---------: |
 | 🏷️ Dynamic Title  | Thay đổi tiêu đề tab theo trang                      |         ✅ |
 | 🔐 Captcha Helper | Hỗ trợ nhập captcha (lowercase, bỏ dấu, auto-submit) |         ✅ |
+| 🚀 Quick Nav      | Điều hướng nhanh giữa trang Điểm TX và Điểm thi      |         ✅ |
 
 ## 🚀 Cài đặt
 
@@ -86,15 +87,6 @@ Do chính sách bảo mật mới của Google, bạn **bắt buộc** phải c�
    > _(Dòng này có chú thích: "Tiện ích này sẽ có thể chạy mã chưa được Google xem xét...")_
 5. Nếu thấy popup cảnh báo "Disable developer mode extensions" khi khởi động lại trình duyệt, hãy chọn **Keep (Giữ lại)**.
 
-#### Trình duyệt thay thế (không cần bật Developer Mode):
-
-| Trình duyệt | Hỗ trợ | Ghi chú                              |
-| ----------- | ------ | ------------------------------------ |
-| Firefox     | ✅     | Khuyến nghị - Quyền riêng tư tốt hơn |
-| Edge        | ⚠️     | Tương tự Chrome                      |
-| Brave       | ⚠️     | Tương tự Chrome                      |
-| Opera       | ⚠️     | Tương tự Chrome                      |
-
 ## 🛠️ Phát triển
 
 ### Yêu cầu
@@ -106,7 +98,7 @@ Do chính sách bảo mật mới của Google, bạn **bắt buộc** phải c�
 
 ```bash
 # Clone repository
-git clone [https://github.com/vuquan2005/svHaUI-Helper.git](https://github.com/vuquan2005/svHaUI-Helper.git)
+git clone https://github.com/vuquan2005/svHaUI-Helper.git
 cd svHaUI-Helper
 
 # Cài đặt dependencies
