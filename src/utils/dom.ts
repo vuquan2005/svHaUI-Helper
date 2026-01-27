@@ -2,54 +2,137 @@
  * DOM Utilities - Utility functions for working with DOM
  */
 
-import { GM_addStyle } from '$';
+/**
+ * Result of the observation operation
+ */
+type ObserveResult = {
+    /** Whether the check condition was met successfully */
+    success: boolean;
+    /**
+     * Result code:
+     * - 'OK': Check passed
+     * - 'TIMEOUT': Max time exceeded
+     * - 'NOT_FOUND': Target element not found
+     * - 'ABORT': Aborted via signal
+     * - 'ERROR': Error in callback
+     */
+    code: 'OK' | 'TIMEOUT' | 'NOT_FOUND' | 'ABORT' | 'ERROR';
+};
 
 /**
- * Wait until element appears in DOM
+ * Observes a DOM element for changes until a condition is met or timeout occurs.
+ * Useful for waiting for dynamic content changes.
+ *
+ * @param target - The element to observe or a selector string
+ * @param checkCallback - Function that checks the condition. Returns true to stop observing, false to continue.
+ * @param options - Configuration options
+ * @param options.debounceMs - Debounce time in ms for the observer callback (default: 50)
+ * @param options.timeoutMs - Maximum time to wait in ms before giving up (default: 10000). Set to 0 for no timeout.
+ * @param options.config - MutationObserver configuration (default: { childList: true, subtree: true })
+ * @param options.signal - AbortSignal to cancel the observation
+ * @returns Promise resolving to an ObserveResult object
+ *
+ * @example
+ * ```ts
+ * const result = await observeDomUntil(
+ *   '#content',
+ *   () => document.querySelector('.result') !== null,
+ *   { timeoutMs: 5000 }
+ * );
+ * if (result.success) {
+ *   console.log('Result found!');
+ * }
+ * ```
  */
-export function waitForElement<T extends Element>(
-    selector: string,
-    timeout = 10000
-): Promise<T | null> {
+export function observeDomUntil(
+    target: Element | string | null,
+    checkCallback: () => boolean | Promise<boolean>,
+    options: {
+        debounceMs?: number;
+        timeoutMs?: number;
+        config?: MutationObserverInit;
+        signal?: AbortSignal;
+    } = {}
+): Promise<ObserveResult> {
     return new Promise((resolve) => {
-        const existing = document.querySelector<T>(selector);
-        if (existing) {
-            resolve(existing);
+        const element = typeof target === 'string' ? document.querySelector(target) : target;
+
+        if (!element) {
+            resolve({ success: false, code: 'NOT_FOUND' });
             return;
         }
 
-        const observer = new MutationObserver((_, obs) => {
-            const element = document.querySelector<T>(selector);
-            if (element) {
-                obs.disconnect();
-                resolve(element);
-            }
+        const {
+            debounceMs = 50,
+            timeoutMs = 10000,
+            config = { childList: true, subtree: true },
+            signal,
+        } = options;
+
+        if (signal?.aborted) {
+            resolve({ success: false, code: 'ABORT' });
+            return;
+        }
+
+        let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+        let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
+        let observer: MutationObserver | null = null;
+        let done = false;
+
+        const finish = (result: ObserveResult) => {
+            if (done) return;
+            done = true;
+
+            if (debounceTimer) clearTimeout(debounceTimer);
+            if (timeoutTimer) clearTimeout(timeoutTimer);
+
+            observer?.disconnect();
+            observer = null;
+
+            signal?.removeEventListener('abort', onAbort);
+
+            resolve(result);
+        };
+
+        const onAbort = () => finish({ success: false, code: 'ABORT' });
+
+        signal?.addEventListener('abort', onAbort, { once: true });
+
+        Promise.resolve(checkCallback())
+            .then((ok) => {
+                if (ok) finish({ success: true, code: 'OK' });
+            })
+            .catch((err) => {
+                console.warn('observeDomUntil initial check error:', err);
+                finish({ success: false, code: 'ERROR' });
+            });
+
+        if (timeoutMs > 0) {
+            timeoutTimer = setTimeout(() => {
+                finish({ success: false, code: 'TIMEOUT' });
+            }, timeoutMs);
+        }
+
+        observer = new MutationObserver(() => {
+            if (done) return;
+
+            if (debounceTimer) clearTimeout(debounceTimer);
+
+            debounceTimer = setTimeout(async () => {
+                if (done || signal?.aborted) return;
+
+                try {
+                    const shouldStop = await checkCallback();
+                    if (shouldStop) {
+                        finish({ success: true, code: 'OK' });
+                    }
+                } catch (error) {
+                    console.warn('observeDomUntil callback error:', error);
+                    finish({ success: false, code: 'ERROR' });
+                }
+            }, debounceMs);
         });
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-        });
-
-        setTimeout(() => {
-            observer.disconnect();
-            resolve(null);
-        }, timeout);
+        observer.observe(element, config);
     });
-}
-
-/**
- * Create element from HTML string
- */
-export function createElementFromHTML<T extends Element>(html: string): T {
-    const template = document.createElement('template');
-    template.innerHTML = html.trim();
-    return template.content.firstElementChild as T;
-}
-
-/**
- * Add CSS to page
- */
-export function addStyles(css: string): void {
-    GM_addStyle(css);
 }
