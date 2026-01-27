@@ -229,3 +229,7 @@ Nếu có thắc mắc, hãy tạo issue với label `question` hoặc liên h�
 ---
 
 Cảm ơn bạn đã đóng góp! 🙏
+
+---
+
+**☕ Ủng hộ dự án:** Nếu bạn thấy script này hữu ích, hãy cân nhắc ủng hộ mình qua QR code trong [README.md](./README.md#☕-%E1%BB%A7ng-h%E1%BB%97).
