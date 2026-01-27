@@ -35,6 +35,3 @@ coverage
 
 # Tools
 .agent/
-
-# Documentation
-docs/api-reference
