@@ -7,7 +7,11 @@ import { createLogger } from './logger';
 
 const log = createLogger('FeatureManager');
 
-class FeatureManager {
+/**
+ * Feature Manager coordinates the lifecycle of all user features.
+ * It handles registration, URL matching, and safe execution/cleanup.
+ */
+export class FeatureManager {
     private features: Map<string, Feature> = new Map();
     private running: Set<string> = new Set();
     private isApplying = false;

@@ -15,9 +15,13 @@
   "entryFileName": "index",
   "mergeReadme": true,
   "useCodeBlocks": true,
-  "expandObjects": true,
+  "expandObjects": false,
   "parametersFormat": "table",
   "propertiesFormat": "table",
   "enumMembersFormat": "table",
-  "typeDeclarationFormat": "table"
+  "typeDeclarationFormat": "table",
+  "disableSources": true,
+  "hideBreadcrumbs": true,
+  "hidePageTitle": false,
+  "hideGroupHeadings": true
 }

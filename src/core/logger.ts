@@ -16,8 +16,13 @@ const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
     none: 4,
 };
 
-interface LoggerOptions {
+/**
+ * Configuration options for creating a new Logger instance.
+ */
+export interface LoggerOptions {
+    /** Prefix to display before log messages (e.g. [Storage]) */
     prefix?: string;
+    /** Minimum log level to display for this specific logger instance. If not set, uses global level. */
     minLevel?: LogLevel;
 }
 

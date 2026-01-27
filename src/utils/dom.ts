@@ -5,7 +5,7 @@
 /**
  * Result of the observation operation
  */
-type ObserveResult = {
+export type ObserveResult = {
     /** Whether the check condition was met successfully */
     success: boolean;
     /**
