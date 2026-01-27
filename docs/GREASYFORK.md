@@ -41,7 +41,7 @@ Do chính sách bảo mật mới của Google, bạn **bắt buộc** phải c�
 
 ## ☕ Ủng hộ
 
-Nếu dự án này giúp ích cho bạn, hãy cân nhắc ủng hộ tôi để duy trì và phát triển thêm nhiều tính năng mới. Cảm ơn bạn rất nhiều! ❤️
+Nếu bạn thấy dự án hữu ích, hãy cân nhắc ủng hộ tác giả.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/vuquan2005/svHaUI-Helper/main/assets/donation-qr.png" alt="Donation QR" width="300">

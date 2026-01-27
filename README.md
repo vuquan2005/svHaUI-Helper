@@ -110,9 +110,8 @@ pnpm dev
 
 ## ☕ Ủng hộ
 
-Nếu dự án này giúp ích cho bạn, hãy cân nhắc ủng hộ tôi để duy trì và phát triển thêm nhiều tính năng mới. Cảm ơn bạn rất nhiều! ❤️
+Nếu bạn thấy dự án hữu ích, hãy cân nhắc ủng hộ tác giả.
 
 <p align="center">
   <img src="assets/donation-qr.png" alt="Donation QR" width="300">
 </p>
-```
