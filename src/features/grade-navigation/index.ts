@@ -1,5 +1,5 @@
 /**
- * Quick Navigation Feature
+ * Grade Navigation Feature
  * Adds navigation links to switch between study results and exam results pages
  */
 
@@ -44,13 +44,13 @@ const URL_PATTERNS = [
 // Feature Implementation
 // ============================================
 
-export class QuickNavFeature extends Feature {
+export class GradeNavigationFeature extends Feature {
     private navElement: HTMLSpanElement | null = null;
 
     constructor() {
         super({
-            id: 'quick-nav',
-            name: 'Quick Nav',
+            id: 'grade-navigation',
+            name: 'Grade Navigation',
             description: 'Điều hướng nhanh giữa trang Điểm TX và Điểm thi',
             urlMatch: URL_PATTERNS,
         });
