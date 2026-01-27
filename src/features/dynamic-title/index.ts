@@ -4,6 +4,7 @@
  */
 
 import { Feature } from '@/core';
+import { observeDomUntil } from '@/utils/dom';
 import { URL_TITLE_MAP } from './url-title-map';
 
 // ============================================
@@ -145,8 +146,7 @@ const DYNAMIC_URL_PATTERNS: DynamicTitleConfig[] = [
 
 export class DynamicTitleFeature extends Feature {
     private originalTitle: string = '';
-    private observer: MutationObserver | null = null;
-    private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    private abortController: AbortController | null = null;
 
     constructor() {
         super({
@@ -161,16 +161,20 @@ export class DynamicTitleFeature extends Feature {
      * Update title and start observing DOM changes
      */
     run(): void {
-        // Save original title
         this.originalTitle = document.title;
 
-        // Update title for the first time
-        const found = this.updateTitle();
+        this.abortController = new AbortController();
 
-        // Only observe if title not found yet (need to wait for DOM load)
-        if (!found) {
-            this.observeContentChanges();
-        }
+        observeDomUntil('.be-content', () => this.updateTitle(), {
+            debounceMs: TITLE_UPDATE_DEBOUNCE_MS,
+            signal: this.abortController.signal,
+        }).then((result) => {
+            if (result.success) {
+                this.log.d('Title found, stopping observer');
+            } else if (result.code !== 'ABORT') {
+                this.log.d(`Observer stopped with code: ${result.code}`);
+            }
+        });
     }
 
     /**
@@ -221,37 +225,6 @@ export class DynamicTitleFeature extends Feature {
         }
     }
 
-    private observeContentChanges(): void {
-        // Observe .be-content for dynamic content changes
-        const content = document.querySelector('.be-content');
-        if (!content) return;
-
-        this.observer = new MutationObserver(() => {
-            // Clear old timeout for proper debounce
-            if (this.debounceTimer) {
-                clearTimeout(this.debounceTimer);
-            }
-
-            this.debounceTimer = setTimeout(() => {
-                this.debounceTimer = null;
-                const found = this.updateTitle();
-                // Stop observer when title is found
-                if (found) {
-                    this.log.d('Title found, stopping observer');
-                    this.observer?.disconnect();
-                    this.observer = null;
-                }
-            }, TITLE_UPDATE_DEBOUNCE_MS);
-        });
-
-        this.observer.observe(content, {
-            childList: true,
-            subtree: true,
-        });
-
-        this.log.d('Started observing for dynamic content');
-    }
-
     /**
      * Cleanup resources when feature is disabled
      * Restore original title and stop observer
@@ -260,14 +233,10 @@ export class DynamicTitleFeature extends Feature {
         // Restore original title
         document.title = this.originalTitle;
 
-        // Stop debounce timer if running
-        if (this.debounceTimer) {
-            clearTimeout(this.debounceTimer);
-            this.debounceTimer = null;
+        // Abort any running observation
+        if (this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
         }
-
-        // Stop observer
-        this.observer?.disconnect();
-        this.observer = null;
     }
 }
