@@ -7,10 +7,12 @@ import { Feature } from '@/core';
 import { DynamicTitleFeature } from './dynamic-title';
 import { CaptchaHelperFeature } from './captcha-helper';
 import { GradeNavigationFeature } from './grade-navigation';
+import { SurveyAutofillFeature } from './survey-autofill';
 
 // Add new features here
 export const allFeatures: Feature<any>[] = [
     new DynamicTitleFeature(),
     new CaptchaHelperFeature(),
     new GradeNavigationFeature(),
+    new SurveyAutofillFeature(),
 ];

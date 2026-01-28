@@ -2,6 +2,16 @@
 
 Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại tại đây.
 
+## [2.3.0] - 2026-01-29
+
+### Added
+
+- **Quick Evaluation (Survey Autofill)**:
+  - Hỗ trợ đánh giá nhanh trên trang khảo sát (`/survey/view`)
+  - Click vào tiêu đề cột (1-5) để chọn tất cả mục tương ứng
+  - Tự động nhận diện bảng khảo sát trong modal
+  - Giao diện trực quan với hover effect
+
 ## [2.2.0] - 2026-01-26
 
 ### Added
