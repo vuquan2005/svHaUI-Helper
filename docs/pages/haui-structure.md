@@ -16,8 +16,8 @@
 
 - **CSS:**
   - `perfect-scrollbar`
-  - `material-design-icons`
-  - `font-awesome` (v4.7.0)
+  - `material-design-iconic-font` (`.mdi`)
+  - `font-awesome` (`.fa`) (v4.7.0)
   - `flaticon`
   - `bootstrap-datetimepicker`
   - `select2`
