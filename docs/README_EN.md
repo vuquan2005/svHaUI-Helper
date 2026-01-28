@@ -51,6 +51,7 @@ The project is built with a modular architecture, making it easy to extend and m
 | 🏷️ Dynamic Title  | Changes tab title based on the page context                   |     ✅ |
 | 🔐 Captcha Helper | Auto-fill captcha (lowercase, remove diacritics, auto-submit) |     ✅ |
 | 🚀 Quick Nav      | Quick switch between Study Results and Exam Results pages     |     ✅ |
+| 📝 Survey Auto    | Quick evaluation (select 1-5 score for all questions)         |     ✅ |
 
 ## 🚀 Installation
 
