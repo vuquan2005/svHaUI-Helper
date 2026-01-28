@@ -210,17 +210,23 @@ Action sẽ:
 
 ### Hướng dẫn Release (Dành cho Maintainers)
 
-1. Cập nhật version trong `package.json`.
-2. Commit thay đổi: `chore(release): bump version to x.y.z`.
-3. Tạo git tag:
+1. Cập nhật version trong `package.json` (nếu chưa cập nhật).
+2. Commit thay đổi (nếu có): `chore(release): bump version to x.y.z`.
+3. Tạo git tag (lưu ý thay `vX.Y.Z` bằng version thực tế):
    ```bash
-   git tag v2.2.0
+   git tag vX.Y.Z
    ```
-4. Push tag lên GitHub:
+4. **Quan trọng**: Push tag lên GitHub để kích hoạt Release Workflow:
+
    ```bash
-   git push --follow-tags
+   # Cách 1: Push tất cả (bao gồm tag)
+   git push origin main --tags
+
+   # Cách 2: Push chỉ định tag vừa tạo
+   git push origin vX.Y.Z
    ```
-5. Đợi GitHub Action hoàn tất quy trình release.
+
+5. Kiểm tra tab [Actions](https://github.com/vuquan2005/svHaUI-Helper/actions) để đảm bảo workflow chạy thành công và Release được tạo.
 
 ## ❓ Câu hỏi?
 
