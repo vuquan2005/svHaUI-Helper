@@ -97,7 +97,13 @@ export class CaptchaHelperFeature extends Feature<StorageSchema> {
      */
     async run(): Promise<void> {
         // Load settings
-        this.isUndoTelex = await this.storage.get('undoTelex', false);
+        this.isUndoTelex = await this.storage.get('undoTelex');
+        if (this.isUndoTelex === undefined) {
+            this.isUndoTelex = false;
+            await this.storage.set('undoTelex', false);
+            this.log.d('Settings initialized:', { isUndoTelex: this.isUndoTelex });
+        } else this.log.d('Settings loaded:', { isUndoTelex: this.isUndoTelex });
+
         this.undoTelexListenerId = await this.storage.onValueChange(
             'undoTelex',
             (_key, _old, newVal) => {

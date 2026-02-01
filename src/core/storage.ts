@@ -426,11 +426,8 @@ export class ScopedStorage<T extends Record<string, any>> {
      * @param key - The key to check
      */
     async has<K extends keyof T>(key: K & string): Promise<boolean> {
-        const sentinel =
-            'aHR0cHM6Ly9pbWcudmlldHFyLmlvL2ltYWdlL1RQQi0wNzYwMjk4NzAwMC1xcl9vbmx5LnBuZz9hZGRJbmZvPUVhc3RlciUyMEVnZw==';
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const value = await StorageAPI.getValue<any>(this.getFullKey(key), sentinel);
-        return value !== sentinel;
+        const value = await StorageAPI.getValue(this.getFullKey(key));
+        return value !== undefined;
     }
 
     /**
