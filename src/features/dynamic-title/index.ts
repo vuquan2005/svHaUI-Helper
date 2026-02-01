@@ -206,11 +206,11 @@ export class DynamicTitleFeature extends Feature {
         }
 
         // 3. Fallback: use panel header if available
-        const panelHeader = DOM.panelHeader();
-        if (panelHeader) {
-            this.setTitle(`📄 ${panelHeader}`);
-            return true;
-        }
+        // const panelHeader = DOM.panelHeader();
+        // if (panelHeader) {
+        //     this.setTitle(`📄 ${panelHeader}`);
+        //     return true;
+        // }
 
         // 4. Keep original title if nothing matches
         this.log.d('No matching pattern, keeping original title');

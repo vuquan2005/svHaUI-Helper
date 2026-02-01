@@ -11,6 +11,7 @@ export const URL_TITLE_MAP: Record<string, string> = {
 
     // Thông tin cá nhân
     '/student/userdetail/userdetail': '👤 Thông tin SV',
+    '/student/userdetail/updateuser': '👤 Thông tin SV',
     '/student/userdetail/updateuserprofile': '📝 Cập nhật hồ sơ',
     '/student/userdetail/usercerupdate': '🎓 TT in bằng',
     '/member/changepass': '🔐 Đổi mật khẩu',
@@ -77,6 +78,7 @@ export const URL_TITLE_MAP: Record<string, string> = {
     '/sso/qpan': '🛡️ GD QP&AN',
     '/sso/dlearning': '🌐 Đào tạo từ xa',
     '/survey': '📝 Khảo sát',
+    '/survey/view': '📝 Làm khảo sát',
     '/student/evaluation/listsemester': '⭐ ĐG rèn luyện',
     '/sso/btl': '📄 KT luận văn',
     '/STSV2023/index.html': '📘 Sổ tay SV',
