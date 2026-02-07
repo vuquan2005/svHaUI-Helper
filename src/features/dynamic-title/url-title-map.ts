@@ -2,6 +2,9 @@ export const URL_TITLE_MAP: Record<string, string> = {
     // Trang chủ
     '/': '🏠 Trang chủ',
 
+    // Đăng nhập
+    '/sso': '🛡️ Xác thực captcha',
+
     // Tài chính
     '/student/recharge/cashinqr': '💳 Nạp tiền QR',
     '/student/recharge/cashin': '💳 Nạp tiền TK',

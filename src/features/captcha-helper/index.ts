@@ -194,7 +194,7 @@ export class CaptchaHelperFeature extends Feature<StorageSchema> {
      * Handle keydown event: submit on Enter
      */
     private onKeyDown(e: KeyboardEvent): void {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Tab') {
             e.preventDefault();
             this.normalizeInput();
             this.submit();
