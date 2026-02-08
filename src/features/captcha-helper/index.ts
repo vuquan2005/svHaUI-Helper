@@ -3,83 +3,27 @@
  * Assists with captcha input: normalize input, auto-submit on blur/Enter
  */
 
-import { Feature, type MatchPattern, type StorageListenerId } from '@/core';
-import { normalizeCaptchaInput, normalizeCaptchaInputUndo } from '@/utils';
-
-// ============================================
-// Constants
-// ============================================
-
-/** Debounce delay before normalizing input (ms) */
-const DEBOUNCE_DELAY_MS = 30;
-
-/** Required captcha length */
-const CAPTCHA_LENGTH = 5;
-
-// ============================================
-// Types & Interfaces
-// ============================================
-
-/**
- * Interface for captcha handler - easily extensible for other pages
- */
-interface CaptchaPageHandler {
-    /** Selector for input field */
-    inputSelector: string;
-    /** Selector for submit button */
-    submitSelector: string;
-    /** Optional: selector for captcha image (for future auto-solve) */
-    imageSelector?: string;
-}
-
-// ============================================
-// Page Handlers (keyed by match pattern name)
-// ============================================
-
-/** URL patterns for matching */
-const URL_PATTERNS: MatchPattern[] = [
-    { name: 'sso-login', pattern: '/sso' },
-    { name: 'register', pattern: '/register' },
-];
-
-/** Handler config for each pattern (keyed by pattern name) */
-const HANDLERS: Record<string, CaptchaPageHandler> = {
-    'sso-login': {
-        inputSelector: '[id^="ctl"][id$="_txtimgcode"]',
-        submitSelector: '[id^="ctl"][id$="_butLogin"]',
-        imageSelector: '[id^="ctl"][id$="_Image1"]',
-    },
-    register: {
-        inputSelector: '[id^="ctl"][id$="_txtimgcode"]',
-        submitSelector: '[id^="ctl"][id$="_btnSubmit"]',
-        imageSelector: '[id^="ctl"][id$="_Image1"]',
-    },
-};
-
-/** Storage schema */
-type StorageSchema = {
-    undoTelex: boolean;
-};
+import { Feature, type StorageListenerId } from '@/core';
+import { URL_PATTERNS, PAGE_HANDLERS } from './config';
+import type { CaptchaPageHandler, CaptchaStorageSchema } from './types';
+import { CaptchaInputHandler } from './input-handler';
+import { CaptchaProcessor } from './captcha-processor';
 
 // ============================================
 // CaptchaHelper Feature
 // ============================================
 
-export class CaptchaHelperFeature extends Feature<StorageSchema> {
+export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
     private inputEl: HTMLInputElement | null = null;
     private submitEl: HTMLElement | null = null;
+    private imgEl: HTMLImageElement | null = null;
+
     private currentHandler: CaptchaPageHandler | null = null;
+    private inputHandler: CaptchaInputHandler | null = null;
+    private captchaProcessor: CaptchaProcessor | null = null;
 
-    private isUndoTelex: StorageSchema['undoTelex'] | undefined;
+    private isUndoTelex = false;
     private undoTelexListenerId: StorageListenerId | null = null;
-
-    // Debounce timer for input normalization
-    private normalizeTimer: ReturnType<typeof setTimeout> | null = null;
-
-    // Event listener references for cleanup
-    private handleInput = this.onInput.bind(this);
-    private handleKeyDown = this.onKeyDown.bind(this);
-    private handleBlur = this.onBlur.bind(this);
 
     constructor() {
         super({
@@ -96,13 +40,28 @@ export class CaptchaHelperFeature extends Feature<StorageSchema> {
      * Find and attach event listeners to captcha input field
      */
     async run(): Promise<void> {
-        // Load settings
-        this.isUndoTelex = await this.storage.get('undoTelex');
+        await this.loadSettings();
+
+        if (!this.setupHandler()) return;
+        if (!this.findElements()) return;
+
+        this.setupInputHandler();
+        this.setupCaptchaProcessor();
+    }
+
+    /**
+     * Load and watch settings from storage
+     */
+    private async loadSettings(): Promise<void> {
+        this.isUndoTelex = (await this.storage.get('undoTelex')) ?? false;
+
         if (this.isUndoTelex === undefined) {
             this.isUndoTelex = false;
             await this.storage.set('undoTelex', false);
             this.log.d('Settings initialized:', { isUndoTelex: this.isUndoTelex });
-        } else this.log.d('Settings loaded:', { isUndoTelex: this.isUndoTelex });
+        } else {
+            this.log.d('Settings loaded:', { isUndoTelex: this.isUndoTelex });
+        }
 
         this.undoTelexListenerId = await this.storage.onValueChange(
             'undoTelex',
@@ -111,128 +70,101 @@ export class CaptchaHelperFeature extends Feature<StorageSchema> {
                 this.log.d('Settings updated:', { isUndoTelex: this.isUndoTelex });
             }
         );
+    }
 
-        // Lấy handler dựa vào pattern đã match
+    /**
+     * Setup handler based on matched URL pattern
+     */
+    private setupHandler(): boolean {
         const matchName = this.matchResult?.matchName;
         if (!matchName) {
             this.log.w('No match result available');
-            return;
+            return false;
         }
 
-        this.currentHandler = HANDLERS[matchName];
+        this.currentHandler = PAGE_HANDLERS[matchName];
         if (!this.currentHandler) {
             this.log.w('No handler found for:', matchName);
-            return;
+            return false;
         }
 
         this.log.d(`Matched pattern: "${matchName}" at ${this.location.path}`);
+        return true;
+    }
 
-        // Find elements
+    /**
+     * Find required DOM elements
+     */
+    private findElements(): boolean {
+        if (!this.currentHandler) return false;
+
+        // Find input element
         this.inputEl = document.querySelector<HTMLInputElement>(this.currentHandler.inputSelector);
-        this.submitEl = document.querySelector<HTMLElement>(this.currentHandler.submitSelector);
-
         if (!this.inputEl) {
             this.log.w('Captcha input not found:', this.currentHandler.inputSelector);
-            return;
-        } else this.log.d('Captcha input found:', this.inputEl.getAttribute('id'));
+            return false;
+        }
+        this.log.d('Captcha input found:', this.inputEl.getAttribute('id'));
 
+        // Find submit button
+        this.submitEl = document.querySelector<HTMLElement>(this.currentHandler.submitSelector);
         if (!this.submitEl) {
             this.log.w('Submit button not found:', this.currentHandler.submitSelector);
-            return;
-        } else this.log.d('Submit button found:', this.submitEl.getAttribute('id'));
+            return false;
+        }
+        this.log.d('Submit button found:', this.submitEl.getAttribute('id'));
 
-        // Attach event listeners to input field
-        this.inputEl.addEventListener('input', this.handleInput);
-        this.inputEl.addEventListener('keydown', this.handleKeyDown);
-        this.inputEl.addEventListener('blur', this.handleBlur);
+        // Find captcha image (optional)
+        if (this.currentHandler.imageSelector) {
+            this.imgEl = document.querySelector<HTMLImageElement>(
+                this.currentHandler.imageSelector
+            );
+            if (this.imgEl) {
+                this.log.d('Captcha image found:', this.imgEl.getAttribute('id'));
+            }
+        }
 
-        // Focus input so user can type immediately
-        this.inputEl.focus();
+        return true;
     }
 
     /**
-     * Handle input event: debounce normalize
+     * Setup input handler for captcha input
      */
-    private onInput(): void {
-        // Clear existing timer
-        if (this.normalizeTimer) {
-            clearTimeout(this.normalizeTimer);
-        }
+    private setupInputHandler(): void {
+        if (!this.inputEl || !this.submitEl) return;
 
-        // Set new timer - normalize after DEBOUNCE_DELAY_MS
-        this.normalizeTimer = setTimeout(() => {
-            this.normalizeInput();
-        }, DEBOUNCE_DELAY_MS);
+        this.inputHandler = new CaptchaInputHandler({
+            inputEl: this.inputEl,
+            submitEl: this.submitEl,
+            getUndoTelex: () => this.isUndoTelex,
+            log: {
+                d: (...args) => this.log.d(...args),
+                i: (...args) => this.log.i(...args),
+            },
+        });
+
+        this.inputHandler.attach();
     }
 
     /**
-     * Normalize input value
+     * Setup captcha image processor
      */
-    private normalizeInput(): void {
-        if (!this.inputEl) return;
+    private setupCaptchaProcessor(): void {
+        if (!this.imgEl) return;
 
-        // Clear timer if exists
-        if (this.normalizeTimer) {
-            clearTimeout(this.normalizeTimer);
-            this.normalizeTimer = null;
-        }
+        this.captchaProcessor = new CaptchaProcessor({
+            imgEl: this.imgEl,
+            log: {
+                d: (...args) => this.log.d(...args),
+                e: (...args) => this.log.e(...args),
+            },
+        });
 
-        const original = this.inputEl.value;
-        const normalized = this.isUndoTelex
-            ? normalizeCaptchaInputUndo(original)
-            : normalizeCaptchaInput(original);
-
-        if (original !== normalized) {
-            this.inputEl.value = normalized;
-            // Set cursor to end
-            this.inputEl.setSelectionRange(normalized.length, normalized.length);
-            this.log.d(`Normalized: "${original}" → "${normalized}"`);
-        }
-    }
-
-    /**
-     * Handle keydown event: submit on Enter
-     */
-    private onKeyDown(e: KeyboardEvent): void {
-        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Tab') {
-            e.preventDefault();
-            this.normalizeInput();
-            this.submit();
-        }
-    }
-
-    /**
-     * Handle blur event: normalize and submit when losing focus
-     */
-    private onBlur(): void {
-        this.normalizeInput();
-
-        // Only submit if input has value
-        if (this.inputEl?.value.trim()) {
-            this.submit();
-        }
-    }
-
-    /**
-     * Submit form
-     */
-    private submit(): void {
-        const value = this.inputEl?.value.trim() || '';
-
-        if (value.length < CAPTCHA_LENGTH) {
-            this.log.d(`Need ${CAPTCHA_LENGTH} chars, got ${value.length}`);
-            return;
-        }
-
-        if (this.submitEl) {
-            this.log.i('Submitting...');
-            this.submitEl.click();
-        }
+        this.captchaProcessor.setup();
     }
 
     /**
      * Cleanup resources when feature is disabled
-     * Remove event listeners and clear timers
      */
     cleanup(): void {
         // Remove storage listener
@@ -241,21 +173,22 @@ export class CaptchaHelperFeature extends Feature<StorageSchema> {
             this.undoTelexListenerId = null;
         }
 
-        // Clear timer
-        if (this.normalizeTimer) {
-            clearTimeout(this.normalizeTimer);
-            this.normalizeTimer = null;
+        // Cleanup input handler
+        if (this.inputHandler) {
+            this.inputHandler.detach();
+            this.inputHandler = null;
         }
 
-        // Cleanup event listeners
-        if (this.inputEl) {
-            this.inputEl.removeEventListener('input', this.handleInput);
-            this.inputEl.removeEventListener('keydown', this.handleKeyDown);
-            this.inputEl.removeEventListener('blur', this.handleBlur);
+        // Cleanup captcha processor
+        if (this.captchaProcessor) {
+            this.captchaProcessor.cleanup();
+            this.captchaProcessor = null;
         }
 
+        // Clear references
         this.inputEl = null;
         this.submitEl = null;
+        this.imgEl = null;
         this.currentHandler = null;
     }
 }

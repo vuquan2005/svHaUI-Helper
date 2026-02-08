@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import monkey from 'vite-plugin-monkey';
+import monkey, { cdn } from 'vite-plugin-monkey';
 import path from 'path';
 import { version } from './package.json';
 
@@ -45,6 +45,12 @@ export default defineConfig({
             build: {
                 autoGrant: true,
                 fileName: isMinify ? 'svhaui-helper.min.user.js' : 'svhaui-helper.user.js',
+                externalGlobals: {
+                    '@techstark/opencv-js': cdn.jsdelivr('cv', 'dist/opencv.min.js'),
+                },
+            },
+            server: {
+                mountGmApi: true,
             },
         }),
     ],
