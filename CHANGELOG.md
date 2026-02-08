@@ -2,6 +2,17 @@
 
 Tất cả thay đổi đáng chú ý của dự án sẽ được ghi lại tại đây.
 
+## [2.4.0] - 2026-02-09
+
+### Added
+
+- **Captcha Helper**:
+  - Integrate OpenCV and Tesseract.js for automatic CAPTCHA solving
+  - Allow submitting captcha with Space or Tab keys
+  - Auto-select captcha input field
+- **Dynamic Title**:
+  - Support title mapping for `/sso` and survey view pages (`/survey/view`)
+
 ## [2.3.0] - 2026-01-29
 
 ### Added
