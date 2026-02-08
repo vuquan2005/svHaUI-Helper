@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:minify": "tsc && cross-env MINIFY=true vite build",
+    "build:dev": "tsc && cross-env DEV_CHANNEL=true vite build",
     "build:all": "rimraf dist && pnpm build && pnpm build:minify",
     "preview": "vite preview",
     "lint": "eslint src",
