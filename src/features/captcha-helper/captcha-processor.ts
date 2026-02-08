@@ -1,15 +1,18 @@
 /**
  * Captcha Image Processor
- * Manages captcha image processing with OpenCV
+ * Manages captcha image processing with OpenCV and OCR recognition
  */
 
 import cv from '@techstark/opencv-js';
 import { CaptchaPreprocessor } from './captcha-pre-processor';
+import { OcrRecognizer } from './ocr-recognizer';
 import { waitForOpenCV } from './opencv-loader';
 
 export interface CaptchaProcessorOptions {
     /** The captcha image element */
     imgEl: HTMLImageElement;
+    /** Callback when text is recognized from captcha */
+    onTextRecognized?: (text: string) => void;
     /** Logger for debug/error messages */
     log: {
         d: (...args: unknown[]) => void;
@@ -18,12 +21,14 @@ export interface CaptchaProcessorOptions {
 }
 
 /**
- * Handles captcha image processing and display
+ * Handles captcha image processing and OCR recognition
  */
 export class CaptchaProcessor {
     private imgEl: HTMLImageElement;
     private canvasEl: HTMLCanvasElement | null = null;
     private log: CaptchaProcessorOptions['log'];
+    private onTextRecognized?: CaptchaProcessorOptions['onTextRecognized'];
+    private ocrRecognizer: OcrRecognizer;
 
     // Bound handler for proper cleanup
     private handleImgLoad = this.onImgLoad.bind(this);
@@ -31,6 +36,8 @@ export class CaptchaProcessor {
     constructor(options: CaptchaProcessorOptions) {
         this.imgEl = options.imgEl;
         this.log = options.log;
+        this.onTextRecognized = options.onTextRecognized;
+        this.ocrRecognizer = new OcrRecognizer({ log: this.log });
     }
 
     /**
@@ -58,13 +65,15 @@ export class CaptchaProcessor {
     /**
      * Cleanup: remove canvas and event listeners
      */
-    cleanup(): void {
+    async cleanup(): Promise<void> {
         this.imgEl.removeEventListener('load', this.handleImgLoad);
 
         if (this.canvasEl) {
             this.canvasEl.remove();
             this.canvasEl = null;
         }
+
+        await this.ocrRecognizer.terminate();
     }
 
     /**
@@ -75,7 +84,7 @@ export class CaptchaProcessor {
     }
 
     /**
-     * Process the captcha image
+     * Process the captcha image and perform OCR
      */
     private async process(): Promise<void> {
         if (!this.canvasEl) return;
@@ -83,6 +92,7 @@ export class CaptchaProcessor {
         try {
             await waitForOpenCV();
 
+            // Step 1: Preprocess image with OpenCV
             const preprocessor = new CaptchaPreprocessor();
             const src = cv.imread(this.imgEl);
             const dst = preprocessor.process(src);
@@ -96,6 +106,14 @@ export class CaptchaProcessor {
             src.delete();
             dst.delete();
             this.log.d('Captcha image processed');
+
+            // Step 2: Perform OCR on the processed image
+            if (this.onTextRecognized) {
+                const text = await this.ocrRecognizer.recognize(this.canvasEl);
+                if (text) {
+                    this.onTextRecognized(text);
+                }
+            }
         } catch (error) {
             this.log.e('Error processing captcha:', error);
         }

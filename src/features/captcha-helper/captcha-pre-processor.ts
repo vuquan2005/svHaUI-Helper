@@ -46,16 +46,22 @@ export class CaptchaPreprocessor {
         kernelDilate.delete();
 
         // --- STEP[7]: Lấy dữ liệu từ kênh S dựa trên Mask ---
-        const result = cv.Mat.zeros(originalSrc.rows, originalSrc.cols, cv.CV_8UC1);
+        const maskedS = cv.Mat.zeros(originalSrc.rows, originalSrc.cols, cv.CV_8UC1);
         // Cắt dữ liệu từ kênh S (steps[2]) dựa trên vùng trắng của bước 6
-        steps[2].copyTo(result, dilated);
+        steps[2].copyTo(maskedS, dilated);
+        steps[7] = maskedS;
+
+        // --- STEP[8]: Threshold ---
+        const finalResult = new cv.Mat();
+        cv.threshold(maskedS, finalResult, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
+        steps[8] = finalResult;
 
         // Giải phóng bộ nhớ các bước trung gian
         steps.forEach((mat, index) => {
-            if (mat && index !== 7) mat.delete();
+            if (mat && index !== 8) mat.delete();
         });
 
-        return result;
+        return finalResult;
     }
 
     private filterContours(src: cv.Mat): cv.Mat {

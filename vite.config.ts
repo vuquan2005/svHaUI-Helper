@@ -47,6 +47,7 @@ export default defineConfig({
                 fileName: isMinify ? 'svhaui-helper.min.user.js' : 'svhaui-helper.user.js',
                 externalGlobals: {
                     '@techstark/opencv-js': cdn.jsdelivr('cv', 'dist/opencv.min.js'),
+                    'tesseract.js': cdn.jsdelivr('Tesseract', 'dist/tesseract.min.js'),
                 },
             },
             server: {

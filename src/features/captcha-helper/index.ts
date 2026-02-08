@@ -137,10 +137,7 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
             inputEl: this.inputEl,
             submitEl: this.submitEl,
             getUndoTelex: () => this.isUndoTelex,
-            log: {
-                d: (...args) => this.log.d(...args),
-                i: (...args) => this.log.i(...args),
-            },
+            log: this.log,
         });
 
         this.inputHandler.attach();
@@ -154,10 +151,16 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
 
         this.captchaProcessor = new CaptchaProcessor({
             imgEl: this.imgEl,
-            log: {
-                d: (...args) => this.log.d(...args),
-                e: (...args) => this.log.e(...args),
+            onTextRecognized: (text) => {
+                if (this.inputEl) {
+                    // Normalize: lowercase, keep only alphanumeric
+                    const normalized = text.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    this.inputEl.value = normalized;
+                    this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                    this.log.i('Captcha auto-filled:', normalized);
+                }
             },
+            log: this.log,
         });
 
         this.captchaProcessor.setup();
@@ -166,7 +169,7 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
     /**
      * Cleanup resources when feature is disabled
      */
-    cleanup(): void {
+    async cleanup(): Promise<void> {
         // Remove storage listener
         if (this.undoTelexListenerId !== null) {
             this.storage.removeValueChangeListener(this.undoTelexListenerId);
@@ -181,7 +184,7 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
 
         // Cleanup captcha processor
         if (this.captchaProcessor) {
-            this.captchaProcessor.cleanup();
+            await this.captchaProcessor.cleanup();
             this.captchaProcessor = null;
         }
 
