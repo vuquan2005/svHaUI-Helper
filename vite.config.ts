@@ -12,7 +12,7 @@ const MINIFIED_SCRIPT_NAME = 'svhaui-helper.min.user.js';
 
 // Dev channel uses raw file from main branch (always latest prerelease)
 const DEV_SCRIPT_NAME = 'svhaui-helper.dev.user.js';
-const DEV_UPDATE_URL = `https://raw.githubusercontent.com/vuquan2005/svHaUI-Helper/main/dist/${DEV_SCRIPT_NAME}`;
+const DEV_UPDATE_URL = `https://github.com/vuquan2005/svHaUI-Helper/releases/download/dev/${DEV_SCRIPT_NAME}`;
 
 const buildTime: string = new Date()
     .toLocaleString('sv-SE', { hour12: false })
