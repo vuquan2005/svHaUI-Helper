@@ -69,8 +69,14 @@ GV: Tên Giảng Viên (098x.xxx.xxx - Tên Khoa)
     ```
 
 2.  **Tách thông tin giảng viên:**
+
     ```regex
     /GV:\s*(?<lecturer>.+?)\s*\((?:(?<sdt>[\d\s.]+)\s*-\s*)?(?<khoa>[^)]+)\)/
+    ```
+
+3.  **Tách địa điểm (Zoom/Phòng học):**
+    ```regex
+    /^\s*\((?<location>[^)]+)\)\s*$/m
     ```
 
 **Kết quả sau khi tách:**
@@ -83,6 +89,33 @@ GV: Tên Giảng Viên (098x.xxx.xxx - Tên Khoa)
 | `lecturer` | `Tên Giảng Viên` | Tên giảng viên        |
 | `sdt`      | `098x.xxx.xxx`   | SĐT (Có thể không có) |
 | `khoa`     | `Tên Khoa`       | Khoa quản lý          |
+| `location` | `Phòng 209...`   | Địa điểm học/thi      |
+
+### Xử lý đa môn học & Lưu ý
+
+Để đảm bảo chính xác khi một buổi có nhiều môn học (nhiều dòng dữ liệu), quy trình xử lý chuẩn như sau:
+
+1.  **Lấy dữ liệu:** Sử dụng thuộc tính `innerText` để lấy nội dung văn bản. Thuộc tính này tự động chuyển đổi các thẻ `<br>` thành ký tự xuống dòng `\n`, giúp bảo toàn cấu trúc dòng cho Regex.
+2.  **Tách khối (Block):** Cắt văn bản thành từng khối môn học riêng biệt dựa trên số thứ tự đầu dòng.
+    ```javascript
+    // Tách thành mảng các block, mỗi block chứa thông tin 1 môn
+    const blocks = rawText.split(/(?=^\d+\.)/gm).filter(Boolean);
+    ```
+3.  **Phân tích:** Duyệt qua từng block và áp dụng Regex để lấy thông tin.
+
+**Ví dụ:**
+
+```javascript
+blocks.forEach((block) => {
+  const info = block.match(regexInfo); // Lấy thông tin môn
+  const gv = block.match(regexGV); // Lấy thông tin GV
+  const location = block.match(regexLocation); // Lấy thông tin địa điểm
+
+  if (info) {
+    console.log(info.groups.course, gv?.groups?.lecturer, location?.groups?.location);
+  }
+});
+```
 
 ### Footer
 
