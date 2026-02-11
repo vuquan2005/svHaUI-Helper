@@ -5,16 +5,18 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
-
+    
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [22.x]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -29,6 +31,15 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Commitlint
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Check format
+        run: pnpm format:check
 
       - name: Type check
         run: pnpm exec tsc --noEmit
