@@ -1,8 +1,10 @@
 /**
  * Calendar Export Feature - ICS Generator
- * Converts TimetableEntry[] to an ICS (iCalendar RFC 5545) string.
+ * Converts TimetableEntry[] to an ICS (iCalendar RFC 5545) string
+ * using the `ics` library.
  */
 
+import { createEvents, type EventAttributes, type HeaderAttributes } from 'ics';
 import { TimetableEntry, PeriodTimeSlot } from './types';
 
 // ============================================
@@ -51,49 +53,6 @@ function parseDateVN(dateStr: string): { day: number; month: number; year: numbe
 }
 
 /**
- * Format a date+time as ICS datetime string (YYYYMMDDTHHMMSS)
- * Uses local time (no timezone conversion).
- */
-function formatICSDateTime(year: number, month: number, day: number, time: string): string {
-    const [h, m] = time.split(':');
-    const yy = String(year);
-    const mm = String(month).padStart(2, '0');
-    const dd = String(day).padStart(2, '0');
-    const hh = h.padStart(2, '0');
-    const mi = m.padStart(2, '0');
-    return `${yy}${mm}${dd}T${hh}${mi}00`;
-}
-
-/**
- * Format current timestamp for ICS DTSTAMP
- */
-function formatICSTimestamp(): string {
-    const now = new Date();
-    const y = String(now.getFullYear());
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const h = String(now.getHours()).padStart(2, '0');
-    const mi = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-    return `${y}${m}${d}T${h}${mi}${s}`;
-}
-
-/**
- * Escape special characters in ICS text fields (RFC 5545 §3.3.11)
- */
-function escapeICS(text: string): string {
-    return text
-        .replace(/\\/g, '\\\\')
-        .replace(/;/g, '\\;')
-        .replace(/,/g, '\\,')
-        .replace(/\n/g, '\\n');
-}
-
-// ============================================
-// ICS Generation
-// ============================================
-
-/**
  * Get the start and end times for a set of periods.
  * Uses the first period's start and last period's end.
  */
@@ -109,27 +68,30 @@ function getTimeRange(periods: number[]): { start: string; end: string } | null 
 }
 
 /**
- * Generate a UID for a VEVENT.
- * Uses classCode + date + periods for uniqueness.
+ * Parse "HH:mm" into [hour, minute].
  */
-function generateUID(entry: TimetableEntry): string {
-    const periodsStr = entry.periods.join('-');
-    return `${entry.classCode}-${entry.date.replace(/\//g, '')}-P${periodsStr}@svhaui-helper`;
+function parseTime(time: string): [number, number] {
+    const [h, m] = time.split(':').map(Number);
+    return [h, m];
 }
 
+// ============================================
+// ICS Generation (using `ics` library)
+// ============================================
+
 /**
- * Generate a single VEVENT block for an entry.
+ * Convert a TimetableEntry to an ics EventAttributes object.
+ * Returns null if the entry cannot be converted.
  */
-function generateVEvent(entry: TimetableEntry, dtstamp: string): string | null {
+function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
     const dateInfo = parseDateVN(entry.date);
     if (!dateInfo) return null;
 
     const timeRange = getTimeRange(entry.periods);
     if (!timeRange) return null;
 
-    const dtstart = formatICSDateTime(dateInfo.year, dateInfo.month, dateInfo.day, timeRange.start);
-    const dtend = formatICSDateTime(dateInfo.year, dateInfo.month, dateInfo.day, timeRange.end);
-    const uid = generateUID(entry);
+    const [startH, startM] = parseTime(timeRange.start);
+    const [endH, endM] = parseTime(timeRange.end);
 
     // Build description parts
     const descParts: string[] = [];
@@ -139,54 +101,62 @@ function generateVEvent(entry: TimetableEntry, dtstamp: string): string | null {
     if (entry.department) descParts.push(`Khoa: ${entry.department}`);
     descParts.push(`Tiết: ${entry.periods.join(', ')}`);
 
-    const lines = [
-        'BEGIN:VEVENT',
-        `UID:${uid}`,
-        `DTSTAMP:${dtstamp}`,
-        `DTSTART:${dtstart}`,
-        `DTEND:${dtend}`,
-        `SUMMARY:${escapeICS(entry.course)}`,
-    ];
+    const periodsStr = entry.periods.join('-');
+    const uid = `${entry.classCode}-${entry.date.replace(/\//g, '')}-P${periodsStr}@svhaui-helper`;
+
+    const attrs: EventAttributes = {
+        start: [dateInfo.year, dateInfo.month, dateInfo.day, startH, startM],
+        startInputType: 'local',
+        startOutputType: 'local',
+        end: [dateInfo.year, dateInfo.month, dateInfo.day, endH, endM],
+        endInputType: 'local',
+        endOutputType: 'local',
+        title: entry.course,
+        description: descParts.join('\n'),
+        uid,
+        status: 'CONFIRMED',
+    };
 
     if (entry.location) {
-        lines.push(`LOCATION:${escapeICS(entry.location)}`);
+        attrs.location = entry.location;
     }
 
-    lines.push(`DESCRIPTION:${escapeICS(descParts.join('\\n'))}`);
-    lines.push('END:VEVENT');
-
-    return lines.join('\r\n');
+    return attrs;
 }
 
 /**
  * Generate a complete ICS calendar string from timetable entries.
  *
  * @param entries - Parsed timetable entries
- * @param calendarName - Name for the calendar (VCALENDAR X-WR-CALNAME)
+ * @param calendarName - Name for the calendar (X-WR-CALNAME)
  * @returns ICS file content as string
  */
 export function generateICS(
     entries: TimetableEntry[],
     calendarName: string = 'HaUI Timetable'
 ): string {
-    const dtstamp = formatICSTimestamp();
-
-    const header = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//svHaUI Helper//Calendar Export//VI',
-        `X-WR-CALNAME:${escapeICS(calendarName)}`,
-        'CALSCALE:GREGORIAN',
-        'METHOD:PUBLISH',
-    ].join('\r\n');
-
     const events = entries
-        .map((entry) => generateVEvent(entry, dtstamp))
-        .filter((e): e is string => e !== null);
+        .map((entry) => toEventAttributes(entry))
+        .filter((e): e is EventAttributes => e !== null);
 
-    const footer = 'END:VCALENDAR';
+    if (events.length === 0) {
+        return '';
+    }
 
-    return [header, ...events, footer].join('\r\n');
+    const headerAttributes: HeaderAttributes = {
+        productId: '-//svHaUI Helper//Calendar Export//VI',
+        calName: calendarName,
+        method: 'PUBLISH',
+    };
+
+    const { error, value } = createEvents(events, headerAttributes);
+
+    if (error) {
+        console.error('[calendar-export] ICS generation error:', error);
+        return '';
+    }
+
+    return value ?? '';
 }
 
 /**

@@ -39,8 +39,6 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
     }
 
     run(): void {
-        this.log.i('Initializing Calendar Export...');
-
         // Find the button area to inject UI
         const buttonArea = document.querySelector('div.col-sm-4');
         if (!buttonArea) {
