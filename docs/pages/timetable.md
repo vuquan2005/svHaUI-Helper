@@ -21,15 +21,16 @@
 
 Khu vực chọn khoảng thời gian xem lịch.
 
-| Thành phần             | Selector                     | Mô tả               |
-| :--------------------- | :--------------------------- | :------------------ |
-| **Ngày bắt đầu (D)**   | `input#ctl03_inpStartDate_d` | Nhập ngày bắt đầu   |
-| **Tháng bắt đầu (M)**  | `input#ctl03_inpStartDate_m` | Nhập tháng bắt đầu  |
-| **Năm bắt đầu (Y)**    | `input#ctl03_inpStartDate`   | Nhập năm bắt đầu    |
-| **Ngày kết thúc (D)**  | `input#ctl03_inpEndDate_d`   | Nhập ngày kết thúc  |
-| **Tháng kết thúc (M)** | `input#ctl03_inpEndDate_m`   | Nhập tháng kết thúc |
-| **Năm kết thúc (Y)**   | `input#ctl03_inpEndDate`     | Nhập năm kết thúc   |
-| **Nút xem**            | `input#ctl03_butGet`         | Button xem lịch     |
+| Thành phần             | Selector                     | Mô tả                            |
+| :--------------------- | :--------------------------- | :------------------------------- |
+| **Ngày bắt đầu (D)**   | `input#ctl03_inpStartDate_d` | Nhập ngày bắt đầu                |
+| **Tháng bắt đầu (M)**  | `input#ctl03_inpStartDate_m` | Nhập tháng bắt đầu               |
+| **Năm bắt đầu (Y)**    | `input#ctl03_inpStartDate`   | Nhập năm bắt đầu                 |
+| **Ngày kết thúc (D)**  | `input#ctl03_inpEndDate_d`   | Nhập ngày kết thúc               |
+| **Tháng kết thúc (M)** | `input#ctl03_inpEndDate_m`   | Nhập tháng kết thúc              |
+| **Năm kết thúc (Y)**   | `input#ctl03_inpEndDate`     | Nhập năm kết thúc                |
+| **Khu vực nút**        | `div.col-sm-4`               | Container chứa các nút chức năng |
+| **Nút xem**            | `input#ctl03_butGet`         | Button xem lịch                  |
 
 ### Bảng lịch học (`table.table.table-bordered`)
 
@@ -81,15 +82,15 @@ GV: Tên Giảng Viên (098x.xxx.xxx - Tên Khoa)
 
 **Kết quả sau khi tách:**
 
-| Group Name | Giá trị mẫu      | Mô tả                 |
-| :--------- | :--------------- | :-------------------- |
-| `periods`  | `1,2,3`          | Chuỗi tiết học        |
-| `course`   | `Tên Môn Học`    | Tên học phần          |
-| `class`    | `Mã_Lớp_123`     | Mã lớp học phần       |
-| `lecturer` | `Tên Giảng Viên` | Tên giảng viên        |
-| `sdt`      | `098x.xxx.xxx`   | SĐT (Có thể không có) |
-| `khoa`     | `Tên Khoa`       | Khoa quản lý          |
-| `location` | `Phòng 209...`   | Địa điểm học/thi      |
+| Group Name | Giá trị mẫu      | Mô tả                      |
+| :--------- | :--------------- | :------------------------- |
+| `periods`  | `1,2,3`          | Chuỗi tiết học             |
+| `course`   | `Tên Môn Học`    | Tên học phần               |
+| `class`    | `20251BS...001`  | Mã lớp (Năm+Kỳ+Mã môn+STT) |
+| `lecturer` | `Tên Giảng Viên` | Tên giảng viên             |
+| `sdt`      | `098x.xxx.xxx`   | SĐT (Có thể không có)      |
+| `khoa`     | `Tên Khoa`       | Khoa quản lý               |
+| `location` | `Phòng 209...`   | Địa điểm học/thi           |
 
 ### Xử lý đa môn học & Lưu ý
 
