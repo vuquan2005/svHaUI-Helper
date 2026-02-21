@@ -6,9 +6,10 @@
 
 import { createEvents, type EventAttributes, type HeaderAttributes } from 'ics';
 import { TimetableEntry, PeriodTimeSlot } from './types';
+import { parseDateTimeVN, vnToUTC } from '@/utils';
 
 // ============================================
-// Period Time Slots (16 periods)
+// Period Time Slots (16 periods, VN local time)
 // ============================================
 
 const PERIOD_SLOTS: PeriodTimeSlot[] = [
@@ -34,23 +35,8 @@ const PERIOD_SLOTS: PeriodTimeSlot[] = [
 ];
 
 // ============================================
-// Date/Time Utilities
+// Helpers
 // ============================================
-
-/**
- * Parse dd/MM/yyyy date string to { day, month, year }
- */
-function parseDateVN(dateStr: string): { day: number; month: number; year: number } | null {
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) return null;
-
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const year = parseInt(parts[2], 10);
-
-    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-    return { day, month, year };
-}
 
 /**
  * Get the start and end times for a set of periods.
@@ -67,31 +53,25 @@ function getTimeRange(periods: number[]): { start: string; end: string } | null 
     return { start: firstSlot.start, end: lastSlot.end };
 }
 
-/**
- * Parse "HH:mm" into [hour, minute].
- */
-function parseTime(time: string): [number, number] {
-    const [h, m] = time.split(':').map(Number);
-    return [h, m];
-}
-
 // ============================================
 // ICS Generation (using `ics` library)
 // ============================================
 
 /**
  * Convert a TimetableEntry to an ics EventAttributes object.
+ * Converts VN local time → UTC for ICS output.
  * Returns null if the entry cannot be converted.
  */
 function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
-    const dateInfo = parseDateVN(entry.date);
-    if (!dateInfo) return null;
-
     const timeRange = getTimeRange(entry.periods);
     if (!timeRange) return null;
 
-    const [startH, startM] = parseTime(timeRange.start);
-    const [endH, endM] = parseTime(timeRange.end);
+    const startVN = parseDateTimeVN(entry.date, timeRange.start);
+    const endVN = parseDateTimeVN(entry.date, timeRange.end);
+    if (!startVN || !endVN) return null;
+
+    const startUTC = vnToUTC(startVN);
+    const endUTC = vnToUTC(endVN);
 
     // Build description parts
     const descParts: string[] = [];
@@ -105,12 +85,12 @@ function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
     const uid = `${entry.classCode}-${entry.date.replace(/\//g, '')}-P${periodsStr}@svhaui-helper`;
 
     const attrs: EventAttributes = {
-        start: [dateInfo.year, dateInfo.month, dateInfo.day, startH, startM],
-        startInputType: 'local',
-        startOutputType: 'local',
-        end: [dateInfo.year, dateInfo.month, dateInfo.day, endH, endM],
-        endInputType: 'local',
-        endOutputType: 'local',
+        start: startUTC,
+        startInputType: 'utc',
+        startOutputType: 'utc',
+        end: endUTC,
+        endInputType: 'utc',
+        endOutputType: 'utc',
         title: entry.course,
         description: descParts.join('\n'),
         uid,
@@ -131,10 +111,7 @@ function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
  * @param calendarName - Name for the calendar (X-WR-CALNAME)
  * @returns ICS file content as string
  */
-export function generateICS(
-    entries: TimetableEntry[],
-    calendarName: string = 'HaUI Timetable'
-): string {
+export function generateICS(entries: TimetableEntry[], calendarName: string = 'HaUI'): string {
     const events = entries
         .map((entry) => toEventAttributes(entry))
         .filter((e): e is EventAttributes => e !== null);
