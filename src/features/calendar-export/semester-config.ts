@@ -232,3 +232,18 @@ export function detectCurrentSemester(now: Date = new Date()): string {
         return `${year - 1}4`;
     }
 }
+
+/**
+ * Get a human-readable label for a semester value.
+ * e.g. "20251" → "HaUI - Kỳ 1 (2025-2026)"
+ */
+export function getSemesterLabel(semesterId: string): string {
+    const parsed = parseSemesterValue(semesterId);
+    if (!parsed) return `HaUI - TKB`;
+
+    const termDef = TERMS.find((t) => t.term === parsed.term);
+    const termName = termDef?.name ?? `Kỳ ${parsed.term}`;
+    const academicYear = parsed.academicYear;
+
+    return `HaUI - ${termName} (${academicYear}-${academicYear + 1})`;
+}

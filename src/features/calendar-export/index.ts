@@ -22,7 +22,7 @@ import {
     showDiffResult,
     UIRefs,
 } from './ui';
-import { detectCurrentSemester } from './semester-config';
+import { detectCurrentSemester, getSemesterLabel } from './semester-config';
 import {
     fetchSemesterTimetable,
     getSemesterDateRangeFormatted,
@@ -37,6 +37,13 @@ import {
 
 export class CalendarExportFeature extends Feature<CalendarExportStorage> {
     private uiRefs: UIRefs | null = null;
+
+    /** Cached pending update data when user declined download */
+    private pendingUpdate: {
+        semesterId: string;
+        entries: import('./types').TimetableEntry[];
+        diff: import('./types').TimetableDiff;
+    } | null = null;
 
     constructor() {
         super({
@@ -93,7 +100,7 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
             this.log.i(`Fetched ${entries.length} timetable entries`);
 
             // Generate ICS
-            const icsContent = generateICS(entries, 'HaUI - Thời khóa biểu');
+            const icsContent = generateICS(entries, getSemesterLabel(semesterId));
 
             // Generate filename
             const dateRange = getSemesterDateRangeFormatted(semesterId);
@@ -136,8 +143,8 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
 
             this.log.i(`Parsed ${entries.length} timetable entries`);
 
-            // Generate ICS
-            const icsContent = generateICS(entries, 'HaUI - Thời khóa biểu');
+            const semesterId = detectCurrentSemester();
+            const icsContent = generateICS(entries, getSemesterLabel(semesterId));
 
             // Generate filename
             const dateRange = readFormDateRange();
@@ -161,10 +168,21 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
 
     /**
      * Handle "🔄 Kiểm tra cập nhật" click.
+     * If there's a pending update (user declined download last time),
+     * show the cached diff again without re-fetching.
      */
     private async handleCheckUpdate(): Promise<void> {
         if (!this.uiRefs) return;
         const btn = this.uiRefs.checkUpdateBtn;
+
+        // If we already have cached pending update, just re-prompt
+        if (this.pendingUpdate) {
+            const wantsDownload = showDiffResult(this.pendingUpdate.diff);
+            if (wantsDownload) {
+                await this.downloadAndSaveUpdate(this.pendingUpdate);
+            }
+            return;
+        }
 
         try {
             setCheckButtonState(btn, 'checking');
@@ -200,17 +218,48 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
                     `Changes detected: +${diff.added.length} -${diff.removed.length} ~${diff.changed.length}`
                 );
 
+                // Cache the pending update
+                this.pendingUpdate = { semesterId, entries: newEntries, diff };
                 setCheckButtonState(btn, 'has-update', now);
-                showDiffResult(diff);
 
-                // Update snapshot with new data
-                await this.saveSnapshot(semesterId, newEntries);
-                await this.storage.set('lastCheckTime', now);
+                // Show diff and ask user if they want to download
+                const wantsDownload = showDiffResult(diff);
+                if (wantsDownload) {
+                    await this.downloadAndSaveUpdate(this.pendingUpdate);
+                }
+                // If user declines: pendingUpdate stays cached
+                // → next click re-prompts without re-fetching
             }
         } catch (error) {
             this.log.e('Check update failed:', error);
             setCheckButtonState(btn, 'normal');
             alert('Kiểm tra cập nhật thất bại. Xem console để biết chi tiết.');
+        }
+    }
+
+    /**
+     * Download ICS from pending update and save snapshot.
+     */
+    private async downloadAndSaveUpdate(
+        update: NonNullable<typeof this.pendingUpdate>
+    ): Promise<void> {
+        const { semesterId, entries } = update;
+        const icsContent = generateICS(entries, getSemesterLabel(semesterId));
+        const dateRange = getSemesterDateRangeFormatted(semesterId);
+        const filename = dateRange
+            ? `TKB_${dateRange.start.replace(/\//g, '-')}_${dateRange.end.replace(/\//g, '-')}.ics`
+            : `TKB_${semesterId}.ics`;
+        downloadICSFile(icsContent, filename);
+        this.log.i(`Downloaded updated ICS: ${filename}`);
+
+        // Save snapshot & clear cache
+        await this.saveSnapshot(semesterId, entries);
+        const now = new Date().toISOString();
+        await this.storage.set('lastCheckTime', now);
+        this.pendingUpdate = null;
+
+        if (this.uiRefs) {
+            setCheckButtonState(this.uiRefs.checkUpdateBtn, 'normal', now);
         }
     }
 

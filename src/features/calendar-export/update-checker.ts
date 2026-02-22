@@ -6,6 +6,7 @@
 import { TimetableEntry, TimetableDiff } from './types';
 import { getSemesterDateRange } from './semester-config';
 import { parseTimetableFromHTML } from './timetable-parser';
+import { formatDateVN } from '../../utils/date';
 
 // ============================================
 // Constants
@@ -43,6 +44,24 @@ export function normalizeEntries(entries: TimetableEntry[]): TimetableEntry[] {
         if (dateA !== dateB) return dateA.localeCompare(dateB);
         return a.periods[0] - b.periods[0];
     });
+}
+
+/**
+ * Filter entries to only include those belonging to a specific semester.
+ * Checks if the classCode starts with the semester ID (e.g., "20252").
+ *
+ * This is useful when the server returns data across date ranges that
+ * may overlap with other terms.
+ *
+ * @param entries - All parsed entries
+ * @param semesterId - Semester value (e.g., "20252")
+ * @returns Entries whose classCode starts with the semesterId
+ */
+export function filterEntriesBySemester(
+    entries: TimetableEntry[],
+    semesterId: string
+): TimetableEntry[] {
+    return entries.filter((e) => e.classCode.startsWith(semesterId));
 }
 
 /**
@@ -103,16 +122,6 @@ export function diffEntries(
 // ============================================
 
 /**
- * Format a Date to dd/MM/yyyy string.
- */
-function formatDateVN(d: Date): string {
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const yyyy = d.getFullYear();
-    return `${dd}/${mm}/${yyyy}`;
-}
-
-/**
  * Fetch the timetable for a given semester by making a same-origin fetch request.
  *
  * Strategy: First GET the page to obtain __VIEWSTATE and other ASP.NET fields,
@@ -165,7 +174,8 @@ export async function fetchSemesterTimetable(semesterId: string): Promise<Timeta
     if (!postResp.ok) throw new Error(`Failed to fetch timetable: ${postResp.status}`);
 
     const resultHtml = await postResp.text();
-    return parseTimetableFromHTML(resultHtml);
+    const allEntries = parseTimetableFromHTML(resultHtml);
+    return filterEntriesBySemester(allEntries, semesterId);
 }
 
 /**

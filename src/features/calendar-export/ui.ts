@@ -10,6 +10,7 @@ import {
     detectCurrentSemester,
 } from './semester-config';
 import { TimetableDiff } from './types';
+import { formatDateVN } from '../../utils/date';
 
 // ============================================
 // Types
@@ -71,8 +72,8 @@ export function createCalendarExportUI(callbacks: UICallbacks): UIRefs {
 
 /**
  * Create a Bootstrap 3 split-button for downloading timetable.
- * Main button: "📥 Tải TKB kỳ này" (auto-fetch semester)
- * Dropdown item: "📅 Tải lịch hiện tại" (parse current DOM)
+ * Main button: "📅 Tải lịch hiển thị" (parse current DOM)
+ * Dropdown item: "📥 Tải TKB kỳ này" (auto-fetch semester)
  */
 function createDownloadSplitButton(
     onDownloadSemester: () => void,
@@ -82,13 +83,13 @@ function createDownloadSplitButton(
     group.className = 'btn-group';
     group.style.cssText = 'margin-right: 5px;';
 
-    // Main button
+    // Main button — download currently displayed timetable
     const mainBtn = document.createElement('button');
     mainBtn.type = 'button';
     mainBtn.className = 'btn btn-success';
-    mainBtn.innerHTML = '📥 Tải TKB kỳ này';
-    mainBtn.title = 'Tự động tải thời khóa biểu toàn kỳ hiện tại';
-    mainBtn.addEventListener('click', onDownloadSemester);
+    mainBtn.innerHTML = '📅 Tải lịch hiển thị';
+    mainBtn.title = 'Xuất lịch đang hiển thị bên dưới thành file ICS';
+    mainBtn.addEventListener('click', onDownloadCurrent);
 
     // Dropdown toggle
     const toggleBtn = document.createElement('button');
@@ -110,11 +111,11 @@ function createDownloadSplitButton(
     const a = document.createElement('a');
     a.href = '#';
     a.style.cursor = 'pointer';
-    a.textContent = '📅 Tải lịch hiện tại';
-    a.title = 'Xuất lịch đang hiển thị trên trang thành file ICS';
+    a.textContent = '📥 Tải TKB kỳ này';
+    a.title = 'Tự động tải toàn bộ thời khóa biểu kỳ hiện tại';
     a.addEventListener('click', (e) => {
         e.preventDefault();
-        onDownloadCurrent();
+        onDownloadSemester();
     });
     li.appendChild(a);
     menu.appendChild(li);
@@ -185,7 +186,7 @@ export function setCheckButtonState(
     // Update title with last check time
     if (lastCheckTime) {
         const dt = new Date(lastCheckTime);
-        const formatted = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth() + 1).toString().padStart(2, '0')}/${dt.getFullYear()} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}`;
+        const formatted = `${formatDateVN(dt)} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}`;
         btn.title = `Lần kiểm tra cuối: ${formatted}`;
     }
 }
@@ -196,37 +197,43 @@ export function setCheckButtonState(
 
 /**
  * Display the diff result to the user.
+ * If changes exist, prompts the user to download the updated ICS.
+ *
+ * @returns true if user wants to download the updated ICS file
  */
-export function showDiffResult(diff: TimetableDiff): void {
+export function showDiffResult(diff: TimetableDiff): boolean {
     const parts: string[] = [];
 
     parts.push(`📊 Kết quả kiểm tra cập nhật TKB:\n`);
 
     if (diff.added.length === 0 && diff.removed.length === 0 && diff.changed.length === 0) {
         parts.push('✅ Không có thay đổi nào.');
-    } else {
-        if (diff.added.length > 0) {
-            parts.push(`➕ Thêm mới (${diff.added.length}):`);
-            for (const e of diff.added) {
-                parts.push(`  • ${e.date} - ${e.course} (${e.classCode})`);
-            }
-        }
-        if (diff.removed.length > 0) {
-            parts.push(`\n➖ Đã xoá (${diff.removed.length}):`);
-            for (const e of diff.removed) {
-                parts.push(`  • ${e.date} - ${e.course} (${e.classCode})`);
-            }
-        }
-        if (diff.changed.length > 0) {
-            parts.push(`\n🔄 Thay đổi (${diff.changed.length}):`);
-            for (const c of diff.changed) {
-                parts.push(`  • ${c.new.date} - ${c.new.course} (${c.new.classCode})`);
-            }
-        }
-        parts.push(`\n📌 Không đổi: ${diff.unchanged} mục`);
+        alert(parts.join('\n'));
+        return false;
     }
 
-    alert(parts.join('\n'));
+    if (diff.added.length > 0) {
+        parts.push(`➕ Thêm mới (${diff.added.length}):`);
+        for (const e of diff.added) {
+            parts.push(`  • ${e.date} - ${e.course} (${e.classCode})`);
+        }
+    }
+    if (diff.removed.length > 0) {
+        parts.push(`\n➖ Đã xoá (${diff.removed.length}):`);
+        for (const e of diff.removed) {
+            parts.push(`  • ${e.date} - ${e.course} (${e.classCode})`);
+        }
+    }
+    if (diff.changed.length > 0) {
+        parts.push(`\n🔄 Thay đổi (${diff.changed.length}):`);
+        for (const c of diff.changed) {
+            parts.push(`  • ${c.new.date} - ${c.new.course} (${c.new.classCode})`);
+        }
+    }
+    parts.push(`\n📌 Không đổi: ${diff.unchanged} mục`);
+    parts.push(`\nBạn có muốn tải file ICS mới không?`);
+
+    return confirm(parts.join('\n'));
 }
 
 // ============================================
