@@ -143,8 +143,7 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
 
             this.log.i(`Parsed ${entries.length} timetable entries`);
 
-            const semesterId = detectCurrentSemester();
-            const icsContent = generateICS(entries, getSemesterLabel(semesterId));
+            const icsContent = generateICS(entries, 'HaUI - Thời khóa biểu');
 
             // Generate filename
             const dateRange = readFormDateRange();
