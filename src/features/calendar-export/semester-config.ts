@@ -192,21 +192,12 @@ export function getSemesterDateRange(value: string): { start: Date; end: Date } 
  * Detect the current semester value based on date.
  */
 export function detectCurrentSemester(now: Date = new Date()): string {
-    const month = now.getMonth() + 1; // 1-12
+    const month = now.getMonth() + 1;
     const year = now.getFullYear();
 
-    // Determine academic year and term from current month
-    if (month >= 8) {
-        // Aug-Dec → Term 1, academic year starts this year
-        return `${year}1`;
-    } else if (month >= 2 && month <= 6) {
-        // Feb-Jun → Term 2, calendar year = this year
-        return `${year}2`;
-    } else if (month === 1) {
-        // Jan → could be end of Term 1 (started prev year) or Term 3 start
-        return `${year - 1}1`;
-    } else {
-        // Jul → Term 4, calendar year = this year
-        return `${year}4`;
-    }
+    const academicYear = month >= 9 ? year : year - 1;
+
+    const semester = month <= 2 ? 3 : month <= 6 ? 2 : month <= 8 ? 4 : 1;
+
+    return `${academicYear}${semester}`;
 }
