@@ -121,7 +121,7 @@ export function generateICS(entries: TimetableEntry[], calendarName: string = 'H
     }
 
     const headerAttributes: HeaderAttributes = {
-        productId: '-//svHaUI Helper//Calendar Export//VI',
+        productId: '-//QuanVu//svHaUI Helper//VI',
         calName: calendarName,
         method: 'PUBLISH',
     };
