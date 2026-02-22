@@ -39,28 +39,52 @@ export interface PeriodTimeSlot {
 }
 
 // ============================================
-// Export History (persisted to GM Storage)
+// Semester Snapshot (for update checking)
 // ============================================
 
-export interface ExportHistoryEntry {
-    /** ISO datetime of export */
-    exportedAt: string;
-    /** SHA-256 hash of the ICS content */
-    sha256: string;
-    /** Semester ID (e.g. "ky1", "ky2") */
+/**
+ * Snapshot of a semester's timetable data, saved for comparison.
+ */
+export interface SemesterSnapshot {
+    /** Semester ID (e.g. "20252") */
     semesterId: string;
-    /** Date range used for the export */
-    dateRange: { start: string; end: string };
-    /** Total number of calendar events */
-    totalEvents: number;
     /** Raw timetable entries */
-    events: TimetableEntry[];
+    entries: TimetableEntry[];
+    /** ISO datetime when this snapshot was saved */
+    savedAt: string;
+    /** Date range used for the fetch */
+    dateRange: { start: string; end: string };
 }
 
+// ============================================
+// Timetable Diff (comparison result)
+// ============================================
+
 /**
- * Shape of the feature's scoped storage
+ * Result of comparing two sets of timetable entries.
+ */
+export interface TimetableDiff {
+    /** Entries present in new but not in old */
+    added: TimetableEntry[];
+    /** Entries present in old but not in new */
+    removed: TimetableEntry[];
+    /** Entries with same classCode+date but different details */
+    changed: Array<{ old: TimetableEntry; new: TimetableEntry }>;
+    /** Number of unchanged entries */
+    unchanged: number;
+}
+
+// ============================================
+// Feature Storage
+// ============================================
+
+/**
+ * Shape of the feature's scoped storage.
  */
 export interface CalendarExportStorage {
-    exportHistory: ExportHistoryEntry[];
+    /** Last saved timetable snapshot for the current semester */
+    lastSnapshot?: SemesterSnapshot;
+    /** ISO datetime of the last update check */
+    lastCheckTime?: string;
     [key: string]: unknown;
 }

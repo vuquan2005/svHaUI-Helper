@@ -3,31 +3,40 @@
  * Exports the HaUI timetable to ICS (iCalendar) format.
  *
  * Features:
- * - "📅 Tải lịch" button: exports currently displayed timetable
+ * - "📥 Tải TKB kỳ này" split-button: auto-fetch current semester timetable & download ICS
+ *   - Dropdown: "📅 Tải lịch hiện tại" exports currently displayed timetable
+ * - "🔄 Kiểm tra cập nhật" button: compare current TKB with last snapshot
  * - Semester split-button dropdown: quickly fill dates for a semester and reload
- * - Export history saved to GM Storage
+ * - Auto-check for updates every 7 days
  */
 
 import { Feature } from '@/core';
-import { CalendarExportStorage, ExportHistoryEntry } from './types';
+import { CalendarExportStorage } from './types';
 import { parseTimetableFromDOM } from './timetable-parser';
 import { generateICS, downloadICSFile } from './ics-generator';
-import { createCalendarExportUI, fillAndSubmitSemesterForm, readFormDateRange } from './ui';
+import {
+    createCalendarExportUI,
+    fillAndSubmitSemesterForm,
+    readFormDateRange,
+    setCheckButtonState,
+    showDiffResult,
+    UIRefs,
+} from './ui';
 import { detectCurrentSemester } from './semester-config';
-
-// ============================================
-// Constants
-// ============================================
-
-/** Maximum number of export history entries to keep */
-const MAX_HISTORY_ENTRIES = 20;
+import {
+    fetchSemesterTimetable,
+    getSemesterDateRangeFormatted,
+    entriesEqual,
+    diffEntries,
+    shouldAutoCheck,
+} from './update-checker';
 
 // ============================================
 // Feature Implementation
 // ============================================
 
 export class CalendarExportFeature extends Feature<CalendarExportStorage> {
-    private uiContainer: HTMLElement | null = null;
+    private uiRefs: UIRefs | null = null;
 
     constructor() {
         super({
@@ -47,20 +56,67 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
         }
 
         // Create and inject UI
-        this.uiContainer = createCalendarExportUI({
-            onDownload: () => this.handleDownload(),
+        this.uiRefs = createCalendarExportUI({
+            onDownloadSemester: () => this.handleDownloadSemester(),
+            onDownloadCurrent: () => this.handleDownloadCurrent(),
+            onCheckUpdate: () => this.handleCheckUpdate(),
             onSemesterSelect: (semesterId) => this.handleSemesterSelect(semesterId),
         });
 
-        buttonArea.appendChild(this.uiContainer);
+        buttonArea.appendChild(this.uiRefs.container);
         this.log.i('UI injected successfully');
+
+        // Run auto-check on page load
+        this.autoCheckOnLoad();
+    }
+
+    // ============================================
+    // Download Handlers
+    // ============================================
+
+    /**
+     * Handle "📥 Tải TKB kỳ này" — auto-detect semester, fetch, download ICS.
+     */
+    private async handleDownloadSemester(): Promise<void> {
+        try {
+            const semesterId = detectCurrentSemester();
+            this.log.i(`Downloading semester timetable: ${semesterId}`);
+
+            // Fetch timetable entries
+            const entries = await fetchSemesterTimetable(semesterId);
+            if (entries.length === 0) {
+                this.log.w('No timetable entries found for current semester');
+                alert('Không có dữ liệu lịch học cho kỳ hiện tại.');
+                return;
+            }
+
+            this.log.i(`Fetched ${entries.length} timetable entries`);
+
+            // Generate ICS
+            const icsContent = generateICS(entries, 'HaUI - Thời khóa biểu');
+
+            // Generate filename
+            const dateRange = getSemesterDateRangeFormatted(semesterId);
+            const filename = dateRange
+                ? `TKB_${dateRange.start.replace(/\//g, '-')}_${dateRange.end.replace(/\//g, '-')}.ics`
+                : `TKB_${semesterId}.ics`;
+
+            // Download
+            downloadICSFile(icsContent, filename);
+            this.log.i(`Downloaded: ${filename}`);
+
+            // Save snapshot
+            await this.saveSnapshot(semesterId, entries);
+        } catch (error) {
+            this.log.e('Semester download failed:', error);
+            alert('Tải TKB kỳ này thất bại. Xem console để biết chi tiết.');
+        }
     }
 
     /**
-     * Handle the "Tải lịch" button click.
-     * Parses the currently displayed timetable and downloads as ICS.
+     * Handle "📅 Tải lịch hiện tại" — parse currently displayed timetable and download.
      */
-    private async handleDownload(): Promise<void> {
+    private async handleDownloadCurrent(): Promise<void> {
         try {
             // Find the timetable table
             const table = document.querySelector<HTMLTableElement>('table.table.table-bordered');
@@ -93,18 +149,158 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
             // Download
             downloadICSFile(icsContent, filename);
             this.log.i(`Downloaded: ${filename}`);
-
-            // Save to history
-            await this.saveExportHistory(icsContent, entries);
         } catch (error) {
             this.log.e('Export failed:', error);
             alert('Xuất lịch thất bại. Xem console để biết chi tiết.');
         }
     }
 
+    // ============================================
+    // Update Check
+    // ============================================
+
+    /**
+     * Handle "🔄 Kiểm tra cập nhật" click.
+     */
+    private async handleCheckUpdate(): Promise<void> {
+        if (!this.uiRefs) return;
+        const btn = this.uiRefs.checkUpdateBtn;
+
+        try {
+            setCheckButtonState(btn, 'checking');
+
+            const semesterId = detectCurrentSemester();
+            const newEntries = await fetchSemesterTimetable(semesterId);
+            this.log.i(`Check update: fetched ${newEntries.length} entries for ${semesterId}`);
+
+            // Load last snapshot
+            const snapshot = await this.storage.get('lastSnapshot');
+            const now = new Date().toISOString();
+
+            if (!snapshot || snapshot.semesterId !== semesterId) {
+                // No previous snapshot for this semester — save as baseline
+                await this.saveSnapshot(semesterId, newEntries);
+                await this.storage.set('lastCheckTime', now);
+                setCheckButtonState(btn, 'no-update', now);
+                this.log.i('No previous snapshot — saved baseline');
+                alert(
+                    'Đã lưu snapshot lần đầu cho kỳ hiện tại. Lần check sau sẽ so sánh với snapshot này.'
+                );
+                return;
+            }
+
+            // Compare
+            if (entriesEqual(snapshot.entries, newEntries)) {
+                await this.storage.set('lastCheckTime', now);
+                setCheckButtonState(btn, 'no-update', now);
+                this.log.i('No changes detected');
+            } else {
+                const diff = diffEntries(snapshot.entries, newEntries);
+                this.log.i(
+                    `Changes detected: +${diff.added.length} -${diff.removed.length} ~${diff.changed.length}`
+                );
+
+                setCheckButtonState(btn, 'has-update', now);
+                showDiffResult(diff);
+
+                // Update snapshot with new data
+                await this.saveSnapshot(semesterId, newEntries);
+                await this.storage.set('lastCheckTime', now);
+            }
+        } catch (error) {
+            this.log.e('Check update failed:', error);
+            setCheckButtonState(btn, 'normal');
+            alert('Kiểm tra cập nhật thất bại. Xem console để biết chi tiết.');
+        }
+    }
+
+    /**
+     * Auto-check on page load if enough time has elapsed.
+     */
+    private async autoCheckOnLoad(): Promise<void> {
+        try {
+            const lastCheckTime = await this.storage.get('lastCheckTime');
+
+            if (!shouldAutoCheck(lastCheckTime as string | undefined)) {
+                // Update button title with last check time
+                if (this.uiRefs && lastCheckTime) {
+                    setCheckButtonState(
+                        this.uiRefs.checkUpdateBtn,
+                        'normal',
+                        lastCheckTime as string
+                    );
+                }
+                return;
+            }
+
+            this.log.i('Auto-check triggered');
+            if (!this.uiRefs) return;
+
+            const btn = this.uiRefs.checkUpdateBtn;
+            const semesterId = detectCurrentSemester();
+
+            try {
+                const newEntries = await fetchSemesterTimetable(semesterId);
+                const snapshot = await this.storage.get('lastSnapshot');
+                const now = new Date().toISOString();
+
+                if (!snapshot || snapshot.semesterId !== semesterId) {
+                    // First time — save silently
+                    await this.saveSnapshot(semesterId, newEntries);
+                    await this.storage.set('lastCheckTime', now);
+                    setCheckButtonState(btn, 'normal', now);
+                    return;
+                }
+
+                if (!entriesEqual(snapshot.entries, newEntries)) {
+                    // Has changes — update button style, don't show alert
+                    setCheckButtonState(btn, 'has-update', now);
+                    this.log.i('Auto-check: changes detected');
+                } else {
+                    setCheckButtonState(btn, 'normal', now);
+                    this.log.i('Auto-check: no changes');
+                }
+
+                await this.storage.set('lastCheckTime', now);
+            } catch (error) {
+                this.log.w('Auto-check fetch failed:', error);
+                // Silently fail — don't bother the user
+            }
+        } catch (error) {
+            this.log.w('Auto-check failed:', error);
+        }
+    }
+
+    // ============================================
+    // Snapshot Management
+    // ============================================
+
+    /**
+     * Save a snapshot of the current semester's timetable.
+     * Also cleans up snapshots from previous semesters.
+     */
+    private async saveSnapshot(
+        semesterId: string,
+        entries: import('./types').TimetableEntry[]
+    ): Promise<void> {
+        const dateRange = getSemesterDateRangeFormatted(semesterId);
+
+        await this.storage.set('lastSnapshot', {
+            semesterId,
+            entries,
+            savedAt: new Date().toISOString(),
+            dateRange: dateRange ?? { start: '', end: '' },
+        });
+
+        this.log.i(`Snapshot saved for ${semesterId} (${entries.length} entries)`);
+    }
+
+    // ============================================
+    // Other Handlers
+    // ============================================
+
     /**
      * Handle semester selection from the dropdown.
-     * Fills the date inputs and submits the form (page reload).
      */
     private handleSemesterSelect(semesterValue: string): void {
         this.log.i(`Semester selected: ${semesterValue}`);
@@ -112,55 +308,10 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
     }
 
     /**
-     * Save export to GM Storage history.
-     */
-    private async saveExportHistory(
-        icsContent: string,
-        entries: import('./types').TimetableEntry[]
-    ): Promise<void> {
-        try {
-            const sha256 = await this.hashContent(icsContent);
-            const dateRange = readFormDateRange();
-            const semesterId = detectCurrentSemester();
-
-            const historyEntry: ExportHistoryEntry = {
-                exportedAt: new Date().toISOString(),
-                sha256,
-                semesterId,
-                dateRange: dateRange ?? { start: '', end: '' },
-                totalEvents: entries.length,
-                events: entries,
-            };
-
-            // Load existing history
-            const existingHistory = (await this.storage.get('exportHistory', [])) ?? [];
-
-            // Prepend new entry, limit size
-            const updatedHistory = [historyEntry, ...existingHistory].slice(0, MAX_HISTORY_ENTRIES);
-
-            await this.storage.set('exportHistory', updatedHistory);
-            this.log.i(`Export history saved (${updatedHistory.length} entries)`);
-        } catch (error) {
-            this.log.w('Failed to save export history:', error);
-        }
-    }
-
-    /**
-     * Compute SHA-256 hash of content using Web Crypto API.
-     */
-    private async hashContent(content: string): Promise<string> {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(content);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    /**
      * Cleanup when feature is disabled or page changes.
      */
     cleanup(): void {
-        this.uiContainer?.remove();
-        this.uiContainer = null;
+        this.uiRefs?.container.remove();
+        this.uiRefs = null;
     }
 }

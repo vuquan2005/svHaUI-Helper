@@ -1,6 +1,6 @@
 /**
  * Calendar Export Feature - UI Components
- * Creates the download button and semester dropdown.
+ * Creates the download split-button, check update button, and semester dropdown.
  * Uses Bootstrap 3 classes already available on HaUI portal.
  */
 
@@ -9,16 +9,29 @@ import {
     getSemesterDateRange,
     detectCurrentSemester,
 } from './semester-config';
+import { TimetableDiff } from './types';
 
 // ============================================
 // Types
 // ============================================
 
 export interface UICallbacks {
-    /** Called when "Tải lịch" button is clicked */
-    onDownload: () => void;
-    /** Called when a semester is selected from the dropdown */
+    /** Called when "📥 Tải TKB kỳ này" main button is clicked */
+    onDownloadSemester: () => void;
+    /** Called when "📅 Tải lịch hiện tại" dropdown item is clicked */
+    onDownloadCurrent: () => void;
+    /** Called when "🔄 Kiểm tra cập nhật" button is clicked */
+    onCheckUpdate: () => void;
+    /** Called when a semester is selected from the semester dropdown */
     onSemesterSelect: (semesterValue: string) => void;
+}
+
+/**
+ * References to UI elements that the controller may need to update.
+ */
+export interface UIRefs {
+    container: HTMLElement;
+    checkUpdateBtn: HTMLButtonElement;
 }
 
 // ============================================
@@ -26,51 +39,202 @@ export interface UICallbacks {
 // ============================================
 
 /**
- * Create the calendar export UI (download button + semester dropdown).
+ * Create the calendar export UI.
+ * Layout: [📥 Tải TKB kỳ này ▾] [🔄 Kiểm tra cập nhật] [📋 Kỳ... ▾]
  */
-export function createCalendarExportUI(callbacks: UICallbacks): HTMLElement {
+export function createCalendarExportUI(callbacks: UICallbacks): UIRefs {
     const container = document.createElement('div');
     container.className = 'svhaui-calendar-export';
     container.style.cssText = 'display: inline-block; margin-left: 5px; vertical-align: top;';
 
-    // Download button
-    const downloadBtn = createDownloadButton(callbacks.onDownload);
-    container.appendChild(downloadBtn);
+    // Download split-button
+    const downloadGroup = createDownloadSplitButton(
+        callbacks.onDownloadSemester,
+        callbacks.onDownloadCurrent
+    );
+    container.appendChild(downloadGroup);
+
+    // Check update button
+    const checkUpdateBtn = createCheckUpdateButton(callbacks.onCheckUpdate);
+    container.appendChild(checkUpdateBtn);
 
     // Semester split-button dropdown
     const semesterDropdown = createSemesterDropdown(callbacks.onSemesterSelect);
     container.appendChild(semesterDropdown);
 
-    return container;
+    return { container, checkUpdateBtn };
 }
 
+// ============================================
+// Download Split-Button
+// ============================================
+
 /**
- * Create the "📅 Tải lịch" download button.
+ * Create a Bootstrap 3 split-button for downloading timetable.
+ * Main button: "📥 Tải TKB kỳ này" (auto-fetch semester)
+ * Dropdown item: "📅 Tải lịch hiện tại" (parse current DOM)
  */
-function createDownloadButton(onClick: () => void): HTMLButtonElement {
+function createDownloadSplitButton(
+    onDownloadSemester: () => void,
+    onDownloadCurrent: () => void
+): HTMLElement {
+    const group = document.createElement('div');
+    group.className = 'btn-group';
+    group.style.cssText = 'margin-right: 5px;';
+
+    // Main button
+    const mainBtn = document.createElement('button');
+    mainBtn.type = 'button';
+    mainBtn.className = 'btn btn-success';
+    mainBtn.innerHTML = '📥 Tải TKB kỳ này';
+    mainBtn.title = 'Tự động tải thời khóa biểu toàn kỳ hiện tại';
+    mainBtn.addEventListener('click', onDownloadSemester);
+
+    // Dropdown toggle
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.className = 'btn btn-success dropdown-toggle';
+    toggleBtn.setAttribute('data-toggle', 'dropdown');
+    toggleBtn.setAttribute('aria-haspopup', 'true');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+
+    const caret = document.createElement('span');
+    caret.className = 'caret';
+    toggleBtn.appendChild(caret);
+
+    // Dropdown menu
+    const menu = document.createElement('ul');
+    menu.className = 'dropdown-menu';
+
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#';
+    a.style.cursor = 'pointer';
+    a.textContent = '📅 Tải lịch hiện tại';
+    a.title = 'Xuất lịch đang hiển thị trên trang thành file ICS';
+    a.addEventListener('click', (e) => {
+        e.preventDefault();
+        onDownloadCurrent();
+    });
+    li.appendChild(a);
+    menu.appendChild(li);
+
+    group.appendChild(mainBtn);
+    group.appendChild(toggleBtn);
+    group.appendChild(menu);
+
+    return group;
+}
+
+// ============================================
+// Check Update Button
+// ============================================
+
+/**
+ * Create the "🔄 Kiểm tra cập nhật" button.
+ * The controller can later update its text, style, and title.
+ */
+function createCheckUpdateButton(onClick: () => void): HTMLButtonElement {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'btn btn-success';
-    btn.innerHTML = '📅 Tải lịch';
-    btn.title = 'Xuất thời khóa biểu đang hiển thị thành file ICS';
+    btn.className = 'btn btn-warning';
+    btn.innerHTML = '🔄 Kiểm tra cập nhật';
+    btn.title = 'Kiểm tra xem thời khóa biểu có thay đổi không';
     btn.style.cssText = 'margin-right: 5px;';
     btn.addEventListener('click', onClick);
     return btn;
 }
 
 /**
+ * Update the check button to show "has update" state.
+ */
+export function setCheckButtonState(
+    btn: HTMLButtonElement,
+    state: 'normal' | 'has-update' | 'checking' | 'no-update',
+    lastCheckTime?: string
+): void {
+    // Reset classes
+    btn.classList.remove('btn-warning', 'btn-danger', 'btn-info', 'btn-default');
+
+    switch (state) {
+        case 'checking':
+            btn.classList.add('btn-info');
+            btn.innerHTML = '⏳ Đang kiểm tra...';
+            btn.disabled = true;
+            break;
+        case 'has-update':
+            btn.classList.add('btn-danger');
+            btn.innerHTML = '🔄 Có thay đổi!';
+            btn.disabled = false;
+            break;
+        case 'no-update':
+            btn.classList.add('btn-default');
+            btn.innerHTML = '✅ Không có thay đổi';
+            btn.disabled = false;
+            // Reset back to normal after 3s
+            setTimeout(() => setCheckButtonState(btn, 'normal', lastCheckTime), 3000);
+            break;
+        case 'normal':
+        default:
+            btn.classList.add('btn-warning');
+            btn.innerHTML = '🔄 Kiểm tra cập nhật';
+            btn.disabled = false;
+            break;
+    }
+
+    // Update title with last check time
+    if (lastCheckTime) {
+        const dt = new Date(lastCheckTime);
+        const formatted = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth() + 1).toString().padStart(2, '0')}/${dt.getFullYear()} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}`;
+        btn.title = `Lần kiểm tra cuối: ${formatted}`;
+    }
+}
+
+// ============================================
+// Diff Result Display
+// ============================================
+
+/**
+ * Display the diff result to the user.
+ */
+export function showDiffResult(diff: TimetableDiff): void {
+    const parts: string[] = [];
+
+    parts.push(`📊 Kết quả kiểm tra cập nhật TKB:\n`);
+
+    if (diff.added.length === 0 && diff.removed.length === 0 && diff.changed.length === 0) {
+        parts.push('✅ Không có thay đổi nào.');
+    } else {
+        if (diff.added.length > 0) {
+            parts.push(`➕ Thêm mới (${diff.added.length}):`);
+            for (const e of diff.added) {
+                parts.push(`  • ${e.date} - ${e.course} (${e.classCode})`);
+            }
+        }
+        if (diff.removed.length > 0) {
+            parts.push(`\n➖ Đã xoá (${diff.removed.length}):`);
+            for (const e of diff.removed) {
+                parts.push(`  • ${e.date} - ${e.course} (${e.classCode})`);
+            }
+        }
+        if (diff.changed.length > 0) {
+            parts.push(`\n🔄 Thay đổi (${diff.changed.length}):`);
+            for (const c of diff.changed) {
+                parts.push(`  • ${c.new.date} - ${c.new.course} (${c.new.classCode})`);
+            }
+        }
+        parts.push(`\n📌 Không đổi: ${diff.unchanged} mục`);
+    }
+
+    alert(parts.join('\n'));
+}
+
+// ============================================
+// Semester Dropdown (mostly unchanged)
+// ============================================
+
+/**
  * Create a Bootstrap 3 split-button dropdown for semester selection.
- * Shows 5 academic years × 4 terms with emoji labels.
- *
- * Structure:
- * <div class="btn-group">
- *   <button class="btn btn-info">[current semester label]</button>
- *   <button class="btn btn-info dropdown-toggle"><span class="caret"></span></button>
- *   <ul class="dropdown-menu">
- *     <li><a>1️⃣ : 2025 - 2026</a></li>
- *     ...
- *   </ul>
- * </div>
  */
 function createSemesterDropdown(onSelect: (semesterValue: string) => void): HTMLElement {
     const group = document.createElement('div');
@@ -151,8 +315,6 @@ function createSemesterDropdown(onSelect: (semesterValue: string) => void): HTML
 /**
  * Fill the timetable filter form with semester date range and submit.
  * Triggers a full page reload.
- *
- * @param semesterValue - Encoded semester value (e.g., "20251")
  */
 export function fillAndSubmitSemesterForm(semesterValue: string): void {
     const range = getSemesterDateRange(semesterValue);
@@ -208,12 +370,4 @@ export function readFormDateRange(): { start: string; end: string } | null {
         start: `${sd}/${sm}/${sy}`,
         end: `${ed}/${em}/${ey}`,
     };
-}
-
-/**
- * Try to detect semester value from the current form date range.
- * Useful for determining semesterId in export history.
- */
-export function detectSemesterFromForm(): string {
-    return detectCurrentSemester();
 }
