@@ -75,11 +75,19 @@ function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
 
     // Build description parts
     const descParts: string[] = [];
-    if (entry.classCode) descParts.push(`Mã lớp: ${entry.classCode}`);
-    if (entry.lecturer) descParts.push(`GV: ${entry.lecturer}`);
-    if (entry.phone) descParts.push(`SĐT: ${entry.phone}`);
-    if (entry.department) descParts.push(`Khoa: ${entry.department}`);
-    descParts.push(`Tiết: ${entry.periods.join(', ')}`);
+
+    const classPart = entry.classCode ? `Lớp: ${entry.classCode}` : '';
+    const periodPart = `(${entry.periods.join(', ')})`;
+    descParts.push([classPart, periodPart].filter(Boolean).join(' '));
+
+    const gvAndPhone = [entry.lecturer, entry.phone].filter(Boolean).join(' - ');
+    if (gvAndPhone) {
+        descParts.push(gvAndPhone);
+    }
+
+    if (entry.department) {
+        descParts.push(entry.department);
+    }
 
     const periodsStr = entry.periods.join('-');
     const uid = `${entry.classCode}-${entry.date.replace(/\//g, '')}-P${periodsStr}@svhaui-helper`;
@@ -98,7 +106,8 @@ function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
     };
 
     if (entry.location) {
-        attrs.location = entry.location;
+        // Keep only the part before ' - Cơ sở'
+        attrs.location = entry.location.replace(/\s*-\s*Cơ sở.*/i, '').trim();
     }
 
     return attrs;

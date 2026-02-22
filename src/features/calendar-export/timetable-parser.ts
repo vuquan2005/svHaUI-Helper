@@ -61,14 +61,16 @@ function parseBlock(block: string): Omit<TimetableEntry, 'date'> | null {
     const lecturerMatch = block.match(REGEX_LECTURER);
     const locationMatch = block.match(REGEX_LOCATION);
 
+    const clean = (str: string | undefined) => str?.replace(/\s+/g, ' ').trim();
+
     return {
         periods: periods.split(',').map(Number),
-        course: course.trim(),
-        classCode: classCode.trim(),
-        lecturer: lecturerMatch?.groups?.lecturer?.trim(),
-        phone: lecturerMatch?.groups?.phone?.trim(),
-        department: lecturerMatch?.groups?.department?.trim(),
-        location: locationMatch?.groups?.location?.trim(),
+        course: clean(course) || '',
+        classCode: clean(classCode) || '',
+        lecturer: clean(lecturerMatch?.groups?.lecturer),
+        phone: clean(lecturerMatch?.groups?.phone),
+        department: clean(lecturerMatch?.groups?.department),
+        location: clean(locationMatch?.groups?.location),
     };
 }
 
@@ -117,7 +119,17 @@ export function parseTimetableFromDOM(tableEl: HTMLTableElement): TimetableEntry
 
         // Parse each session column
         for (const col of SESSION_COLUMNS) {
-            const cellText = cells[col - 1]?.innerText ?? '';
+            // Extract text preserving line breaks. innerText might not preserve newlines
+            // from DOMParser since the elements are not rendered.
+            // We use innerHTML but first replace <br> tags with \n, then get textContent.
+            let cellText = '';
+            const cell = cells[col - 1];
+            if (cell) {
+                // Clone the cell to avoid mutating the actual DOM if it's currently rendered
+                const clone = cell.cloneNode(true) as HTMLTableCellElement;
+                clone.querySelectorAll('br').forEach((br) => br.replaceWith('\n'));
+                cellText = clone.textContent ?? '';
+            }
             const cellEntries = parseSessionCell(cellText, date);
             entries.push(...cellEntries);
         }
