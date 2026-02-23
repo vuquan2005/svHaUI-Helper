@@ -54,6 +54,6 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
-    "ics": "^3.8.1"
+    "ical-generator": "^10.0.0"
   }
 }

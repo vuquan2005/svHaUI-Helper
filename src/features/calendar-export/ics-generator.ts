@@ -1,12 +1,11 @@
 /**
  * Calendar Export Feature - ICS Generator
  * Converts TimetableEntry[] to an ICS (iCalendar RFC 5545) string
- * using the `ics` library.
+ * using the `ical-generator` library.
  */
 
-import { createEvents, type EventAttributes, type HeaderAttributes } from 'ics';
+import ical, { ICalCalendarMethod, ICalEventStatus } from 'ical-generator';
 import { TimetableEntry, PeriodTimeSlot } from './types';
-import { parseDateTimeVN, vnToUTC } from '@/utils';
 
 // ============================================
 // Period Time Slots (16 periods, VN local time)
@@ -35,6 +34,13 @@ const PERIOD_SLOTS: PeriodTimeSlot[] = [
 ];
 
 // ============================================
+// Constants
+// ============================================
+
+/** Vietnam timezone offset in hours (UTC+7) */
+const VN_UTC_OFFSET_HOURS = 7;
+
+// ============================================
 // Helpers
 // ============================================
 
@@ -53,27 +59,40 @@ function getTimeRange(periods: number[]): { start: string; end: string } | null 
     return { start: firstSlot.start, end: lastSlot.end };
 }
 
+/**
+ * Build a UTC Date from a dd/MM/yyyy date string and an HH:mm time string (VN local time).
+ * Converts VN time (UTC+7) to UTC automatically.
+ *
+ * @returns Date in UTC, or null if parsing fails.
+ */
+function buildUTCDate(dateStr: string, timeStr: string): Date | null {
+    const dateParts = dateStr.split('/');
+    if (dateParts.length !== 3) return null;
+
+    const day = parseInt(dateParts[0], 10);
+    const month = parseInt(dateParts[1], 10);
+    const year = parseInt(dateParts[2], 10);
+
+    const timeParts = timeStr.split(':');
+    if (timeParts.length !== 2) return null;
+
+    const hour = parseInt(timeParts[0], 10);
+    const minute = parseInt(timeParts[1], 10);
+
+    if ([day, month, year, hour, minute].some(isNaN)) return null;
+
+    // Create UTC date by subtracting VN offset (UTC+7)
+    return new Date(Date.UTC(year, month - 1, day, hour - VN_UTC_OFFSET_HOURS, minute));
+}
+
 // ============================================
-// ICS Generation (using `ics` library)
+// ICS Generation (using `ical-generator`)
 // ============================================
 
 /**
- * Convert a TimetableEntry to an ics EventAttributes object.
- * Converts VN local time → UTC for ICS output.
- * Returns null if the entry cannot be converted.
+ * Build event description from a TimetableEntry.
  */
-function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
-    const timeRange = getTimeRange(entry.periods);
-    if (!timeRange) return null;
-
-    const startVN = parseDateTimeVN(entry.date, timeRange.start);
-    const endVN = parseDateTimeVN(entry.date, timeRange.end);
-    if (!startVN || !endVN) return null;
-
-    const startUTC = vnToUTC(startVN);
-    const endUTC = vnToUTC(endVN);
-
-    // Build description parts
+function buildDescription(entry: TimetableEntry): string {
     const descParts: string[] = [];
 
     const classPart = entry.classCode ? `Lớp: ${entry.classCode}` : '';
@@ -89,28 +108,7 @@ function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
         descParts.push(entry.department);
     }
 
-    const periodsStr = entry.periods.join('-');
-    const uid = `${entry.classCode}-${entry.date.replace(/\//g, '')}-P${periodsStr}@svhaui-helper`;
-
-    const attrs: EventAttributes = {
-        start: startUTC,
-        startInputType: 'utc',
-        startOutputType: 'utc',
-        end: endUTC,
-        endInputType: 'utc',
-        endOutputType: 'utc',
-        title: entry.course,
-        description: descParts.join('\n'),
-        uid,
-        status: 'CONFIRMED',
-    };
-
-    if (entry.location) {
-        // Keep only the part before ' - Cơ sở'
-        attrs.location = entry.location.replace(/\s*-\s*Cơ sở.*/i, '').trim();
-    }
-
-    return attrs;
+    return descParts.join('\n');
 }
 
 /**
@@ -121,28 +119,47 @@ function toEventAttributes(entry: TimetableEntry): EventAttributes | null {
  * @returns ICS file content as string
  */
 export function generateICS(entries: TimetableEntry[], calendarName: string = 'HaUI'): string {
-    const events = entries
-        .map((entry) => toEventAttributes(entry))
-        .filter((e): e is EventAttributes => e !== null);
+    const cal = ical({
+        name: calendarName,
+        prodId: '-//QuanVu//svHaUI Helper//VI',
+    });
+    cal.method(ICalCalendarMethod.PUBLISH);
 
-    if (events.length === 0) {
+    let eventCount = 0;
+
+    for (const entry of entries) {
+        const timeRange = getTimeRange(entry.periods);
+        if (!timeRange) continue;
+
+        const start = buildUTCDate(entry.date, timeRange.start);
+        const end = buildUTCDate(entry.date, timeRange.end);
+        if (!start || !end) continue;
+
+        const periodsStr = entry.periods.join('-');
+        const uid = `${entry.classCode}-${entry.date.replace(/\//g, '')}-P${periodsStr}@svhaui-helper`;
+
+        const location = entry.location
+            ? entry.location.replace(/\s*-\s*Cơ sở.*/i, '').trim()
+            : undefined;
+
+        cal.createEvent({
+            id: uid,
+            start,
+            end,
+            summary: entry.course,
+            description: buildDescription(entry),
+            location,
+            status: ICalEventStatus.CONFIRMED,
+        });
+
+        eventCount++;
+    }
+
+    if (eventCount === 0) {
         return '';
     }
 
-    const headerAttributes: HeaderAttributes = {
-        productId: '-//QuanVu//svHaUI Helper//VI',
-        calName: calendarName,
-        method: 'PUBLISH',
-    };
-
-    const { error, value } = createEvents(events, headerAttributes);
-
-    if (error) {
-        console.error('[calendar-export] ICS generation error:', error);
-        return '';
-    }
-
-    return value ?? '';
+    return cal.toString();
 }
 
 /**
