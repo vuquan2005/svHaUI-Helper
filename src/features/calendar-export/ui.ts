@@ -11,6 +11,7 @@ import {
 } from './semester-config';
 import { TimetableDiff } from './types';
 import { formatDateVN } from '../../utils/date';
+import styles from './style.module.scss';
 
 // ============================================
 // Types
@@ -45,8 +46,7 @@ export interface UIRefs {
  */
 export function createCalendarExportUI(callbacks: UICallbacks): UIRefs {
     const container = document.createElement('div');
-    container.className = 'svhaui-calendar-export';
-    container.style.cssText = 'display: inline-block; margin-left: 5px; vertical-align: top;';
+    container.className = `svhaui-calendar-export ${styles.container}`;
 
     // Download split-button
     const downloadGroup = createDownloadSplitButton(
@@ -81,7 +81,6 @@ function createDownloadSplitButton(
 ): HTMLElement {
     const group = document.createElement('div');
     group.className = 'btn-group';
-    group.style.cssText = 'margin-right: 5px;';
 
     // Main button — download currently displayed timetable
     const mainBtn = document.createElement('button');
@@ -141,7 +140,6 @@ function createCheckUpdateButton(onClick: () => void): HTMLButtonElement {
     btn.className = 'btn btn-warning';
     btn.innerHTML = '🔄 Kiểm tra cập nhật';
     btn.title = 'Kiểm tra xem thời khóa biểu có thay đổi không';
-    btn.style.cssText = 'margin-right: 5px;';
     btn.addEventListener('click', onClick);
     return btn;
 }
