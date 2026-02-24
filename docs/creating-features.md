@@ -17,24 +17,19 @@ Mỗi feature trong dự án:
 
 ### 1. Tạo folder và file
 
-```
+```text
 src/features/
 └── my-feature/
-    └── index.ts
+    ├── index.ts
+    └── style.module.scss # Nếu cần CSS
 ```
 
 ### 2. Tạo Feature class
 
 ```typescript
 // src/features/my-feature/index.ts
-import { Feature } from '../../core';
-import { addStyles } from '../../utils';
-
-const styles = `
-  .my-feature-container {
-    /* CSS của bạn */
-  }
-`;
+import { Feature } from '@/core';
+import styles from './style.module.scss';
 
 export class MyFeature extends Feature {
   constructor() {
@@ -49,7 +44,9 @@ export class MyFeature extends Feature {
   run(): void {
     // this.log tự động có prefix [HaUI:My Feature]
     this.log.i('Đang khởi tạo...');
-    addStyles(styles);
+
+    // Thêm class từ module CSS
+    document.body.classList.add(styles.myFeatureContainer);
 
     // Logic của bạn ở đây
   }
@@ -66,7 +63,10 @@ export class MyFeature extends Feature {
 // src/features/index.ts
 import { MyFeature } from './my-feature';
 
-export const allFeatures: Feature[] = [new MyFeature()];
+export const allFeatures: Feature<any>[] = [
+  // ... các feature khác
+  new MyFeature(),
+];
 ```
 
 ### 4. Test
@@ -81,7 +81,7 @@ pnpm dev
 ### FeatureConfig
 
 ```typescript
-import { MatchPattern } from '../../core';
+import { MatchPattern } from '@/core';
 
 type UrlMatchConfig = RegExp | string | MatchPattern | MatchPattern[];
 
@@ -179,13 +179,3 @@ class MyFeature extends Feature {
   }
 }
 ```
-
-## 🛠️ Utilities
-
-Xem chi tiết các APIs: [API Reference](api-reference.md)
-
-## 💡 Tips
-
-- **CSS prefix**: Dùng prefix như `.svhaui-` để tránh xung đột
-- **Error handling**: Luôn try-catch khi làm việc với DOM
-- **Async/await**: `run()` có thể là async
