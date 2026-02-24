@@ -4,15 +4,10 @@ import path from 'path';
 import { version } from './package.json';
 
 const isMinify = process.env.MINIFY === 'true';
-const isDevChannel = process.env.DEV_CHANNEL === 'true';
 
 // GitHub release URLs for auto-update (only for minified version)
 const GITHUB_RELEASE_BASE = 'https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download';
 const MINIFIED_SCRIPT_NAME = 'svhaui-helper.min.user.js';
-
-// Dev channel uses raw file from main branch (always latest prerelease)
-const DEV_SCRIPT_NAME = 'svhaui-helper.dev.user.js';
-const DEV_UPDATE_URL = `https://github.com/vuquan2005/svHaUI-Helper/releases/download/dev/${DEV_SCRIPT_NAME}`;
 
 const buildTime: string = new Date()
     .toLocaleString('sv-SE', { hour12: false })
@@ -21,19 +16,12 @@ const buildTime: string = new Date()
 
 // Determine output file name
 const getFileName = () => {
-    if (isDevChannel) return DEV_SCRIPT_NAME;
     if (isMinify) return MINIFIED_SCRIPT_NAME;
     return 'svhaui-helper.user.js';
 };
 
 // Determine update URLs based on build type
 const getUpdateUrls = () => {
-    if (isDevChannel) {
-        return {
-            downloadURL: DEV_UPDATE_URL,
-            updateURL: DEV_UPDATE_URL,
-        };
-    }
     if (isMinify) {
         return {
             downloadURL: `${GITHUB_RELEASE_BASE}/${MINIFIED_SCRIPT_NAME}`,
@@ -53,13 +41,11 @@ export default defineConfig({
         monkey({
             entry: 'src/main.ts',
             userscript: {
-                name: isDevChannel ? 'SV HaUI Helper (Dev)' : 'SV HaUI Helper',
+                name: 'SV HaUI Helper',
                 version,
                 namespace: 'https://github.com/vuquan2005/svHaUI-Helper',
                 author: 'VuQuan',
-                description: isDevChannel
-                    ? '⚠️ DEV BUILD - Nâng cao trải nghiệm cho sinh viên HaUI'
-                    : 'Nâng cao trải nghiệm cho sinh viên HaUI',
+                description: 'Nâng cao trải nghiệm cho sinh viên HaUI',
                 license: 'GPL-3.0-only',
                 homepageURL: 'https://github.com/vuquan2005/svHaUI-Helper',
                 supportURL: 'https://github.com/vuquan2005/svHaUI-Helper/issues',
