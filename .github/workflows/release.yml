@@ -2,49 +2,58 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  release:
+  release-please:
     runs-on: ubuntu-latest
-
     steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: node
+
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        if: ${{ steps.release.outputs.release_created }}
         with:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
+        if: ${{ steps.release.outputs.release_created }}
         with:
           node-version: 22.x
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        if: ${{ steps.release.outputs.release_created }}
 
       - name: Type check
         run: pnpm exec tsc --noEmit
+        if: ${{ steps.release.outputs.release_created }}
 
       - name: Test
         run: pnpm test
+        if: ${{ steps.release.outputs.release_created }}
 
       - name: Build all
         run: pnpm build:all
+        if: ${{ steps.release.outputs.release_created }}
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/svhaui-helper.user.js
-            dist/svhaui-helper.min.user.js
-          generate_release_notes: true
-          draft: false
-          prerelease: false
+      - name: Upload Release Assets
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ steps.release.outputs.tag_name }} ./dist/svhaui-helper.user.js ./dist/svhaui-helper.min.user.js
