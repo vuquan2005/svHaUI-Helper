@@ -46,12 +46,14 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 
 ### Tính năng hiện có
 
-| Tính năng         | Mô tả                                                  | Trạng thái |
-| ----------------- | ------------------------------------------------------ | ---------: |
-| 🏷️ Dynamic Title  | Thay đổi tiêu đề tab theo trang                        |         ✅ |
-| 🔐 Captcha Helper | Tự động nhận diện (OpenCV + Tesseract) và nhập captcha |         ✅ |
-| 🚀 Quick Nav      | Điều hướng nhanh giữa trang Điểm TX và Điểm thi        |         ✅ |
-| 📝 Survey Auto    | Đánh giá nhanh (chọn 1-5 điểm cho toàn bộ câu hỏi)     |         ✅ |
+| Tính năng          | Mô tả                                                  | Trạng thái |
+| ------------------ | ------------------------------------------------------ | ---------: |
+| 🏷️ Dynamic Title   | Thay đổi tiêu đề tab theo trang                        |         ✅ |
+| 🔐 Captcha Helper  | Tự động nhận diện (OpenCV + Tesseract) và nhập captcha |         ✅ |
+| 🚀 Quick Nav       | Điều hướng nhanh giữa trang Điểm TX và Điểm thi        |         ✅ |
+| 📝 Survey Auto     | Đánh giá nhanh (chọn 1-5 điểm cho toàn bộ câu hỏi)     |         ✅ |
+| 📅 Calendar Export | Xuất thời khóa biểu sang file ICS, theo dõi cập nhật   |         ✅ |
+| ❄️ Remove Snowfall | Ẩn hiệu ứng tuyết rơi trên trang                       |         ✅ |
 
 ## 🚀 Cài đặt
 

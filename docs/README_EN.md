@@ -46,12 +46,14 @@ The project is built with a modular architecture, making it easy to extend and m
 
 ### Current Features
 
-| Feature           | Description                                               | Status |
-| ----------------- | --------------------------------------------------------- | -----: |
-| 🏷️ Dynamic Title  | Changes tab title based on the page context               |     ✅ |
-| 🔐 Captcha Helper | Auto-solve (OpenCV + Tesseract) and fill captcha          |     ✅ |
-| 🚀 Quick Nav      | Quick switch between Study Results and Exam Results pages |     ✅ |
-| 📝 Survey Auto    | Quick evaluation (select 1-5 score for all questions)     |     ✅ |
+| Feature            | Description                                               | Status |
+| ------------------ | --------------------------------------------------------- | -----: |
+| 🏷️ Dynamic Title   | Changes tab title based on the page context               |     ✅ |
+| 🔐 Captcha Helper  | Auto-solve (OpenCV + Tesseract) and fill captcha          |     ✅ |
+| 🚀 Quick Nav       | Quick switch between Study Results and Exam Results pages |     ✅ |
+| 📝 Survey Auto     | Quick evaluation (select 1-5 score for all questions)     |     ✅ |
+| 📅 Calendar Export | Export timetable to ICS format, auto-check for updates    |     ✅ |
+| ❄️ Remove Snowfall | Hide snowfall animation on the website                    |     ✅ |
 
 ## 🚀 Installation
 
