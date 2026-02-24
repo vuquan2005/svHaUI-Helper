@@ -39,6 +39,91 @@ export interface PeriodTimeSlot {
 }
 
 // ============================================
+// Recurrence Types (RRULE pipeline)
+// ============================================
+
+/**
+ * A group of entries that share the same classCode + periods,
+ * representing a recurring series of classes.
+ */
+export interface SeriesGroup {
+    /** Course name */
+    course: string;
+    /** Class code (e.g. "20251BS6001001") */
+    classCode: string;
+    /** Period numbers (sorted, e.g. [1, 2, 3]) */
+    periods: number[];
+    /** All entries belonging to this group */
+    entries: TimetableEntry[];
+}
+
+/**
+ * Result of majority voting for a field value.
+ * Used to determine the "default" value for a recurring series.
+ */
+export interface MajorityVoteResult<T> {
+    /** Winning value, undefined if no consensus (< threshold) */
+    winner: T | undefined;
+    /** Whether the winner met the threshold (>= 60%) */
+    isConsensus: boolean;
+}
+
+/**
+ * Master info derived from majority voting across all entries in a group.
+ * These are the "default" values used for the recurring event.
+ */
+export interface MasterInfo {
+    location: MajorityVoteResult<string>;
+    lecturer: MajorityVoteResult<string>;
+    phone: MajorityVoteResult<string>;
+    department: MajorityVoteResult<string>;
+}
+
+/** RRULE parameters for a recurring event */
+export interface RecurrenceParams {
+    /** First occurrence date */
+    dtstart: Date;
+    /** Last occurrence date (RRULE UNTIL) */
+    until: Date;
+    /** Days of the week (e.g. ['MO', 'TH']) */
+    byDay: string[];
+    /** Week interval (1 = weekly, 2 = biweekly) */
+    interval: number;
+}
+
+/**
+ * Exceptions detected by comparing ideal schedule vs actual schedule.
+ */
+export interface RecurrenceExceptions {
+    /** Dates in ideal but not actual — student is off (EXDATE) */
+    exdates: Date[];
+    /** Dates in actual but not ideal, with same attributes — makeup classes (RDATE) */
+    rdates: Date[];
+    /** Dates where actual attributes differ from master — overrides (RECURRENCE-ID) */
+    overrides: OverrideEvent[];
+}
+
+/** An override event for a specific date in the recurring series */
+export interface OverrideEvent {
+    /** The date being overridden */
+    recurrenceId: Date;
+    /** The actual entry with different attributes */
+    entry: TimetableEntry;
+}
+
+/**
+ * Complete result for one recurring series, ready for ICS generation.
+ */
+export interface RecurringSeries {
+    group: SeriesGroup;
+    masterInfo: MasterInfo;
+    rrule: RecurrenceParams;
+    exceptions: RecurrenceExceptions;
+    /** Unique identifier for this series */
+    uid: string;
+}
+
+// ============================================
 // Semester Snapshot (for update checking)
 // ============================================
 
