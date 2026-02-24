@@ -99,18 +99,8 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
 
             this.log.i(`Fetched ${entries.length} timetable entries`);
 
-            // Generate ICS
-            const icsContent = generateICS(entries, getSemesterLabel(semesterId));
-
-            // Generate filename
-            const dateRange = getSemesterDateRangeFormatted(semesterId);
-            const filename = dateRange
-                ? `TKB_${dateRange.start.replace(/\//g, '-')}_${dateRange.end.replace(/\//g, '-')}.ics`
-                : `TKB_${semesterId}.ics`;
-
-            // Download
-            downloadICSFile(icsContent, filename);
-            this.log.i(`Downloaded: ${filename}`);
+            // Generate and Download
+            this.downloadSemesterICS(semesterId, entries);
 
             // Save snapshot
             await this.saveSnapshot(semesterId, entries);
@@ -200,9 +190,14 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
                 await this.storage.set('lastCheckTime', now);
                 setCheckButtonState(btn, 'no-update', now);
                 this.log.i('No previous snapshot — saved baseline');
-                alert(
-                    'Đã lưu snapshot lần đầu cho kỳ hiện tại. Lần check sau sẽ so sánh với snapshot này.'
+
+                const wantsDownload = confirm(
+                    'Đã lưu dữ liệu lần đầu cho kỳ hiện tại để theo dõi cập nhật. Bạn có muốn tải file TKB (ICS) về máy luôn không?'
                 );
+
+                if (wantsDownload) {
+                    this.downloadSemesterICS(semesterId, newEntries);
+                }
                 return;
             }
 
@@ -243,13 +238,7 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
         update: NonNullable<typeof this.pendingUpdate>
     ): Promise<void> {
         const { semesterId, entries } = update;
-        const icsContent = generateICS(entries, getSemesterLabel(semesterId));
-        const dateRange = getSemesterDateRangeFormatted(semesterId);
-        const filename = dateRange
-            ? `TKB_${dateRange.start.replace(/\//g, '-')}_${dateRange.end.replace(/\//g, '-')}.ics`
-            : `TKB_${semesterId}.ics`;
-        downloadICSFile(icsContent, filename);
-        this.log.i(`Downloaded updated ICS: ${filename}`);
+        this.downloadSemesterICS(semesterId, entries);
 
         // Save snapshot & clear cache
         await this.saveSnapshot(semesterId, entries);
@@ -322,6 +311,19 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
     // ============================================
     // Snapshot Management
     // ============================================
+
+    /**
+     * Reusable method to generate and download ICS for a semester.
+     */
+    private downloadSemesterICS(semesterId: string, entries: import('./types').TimetableEntry[]) {
+        const icsContent = generateICS(entries, getSemesterLabel(semesterId));
+        const dateRange = getSemesterDateRangeFormatted(semesterId);
+        const filename = dateRange
+            ? `TKB_${dateRange.start.replace(/\//g, '-')}_${dateRange.end.replace(/\//g, '-')}.ics`
+            : `TKB_${semesterId}.ics`;
+        downloadICSFile(icsContent, filename);
+        this.log.i(`Downloaded ICS: ${filename}`);
+    }
 
     /**
      * Save a snapshot of the current semester's timetable.
