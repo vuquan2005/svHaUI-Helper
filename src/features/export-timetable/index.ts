@@ -180,6 +180,27 @@ export class ExportTimetableFeature extends Feature<ExportTimetableStorage> {
         }
 
         try {
+            const currentSemesterId = detectCurrentSemester();
+            const [isDownloaded, snapshot] = await Promise.all([
+                this.storage.get('isDownloaded'),
+                this.storage.get('lastSnapshot'),
+            ]);
+
+            const hasValidSnapshot = snapshot != null && snapshot.semesterId === currentSemesterId;
+
+            // ── Branch: not downloaded + valid snapshot → show prompt ──
+            if (!isDownloaded && hasValidSnapshot) {
+                const wantsDownload = confirm(
+                    'Bạn chưa tải file TKB (ICS) của kỳ hiện tại. Bạn có muốn tải xuống không?'
+                );
+                if (wantsDownload) {
+                    this.downloadSemesterICS(currentSemesterId, snapshot.entries);
+                    await this.storage.set('isDownloaded', true);
+                    setCheckButtonState(btn, 'normal');
+                }
+                return;
+            }
+
             setCheckButtonState(btn, 'checking');
             const { semesterId, newEntries, result, now } = await this.performUpdateCheck();
 
