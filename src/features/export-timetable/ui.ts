@@ -149,11 +149,11 @@ function createCheckUpdateButton(onClick: () => void): HTMLButtonElement {
  */
 export function setCheckButtonState(
     btn: HTMLButtonElement,
-    state: 'normal' | 'has-update' | 'checking' | 'no-update',
+    state: 'normal' | 'has-update' | 'checking' | 'no-update' | 'not-downloaded',
     lastCheckTime?: string
 ): void {
     // Reset classes
-    btn.classList.remove('btn-warning', 'btn-danger', 'btn-info', 'btn-default');
+    btn.classList.remove('btn-warning', 'btn-danger', 'btn-info', 'btn-default', 'btn-success');
 
     switch (state) {
         case 'checking':
@@ -164,6 +164,11 @@ export function setCheckButtonState(
         case 'has-update':
             btn.classList.add('btn-danger');
             btn.innerHTML = '🔄 Có thay đổi!';
+            btn.disabled = false;
+            break;
+        case 'not-downloaded':
+            btn.classList.add('btn-success');
+            btn.innerHTML = '📥 Chưa tải TKB';
             btn.disabled = false;
             break;
         case 'no-update':

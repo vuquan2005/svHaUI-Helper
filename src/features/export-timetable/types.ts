@@ -171,5 +171,7 @@ export interface ExportTimetableStorage {
     lastSnapshot?: SemesterSnapshot;
     /** ISO datetime of the last update check */
     lastCheckTime?: string;
+    /** Whether the user has downloaded the ICS for the current snapshot */
+    isDownloaded?: boolean;
     [key: string]: unknown;
 }

@@ -102,8 +102,14 @@ export class ExportTimetableFeature extends Feature<ExportTimetableStorage> {
             // Generate and Download
             this.downloadSemesterICS(semesterId, entries);
 
-            // Save snapshot
+            // Save snapshot & mark as downloaded
             await this.saveSnapshot(semesterId, entries);
+            await this.storage.set('isDownloaded', true);
+
+            if (this.uiRefs) {
+                const now = new Date().toISOString();
+                setCheckButtonState(this.uiRefs.checkUpdateBtn, 'normal', now);
+            }
         } catch (error) {
             this.log.e('Semester download failed:', error);
             alert('Tải TKB kỳ này thất bại. Xem console để biết chi tiết.');
@@ -175,54 +181,42 @@ export class ExportTimetableFeature extends Feature<ExportTimetableStorage> {
 
         try {
             setCheckButtonState(btn, 'checking');
+            const { semesterId, newEntries, result, now } = await this.performUpdateCheck();
 
-            const semesterId = detectCurrentSemester();
-            const newEntries = await fetchSemesterTimetable(semesterId);
-            this.log.i(`Check update: fetched ${newEntries.length} entries for ${semesterId}`);
+            switch (result.outcome) {
+                case 'new-semester': {
+                    setCheckButtonState(btn, 'not-downloaded', now);
+                    this.log.i('New semester — saved baseline');
 
-            // Load last snapshot
-            const snapshot = await this.storage.get('lastSnapshot');
-            const now = new Date().toISOString();
-
-            if (!snapshot || snapshot.semesterId !== semesterId) {
-                // No previous snapshot for this semester — save as baseline
-                await this.saveSnapshot(semesterId, newEntries);
-                await this.storage.set('lastCheckTime', now);
-                setCheckButtonState(btn, 'no-update', now);
-                this.log.i('No previous snapshot — saved baseline');
-
-                const wantsDownload = confirm(
-                    'Đã lưu dữ liệu lần đầu cho kỳ hiện tại để theo dõi cập nhật. Bạn có muốn tải file TKB (ICS) về máy luôn không?'
-                );
-
-                if (wantsDownload) {
-                    this.downloadSemesterICS(semesterId, newEntries);
+                    const wantsDownload = confirm(
+                        'Đã lưu dữ liệu lần đầu cho kỳ hiện tại để theo dõi cập nhật. Bạn có muốn tải file TKB (ICS) về máy luôn không?'
+                    );
+                    if (wantsDownload) {
+                        this.downloadSemesterICS(semesterId, newEntries);
+                        await this.storage.set('isDownloaded', true);
+                        setCheckButtonState(btn, 'normal', now);
+                    }
+                    break;
                 }
-                return;
-            }
+                case 'has-changes': {
+                    const diff = diffEntries(result.oldEntries!, newEntries);
+                    this.log.i(
+                        `Changes detected: +${diff.added.length} -${diff.removed.length} ~${diff.changed.length}`
+                    );
 
-            // Compare
-            if (entriesEqual(snapshot.entries, newEntries)) {
-                await this.storage.set('lastCheckTime', now);
-                setCheckButtonState(btn, 'no-update', now);
-                this.log.i('No changes detected');
-            } else {
-                const diff = diffEntries(snapshot.entries, newEntries);
-                this.log.i(
-                    `Changes detected: +${diff.added.length} -${diff.removed.length} ~${diff.changed.length}`
-                );
+                    this.pendingUpdate = { semesterId, entries: newEntries, diff };
+                    setCheckButtonState(btn, 'has-update', now);
 
-                // Cache the pending update
-                this.pendingUpdate = { semesterId, entries: newEntries, diff };
-                setCheckButtonState(btn, 'has-update', now);
-
-                // Show diff and ask user if they want to download
-                const wantsDownload = showDiffResult(diff);
-                if (wantsDownload) {
-                    await this.downloadAndSaveUpdate(this.pendingUpdate);
+                    const wantsDownload = showDiffResult(diff);
+                    if (wantsDownload) {
+                        await this.downloadAndSaveUpdate(this.pendingUpdate);
+                    }
+                    break;
                 }
-                // If user declines: pendingUpdate stays cached
-                // → next click re-prompts without re-fetching
+                case 'no-changes':
+                    setCheckButtonState(btn, 'no-update', now);
+                    this.log.i('No changes detected');
+                    break;
             }
         } catch (error) {
             this.log.e('Check update failed:', error);
@@ -240,8 +234,9 @@ export class ExportTimetableFeature extends Feature<ExportTimetableStorage> {
         const { semesterId, entries } = update;
         this.downloadSemesterICS(semesterId, entries);
 
-        // Save snapshot & clear cache
+        // Save snapshot, mark downloaded & clear cache
         await this.saveSnapshot(semesterId, entries);
+        await this.storage.set('isDownloaded', true);
         const now = new Date().toISOString();
         await this.storage.set('lastCheckTime', now);
         this.pendingUpdate = null;
@@ -252,60 +247,121 @@ export class ExportTimetableFeature extends Feature<ExportTimetableStorage> {
     }
 
     /**
-     * Auto-check on page load if enough time has elapsed.
+     * Auto-check on page load following the flow:
+     *
+     *  isDownloaded?
+     *    false + valid snapshot → btn = "not-downloaded"
+     *    true / expired / no snapshot → shouldAutoCheck?
+     *      yes → fetchAndCompare
+     *        new semester → save baseline + reset → btn = "not-downloaded"
+     *        has changes → btn = "has-update"
+     *        no changes → btn = "normal"
+     *      no → btn = "normal" (with lastCheckTime title)
      */
     private async autoCheckOnLoad(): Promise<void> {
         try {
-            const lastCheckTime = await this.storage.get('lastCheckTime');
+            if (!this.uiRefs) return;
+            const btn = this.uiRefs.checkUpdateBtn;
+            const currentSemesterId = detectCurrentSemester();
 
-            if (!shouldAutoCheck(lastCheckTime as string | undefined)) {
-                // Update button title with last check time
-                if (this.uiRefs && lastCheckTime) {
-                    setCheckButtonState(
-                        this.uiRefs.checkUpdateBtn,
-                        'normal',
-                        lastCheckTime as string
-                    );
+            const [isDownloaded, snapshot, storedCheckTime] = await Promise.all([
+                this.storage.get('isDownloaded'),
+                this.storage.get('lastSnapshot'),
+                this.storage.get('lastCheckTime'),
+            ]);
+
+            const hasValidSnapshot = snapshot != null && snapshot.semesterId === currentSemesterId;
+
+            // ── Branch: not downloaded + valid snapshot → show prompt ──
+            if (!isDownloaded && hasValidSnapshot) {
+                setCheckButtonState(btn, 'not-downloaded', storedCheckTime);
+                this.log.i('Page load: snapshot exists but not downloaded');
+                return;
+            }
+
+            // ── Branch: should auto-check? ──
+            if (!shouldAutoCheck(storedCheckTime)) {
+                // Not time yet — just set title and idle state
+                if (storedCheckTime) {
+                    setCheckButtonState(btn, 'normal', storedCheckTime);
                 }
                 return;
             }
 
+            // ── Auto-check: fetch & compare ──
             this.log.i('Auto-check triggered');
-            if (!this.uiRefs) return;
-
-            const btn = this.uiRefs.checkUpdateBtn;
-            const semesterId = detectCurrentSemester();
-
             try {
-                const newEntries = await fetchSemesterTimetable(semesterId);
-                const snapshot = await this.storage.get('lastSnapshot');
-                const now = new Date().toISOString();
+                const { semesterId, newEntries, result, now } = await this.performUpdateCheck();
 
-                if (!snapshot || snapshot.semesterId !== semesterId) {
-                    // First time — save silently
-                    await this.saveSnapshot(semesterId, newEntries);
-                    await this.storage.set('lastCheckTime', now);
-                    setCheckButtonState(btn, 'normal', now);
-                    return;
+                switch (result.outcome) {
+                    case 'new-semester':
+                        // Baseline saved, user hasn't downloaded → not-downloaded
+                        setCheckButtonState(btn, 'not-downloaded', now);
+                        this.log.i('Auto-check: new semester — baseline saved');
+                        break;
+                    case 'has-changes': {
+                        const diff = diffEntries(result.oldEntries!, newEntries);
+                        this.pendingUpdate = { semesterId, entries: newEntries, diff };
+                        setCheckButtonState(btn, 'has-update', now);
+                        this.log.i('Auto-check: changes detected');
+                        break;
+                    }
+                    case 'no-changes':
+                        setCheckButtonState(btn, 'normal', now);
+                        this.log.i('Auto-check: no changes');
+                        break;
                 }
-
-                if (!entriesEqual(snapshot.entries, newEntries)) {
-                    // Has changes — update button style, don't show alert
-                    setCheckButtonState(btn, 'has-update', now);
-                    this.log.i('Auto-check: changes detected');
-                } else {
-                    setCheckButtonState(btn, 'normal', now);
-                    this.log.i('Auto-check: no changes');
-                }
-
-                await this.storage.set('lastCheckTime', now);
             } catch (error) {
                 this.log.w('Auto-check fetch failed:', error);
-                // Silently fail — don't bother the user
             }
         } catch (error) {
             this.log.w('Auto-check failed:', error);
         }
+    }
+
+    /**
+     * Shared fetch-compare-save flow used by both handleCheckUpdate and autoCheckOnLoad.
+     * Detects semester → fetches timetable → compares with snapshot → saves lastCheckTime.
+     */
+    private async performUpdateCheck() {
+        const semesterId = detectCurrentSemester();
+        const newEntries = await fetchSemesterTimetable(semesterId);
+        this.log.i(`Update check: fetched ${newEntries.length} entries for ${semesterId}`);
+
+        const result = await this.fetchAndCompare(semesterId, newEntries);
+        const now = new Date().toISOString();
+        await this.storage.set('lastCheckTime', now);
+
+        return { semesterId, newEntries, result, now };
+    }
+
+    /**
+     * Core comparison logic shared by autoCheckOnLoad and handleCheckUpdate.
+     * Saves baseline for new semesters and resets isDownloaded state.
+     *
+     * @returns The outcome and, for 'has-changes', the old entries for diffing.
+     */
+    private async fetchAndCompare(
+        semesterId: string,
+        newEntries: import('./types').TimetableEntry[]
+    ): Promise<{
+        outcome: 'new-semester' | 'has-changes' | 'no-changes';
+        oldEntries?: import('./types').TimetableEntry[];
+    }> {
+        const snapshot = await this.storage.get('lastSnapshot');
+
+        if (!snapshot || snapshot.semesterId !== semesterId) {
+            // New semester — save baseline & reset download state
+            await this.saveSnapshot(semesterId, newEntries);
+            await this.storage.set('isDownloaded', false);
+            return { outcome: 'new-semester' };
+        }
+
+        if (!entriesEqual(snapshot.entries, newEntries)) {
+            return { outcome: 'has-changes', oldEntries: snapshot.entries };
+        }
+
+        return { outcome: 'no-changes' };
     }
 
     // ============================================
