@@ -9,7 +9,7 @@ import { CaptchaHelperFeature } from './captcha-helper';
 import { GradeNavigationFeature } from './grade-navigation';
 import { SurveyAutofillFeature } from './survey-autofill';
 import { RemoveSnowfallFeature } from './misc';
-import { CalendarExportFeature } from './calendar-export';
+import { ExportTimetableFeature } from './export-timetable';
 
 // Add new features here
 export const allFeatures: Feature<any>[] = [
@@ -18,5 +18,5 @@ export const allFeatures: Feature<any>[] = [
     new GradeNavigationFeature(),
     new SurveyAutofillFeature(),
     new RemoveSnowfallFeature(),
-    new CalendarExportFeature(),
+    new ExportTimetableFeature(),
 ];

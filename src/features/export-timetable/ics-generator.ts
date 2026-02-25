@@ -1,5 +1,5 @@
 /**
- * Calendar Export Feature - ICS Generator
+ * Export Timetable Feature - ICS Generator
  * Converts TimetableEntry[] to an ICS (iCalendar RFC 5545) string
  * using the `ical-generator` library.
  *
@@ -17,6 +17,8 @@ import ical, {
 } from 'ical-generator';
 import { TimetableEntry, PeriodTimeSlot, RecurringSeries } from './types';
 import { buildRecurringSeries } from './recurrence-builder';
+import { buildUTCDate, dateToUTC, formatICSDateTime } from '../../utils/date';
+import { downloadFile } from '../../utils/download';
 
 // ============================================
 // Period Time Slots (16 periods, VN local time)
@@ -48,9 +50,6 @@ const PERIOD_SLOTS: PeriodTimeSlot[] = [
 // Constants
 // ============================================
 
-/** Vietnam timezone offset in hours (UTC+7) */
-const VN_UTC_OFFSET_HOURS = 7;
-
 /** Map RRULE day abbreviations to ical-generator ICalWeekday enum */
 const DAY_MAP: Record<string, ICalWeekday> = {
     SU: ICalWeekday.SU,
@@ -79,70 +78,6 @@ export function getTimeRange(periods: number[]): { start: string; end: string } 
 
     if (!firstSlot || !lastSlot) return null;
     return { start: firstSlot.start, end: lastSlot.end };
-}
-
-/**
- * Build a UTC Date from a dd/MM/yyyy date string and an HH:mm time string (VN local time).
- * Converts VN time (UTC+7) to UTC automatically.
- *
- * @returns Date in UTC, or null if parsing fails.
- */
-export function buildUTCDate(dateStr: string, timeStr: string): Date | null {
-    const dateParts = dateStr.split('/');
-    if (dateParts.length !== 3) return null;
-
-    const day = parseInt(dateParts[0], 10);
-    const month = parseInt(dateParts[1], 10);
-    const year = parseInt(dateParts[2], 10);
-
-    const timeParts = timeStr.split(':');
-    if (timeParts.length !== 2) return null;
-
-    const hour = parseInt(timeParts[0], 10);
-    const minute = parseInt(timeParts[1], 10);
-
-    if ([day, month, year, hour, minute].some(isNaN)) return null;
-
-    // Create UTC date by subtracting VN offset (UTC+7)
-    return new Date(Date.UTC(year, month - 1, day, hour - VN_UTC_OFFSET_HOURS, minute));
-}
-
-/**
- * Convert a local VN date (midnight) to UTC for RRULE/EXDATE purposes.
- * Subtracts 7 hours from midnight VN time.
- */
-function dateToUTC(date: Date, timeStr: string): Date {
-    const [hour, minute] = timeStr.split(':').map(Number);
-    return new Date(
-        Date.UTC(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate(),
-            hour - VN_UTC_OFFSET_HOURS,
-            minute
-        )
-    );
-}
-
-/**
- * Format a Date as ICS UTC datetime string (e.g. "20260301T000000Z").
- */
-function formatICSDateTime(date: Date): string {
-    const y = date.getUTCFullYear();
-    const m = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const d = String(date.getUTCDate()).padStart(2, '0');
-    const h = String(date.getUTCHours()).padStart(2, '0');
-    const min = String(date.getUTCMinutes()).padStart(2, '0');
-    const s = String(date.getUTCSeconds()).padStart(2, '0');
-    return `${y}${m}${d}T${h}${min}${s}Z`;
-}
-
-/**
- * Clean location string: remove "- Cơ sở..." suffix.
- */
-function cleanLocation(location: string | undefined): string | undefined {
-    if (!location) return undefined;
-    return location.replace(/\s*-\s*Cơ sở.*/i, '').trim() || undefined;
 }
 
 // ============================================
@@ -207,7 +142,7 @@ function buildMasterDescription(series: RecurringSeries): string {
     if (!masterInfo.location.isConsensus) {
         const unique = [...new Set(group.entries.map((e) => e.location).filter(Boolean))];
         if (unique.length > 0) {
-            descParts.push(`Phòng: ${unique.map((l) => cleanLocation(l)).join(', ')}`);
+            descParts.push(`Phòng: ${unique.join(', ')}`);
         }
     }
 
@@ -252,7 +187,7 @@ function createMasterEvent(cal: ICalCalendar, series: RecurringSeries): void {
         end,
         summary: group.course,
         description: buildMasterDescription(series),
-        location: cleanLocation(masterInfo.location.winner),
+        location: masterInfo.location.winner,
         status: ICalEventStatus.CONFIRMED,
         repeating: {
             freq: ICalEventRepeatingFreq.WEEKLY,
@@ -290,7 +225,7 @@ function createOverrideEvent(
         end,
         summary: series.group.course,
         description: buildDescription(override.entry),
-        location: cleanLocation(override.entry.location),
+        location: override.entry.location,
         status: ICalEventStatus.CONFIRMED,
     });
 }
@@ -315,7 +250,7 @@ function createFlatEvent(cal: ICalCalendar, entry: TimetableEntry): void {
         end,
         summary: entry.course,
         description: buildDescription(entry),
-        location: cleanLocation(entry.location),
+        location: entry.location,
         status: ICalEventStatus.CONFIRMED,
     });
 }
@@ -386,25 +321,11 @@ export function generateICS(entries: TimetableEntry[], calendarName: string = 'H
 // ============================================
 
 /**
- * Trigger a file download in the browser.
+ * Trigger an ICS file download in the browser.
  *
- * @param content - File content as string
+ * @param content - ICS file content as string
  * @param filename - Suggested filename
  */
 export function downloadICSFile(content: string, filename: string): void {
-    const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-
-    // Cleanup
-    setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }, 100);
+    downloadFile(content, filename, 'text/calendar;charset=utf-8');
 }

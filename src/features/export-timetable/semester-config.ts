@@ -1,5 +1,5 @@
 /**
- * Calendar Export Feature - Semester Configuration
+ * Export Timetable Feature - Semester Configuration
  *
  * Semester value format: `${academicYear}${term}`
  * - academicYear: the starting year of the academic year pair (e.g., 2025 for 2025-2026)

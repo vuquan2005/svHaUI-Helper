@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { generateICS, getTimeRange, buildUTCDate } from '../ics-generator';
+import { generateICS, getTimeRange } from '../ics-generator';
+import { buildUTCDate } from '../../../utils/date';
 import type { TimetableEntry } from '../types';
 
 // ============================================
@@ -143,12 +144,11 @@ describe('generateICS', () => {
         expect(ics).toContain('END:VEVENT');
     });
 
-    it('cleans location (removes Cơ sở suffix)', () => {
-        const entries = [makeEntry({ date: '03/03/2026', location: 'P.301 - Cơ sở 1 - Khu A' })];
+    it('uses location as-is (cleaning is done in parser)', () => {
+        const entries = [makeEntry({ date: '03/03/2026', location: 'P.301' })];
         const ics = generateICS(entries);
 
         expect(ics).toContain('P.301');
-        expect(ics).not.toContain('Cơ sở');
     });
 
     it('includes calendar name', () => {

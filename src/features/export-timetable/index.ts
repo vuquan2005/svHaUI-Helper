@@ -1,5 +1,5 @@
 /**
- * Calendar Export Feature
+ * Export Timetable Feature
  * Exports the HaUI timetable to ICS (iCalendar) format.
  *
  * Features:
@@ -11,11 +11,11 @@
  */
 
 import { Feature } from '@/core';
-import { CalendarExportStorage } from './types';
+import { ExportTimetableStorage } from './types';
 import { parseTimetableFromDOM } from './timetable-parser';
 import { generateICS, downloadICSFile } from './ics-generator';
 import {
-    createCalendarExportUI,
+    createExportTimetableUI,
     fillAndSubmitSemesterForm,
     readFormDateRange,
     setCheckButtonState,
@@ -35,7 +35,7 @@ import {
 // Feature Implementation
 // ============================================
 
-export class CalendarExportFeature extends Feature<CalendarExportStorage> {
+export class ExportTimetableFeature extends Feature<ExportTimetableStorage> {
     private uiRefs: UIRefs | null = null;
 
     /** Cached pending update data when user declined download */
@@ -47,8 +47,8 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
 
     constructor() {
         super({
-            id: 'calendar-export',
-            name: 'Calendar Export',
+            id: 'export-timetable',
+            name: 'Export Timetable',
             description: 'Xuất thời khóa biểu sang file ICS',
             urlMatch: [{ name: 'timetable', pattern: '/timestable/calendarcl' }],
         });
@@ -63,7 +63,7 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
         }
 
         // Create and inject UI
-        this.uiRefs = createCalendarExportUI({
+        this.uiRefs = createExportTimetableUI({
             onDownloadSemester: () => this.handleDownloadSemester(),
             onDownloadCurrent: () => this.handleDownloadCurrent(),
             onCheckUpdate: () => this.handleCheckUpdate(),
@@ -139,7 +139,7 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
             const dateRange = readFormDateRange();
             const timestamp = new Date().toISOString().slice(0, 10);
             const filename = dateRange
-                ? `TKB_${dateRange.start.replace(/\//g, '-')}_${dateRange.end.replace(/\//g, '-')}.ics`
+                ? `TKB_${dateRange.start.replace(/\//g, '')}-${dateRange.end.replace(/\//g, '')}.ics`
                 : `TKB_${timestamp}.ics`;
 
             // Download
@@ -317,10 +317,7 @@ export class CalendarExportFeature extends Feature<CalendarExportStorage> {
      */
     private downloadSemesterICS(semesterId: string, entries: import('./types').TimetableEntry[]) {
         const icsContent = generateICS(entries, getSemesterLabel(semesterId));
-        const dateRange = getSemesterDateRangeFormatted(semesterId);
-        const filename = dateRange
-            ? `TKB_${dateRange.start.replace(/\//g, '-')}_${dateRange.end.replace(/\//g, '-')}.ics`
-            : `TKB_${semesterId}.ics`;
+        const filename = `TKB_${semesterId}.ics`;
         downloadICSFile(icsContent, filename);
         this.log.i(`Downloaded ICS: ${filename}`);
     }

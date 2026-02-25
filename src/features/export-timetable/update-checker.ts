@@ -1,5 +1,5 @@
 /**
- * Calendar Export Feature - Update Checker
+ * Export Timetable Feature - Update Checker
  * Handles fetching timetable data, comparing entries, and diffing.
  */
 
