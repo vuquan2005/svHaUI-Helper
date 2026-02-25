@@ -46,3 +46,6 @@ docs/api-reference
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+
+# Changelog (release please auto generated)
+CHANGELOG.md
