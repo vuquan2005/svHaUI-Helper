@@ -42,15 +42,16 @@ Bảng chính hiển thị danh sách các môn thi và thông tin chi tiết.
 | **STT**          | `td:nth-child(1)`              | Số thứ tự                                                       |
 | **Môn thi**      | `td:nth-child(2)`              | Tên học phần thi                                                |
 | **Ngày thi**     | `td:nth-child(3)`              | Ngày thi (định dạng dd/MM/yyyy)                                 |
-| **Ca thi**       | `td:nth-child(4)`              | Giờ bắt đầu thi                                                 |
-| **SBD**          | `td:nth-child(5)`              | Số báo danh của sinh viên                                       |
+| **Ca thi**       | `td:nth-child(4)`              | Giờ bắt đầu thi `H'h'mm`                                        |
+| **SBD**          | `td:nth-child(5)`              | Số báo danh của sinh viên \d{6}                                 |
 | **Lần thi**      | `td:nth-child(6)`              | Lần thi (1, 2...)                                               |
-| **Vị trí thi**   | `td:nth-child(7)`              | Số ghế/Vị trí ngồi trong phòng                                  |
+| **Vị trí thi**   | `td:nth-child(7)`              | Số ghế/Vị trí ngồi trong phòng [A-Z]\d{1,2}                     |
 | **Phòng thi**    | `td:nth-child(8)`              | Mã phòng thi                                                    |
-| **Tòa nhà**      | `td:nth-child(9)`              | Tòa nhà tổ chức thi                                             |
-| **Cơ sở**        | `td:nth-child(10)`             | Cơ sở đào tạo (Khu A, B, C...)                                  |
-| **Tiền VP PVT**  | `td:nth-child(11)`             | Lệ phí thi/Tiền văn phòng phẩm                                  |
-| **Tham gia thi** | `td:nth-child(12)`             | Trạng thái đăng ký tham gia                                     |
-| **Tình trạng**   | `td:nth-child(13)`             | Ghi chú thêm (nếu có)                                           |
+| **Tòa nhà**      | `td:nth-child(9)`              | Tòa nhà tổ chức thi [ABC]\d{1,2}                                |
+| **Cơ sở**        | `td:nth-child(10)`             | Cơ sở đào tạo (Khu A, B, C...) (thường không cần thiết)         |
+| **Tiền VP PVT**  | `td:nth-child(11)`             | Lệ phí thi/Tiền văn phòng phẩm (thường 0đ)                      |
+| **Tham gia thi** | `td:nth-child(12)`             | Thường là `Tham gia thi`                                        |
+| **Tình trạng**   | `td:nth-child(13)`             | Thường trống                                                    |
+| **Check box**    | `td:nth-child(14)`             | Cột trống, ở thead có checkbox                                  |
 
 ---
