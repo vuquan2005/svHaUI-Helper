@@ -39,13 +39,6 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 
 ## ✨ Tính năng
 
-- 🚀 **Tích hợp sẵn sàng** - Hoạt động ngay khi cài đặt
-- ⚙️ **Cài đặt linh hoạt** - Bật/tắt từng tính năng theo ý muốn
-- 🎨 **Giao diện đẹp** - UI hiện đại, thân thiện
-- 💾 **Lưu trữ cục bộ** - Cài đặt được lưu trên trình duyệt
-
-### Tính năng hiện có
-
 | Tính năng          | Mô tả                                                  | Trạng thái |
 | ------------------ | ------------------------------------------------------ | ---------: |
 | 🏷️ Dynamic Title   | Thay đổi tiêu đề tab theo trang                        |         ✅ |
@@ -61,19 +54,19 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 
 - Trình duyệt: Chrome, Firefox, Edge, hoặc Safari
 - Extension quản lý userscript:
-  - [Tampermonkey](https://www.tampermonkey.net/) (Khuyến nghị - Ổn định nhất)
-  - [Violentmonkey](https://violentmonkey.github.io/) (Mã nguồn mở)
+  - [Tampermonkey](https://www.tampermonkey.net/)
+  - [Violentmonkey](https://violentmonkey.github.io/)
 
 ### Cài đặt nhanh
 
 1. Cài đặt **Tampermonkey** hoặc **Violentmonkey** từ cửa hàng extension của trình duyệt.
 2. Chọn **một trong các nguồn** dưới đây để cài đặt script:
 
-| Nguồn             | Link                                                                                                                        | Ghi chú                        |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| **Greasy Fork**   | [Cài đặt](https://greasyfork.org/vi/scripts/562762-sv-haui-helper)                                                          | Khuyến nghị - Tự động cập nhật |
-| GitHub (readable) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)         | Dễ đọc, dùng cho dev           |
-| GitHub (minified) | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Nhẹ hơn, tự động cập nhật      |
+| Nguồn               | Link                                                                                                                        | Ghi chú                                                                                                                 |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Greasy Fork**     | [Cài đặt](https://greasyfork.org/vi/scripts/562762-sv-haui-helper)                                                          | ⭐ Khuyến nghị. Tự động cập nhật. Thích hợp cho đa số người dùng.                                                       |
+| GitHub (minified)   | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Nhẹ hơn, nhận bản cập nhật trực tiếp từ kho lưu trữ.                                                                    |
+| GitHub (unminified) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)         | Bản build dễ đọc hơn. Dành để kiểm tra mã (chưa nén). Cài đặt bản mới nhất tại thời điểm tải và không tự động cập nhật. |
 
 3. Xác nhận cài đặt trong popup của Tampermonkey/Violentmonkey.
 4. Truy cập [sv.haui.edu.vn](https://sv.haui.edu.vn) và tận hưởng!
@@ -83,7 +76,7 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 Do chính sách bảo mật mới của Google, bạn **bắt buộc** phải cấp quyền thủ công thì Script mới chạy được:
 
 1. Mở trang Quản lý tiện ích: gõ `chrome://extensions` vào thanh địa chỉ.
-2. Bật **Developer mode** (Chế độ nhà phát triển) ở góc trên bên phải.
+2. Bật **Developer mode** (Chế độ nhà phát triển) ở góc trên bên phải (nếu dùng Chrome hãy làm tiếp các bước bên dưới).
 3. Tìm **Tampermonkey/Violentmonkey** → Click nút **Details** (Chi tiết).
 4. Kéo xuống tìm và bật công tắc tại dòng:
    > **Cho phép tập lệnh của người dùng** (Allow user scripts)

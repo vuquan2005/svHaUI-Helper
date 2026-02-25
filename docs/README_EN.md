@@ -24,7 +24,7 @@
   <a href="https://github.com/vuquan2005/svHaUI-Helper/stargazers">
     <img src="https://img.shields.io/github/stars/vuquan2005/svHaUI-Helper?style=flat-square" alt="Stars">
   </a>
-  <a href="https://greasyfork.org/scripts/562762-sv-haui-helper">
+  <a href="https://greasyfork.org/en/scripts/562762-sv-haui-helper">
     <img src="https://img.shields.io/badge/Greasy%20Fork-Script-black?style=flat-square&logo=greasyfork" alt="Greasy Fork">
   </a>
 </p>
@@ -38,13 +38,6 @@
 The project is built with a modular architecture, making it easy to extend and maintain.
 
 ## ✨ Features
-
-- 🚀 **Ready to use** - Works immediately after installation
-- ⚙️ **Flexible settings** - Toggle individual features as needed
-- 🎨 **Beautiful UI** - Modern, user-friendly interface
-- 💾 **Local storage** - Settings are saved in your browser
-
-### Current Features
 
 | Feature            | Description                                               | Status |
 | ------------------ | --------------------------------------------------------- | -----: |
@@ -69,11 +62,11 @@ The project is built with a modular architecture, making it easy to extend and m
 1. Install **Tampermonkey** or **Violentmonkey** from your browser's extension store.
 2. Choose **one of the sources** below to install the script:
 
-| Source            | Link                                                                                                                        | Notes                      |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| **Greasy Fork**   | [Install](https://greasyfork.org/scripts/562762-sv-haui-helper)                                                             | Recommended - Auto-updates |
-| GitHub (readable) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)         | Easy to read, for devs     |
-| GitHub (minified) | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Smaller, auto-updates      |
+| Source              | Link                                                                                                                        | Notes                                                                                                                 |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Greasy Fork**     | [Install](https://greasyfork.org/en/scripts/562762-sv-haui-helper)                                                          | ⭐ Recommended. Automatically updates. Suitable for most users.                                                       |
+| GitHub (minified)   | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Lighter, receives updates directly from the repository.                                                               |
+| GitHub (unminified) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)         | More readable build. Meant for code inspection (unminified). Installs the latest version at download, no auto-update. |
 
 3. Confirm the installation in the Tampermonkey/Violentmonkey popup.
 4. Visit [sv.haui.edu.vn](https://sv.haui.edu.vn) and enjoy!
