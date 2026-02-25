@@ -1,5 +1,5 @@
 /**
- * Calendar Export Feature - Type Definitions
+ * Export Timetable Feature - Type Definitions
  */
 
 // ============================================
@@ -166,7 +166,7 @@ export interface TimetableDiff {
 /**
  * Shape of the feature's scoped storage.
  */
-export interface CalendarExportStorage {
+export interface ExportTimetableStorage {
     /** Last saved timetable snapshot for the current semester */
     lastSnapshot?: SemesterSnapshot;
     /** ISO datetime of the last update check */

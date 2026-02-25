@@ -1,5 +1,5 @@
 /**
- * Calendar Export Feature - Recurrence Builder
+ * Export Timetable Feature - Recurrence Builder
  *
  * Converts discrete TimetableEntry[] into RecurringSeries[] with:
  * - Grouping by classCode + periods

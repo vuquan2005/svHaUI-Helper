@@ -1,5 +1,5 @@
 /**
- * Calendar Export Feature - UI Components
+ * Export Timetable Feature - UI Components
  * Creates the download split-button, check update button, and semester dropdown.
  * Uses Bootstrap 3 classes already available on HaUI portal.
  */
@@ -41,12 +41,12 @@ export interface UIRefs {
 // ============================================
 
 /**
- * Create the calendar export UI.
+ * Create the export timetable UI.
  * Layout: [📥 Tải TKB kỳ này ▾] [🔄 Kiểm tra cập nhật] [📋 Kỳ... ▾]
  */
-export function createCalendarExportUI(callbacks: UICallbacks): UIRefs {
+export function createExportTimetableUI(callbacks: UICallbacks): UIRefs {
     const container = document.createElement('div');
-    container.className = `svhaui-calendar-export ${styles.container}`;
+    container.className = `svhaui-export-timetable ${styles.container}`;
 
     // Download split-button
     const downloadGroup = createDownloadSplitButton(

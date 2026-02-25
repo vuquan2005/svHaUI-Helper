@@ -1,5 +1,5 @@
 /**
- * Calendar Export Feature - Timetable Parser
+ * Export Timetable Feature - Timetable Parser
  * Parses the HaUI timetable table into structured TimetableEntry objects.
  *
  * Based on parsing rules documented in docs/pages/timetable.md
@@ -46,6 +46,18 @@ const COL = {
 const SESSION_COLUMNS = [COL.MORNING, COL.AFTERNOON, COL.EVENING] as const;
 
 // ============================================
+// Helpers
+// ============================================
+
+/**
+ * Clean location string: remove "- Cơ sở..." suffix.
+ */
+function cleanLocation(location: string | undefined): string | undefined {
+    if (!location) return undefined;
+    return location.replace(/\s*-\s*Cơ sở.*/i, '').trim() || undefined;
+}
+
+// ============================================
 // Parser Functions
 // ============================================
 
@@ -70,7 +82,7 @@ function parseBlock(block: string): Omit<TimetableEntry, 'date'> | null {
         lecturer: clean(lecturerMatch?.groups?.lecturer),
         phone: clean(lecturerMatch?.groups?.phone),
         department: clean(lecturerMatch?.groups?.department),
-        location: clean(locationMatch?.groups?.location),
+        location: cleanLocation(clean(locationMatch?.groups?.location)),
     };
 }
 
