@@ -87,7 +87,7 @@ export function getTimeRange(periods: number[]): { start: string; end: string } 
 /**
  * Build event description from a TimetableEntry (flat mode).
  */
-function buildDescription(entry: TimetableEntry): string {
+function buildDescription(entry: TimetableEntry): { plain: string; html: string } {
     const descParts: string[] = [];
 
     const classPart = entry.classCode ? `Lớp: ${entry.classCode}` : '';
@@ -103,7 +103,18 @@ function buildDescription(entry: TimetableEntry): string {
         descParts.push(entry.department);
     }
 
-    return descParts.join('\n');
+    const plainParts = [...descParts];
+    const htmlParts = [...descParts];
+
+    if (entry.isOnline) {
+        plainParts.push('https://sv.haui.edu.vn/sso/elearning');
+        htmlParts.push('<a href="https://sv.haui.edu.vn/sso/elearning">Học trực tuyến</a>');
+    }
+
+    return {
+        plain: plainParts.join('\n'),
+        html: htmlParts.join('<br>'),
+    };
 }
 
 /**
@@ -111,7 +122,7 @@ function buildDescription(entry: TimetableEntry): string {
  * Includes class code, periods, and master info.
  * If a field has no consensus, list all unique values.
  */
-function buildMasterDescription(series: RecurringSeries): string {
+function buildMasterDescription(series: RecurringSeries): { plain: string; html: string } {
     const { group, masterInfo } = series;
     const descParts: string[] = [];
 
@@ -146,7 +157,18 @@ function buildMasterDescription(series: RecurringSeries): string {
         }
     }
 
-    return descParts.join('\n');
+    const plainParts = [...descParts];
+    const htmlParts = [...descParts];
+
+    if (masterInfo.isOnline.winner) {
+        plainParts.push('https://sv.haui.edu.vn/sso/elearning');
+        htmlParts.push('<a href="https://sv.haui.edu.vn/sso/elearning">Học trực tuyến</a>');
+    }
+
+    return {
+        plain: plainParts.join('\n'),
+        html: htmlParts.join('<br>'),
+    };
 }
 
 // ============================================
@@ -181,13 +203,15 @@ function createMasterEvent(cal: ICalCalendar, series: RecurringSeries): void {
 
     const untilUTC = dateToUTC(rrule.until, timeRange.start);
 
+    const isOnline = masterInfo.isOnline.winner;
+
     cal.createEvent({
         id: uid,
         start,
         end,
-        summary: group.course,
+        summary: isOnline ? `[Online] ${group.course}` : group.course,
         description: buildMasterDescription(series),
-        location: masterInfo.location.winner,
+        location: isOnline ? '' : masterInfo.location.winner,
         status: ICalEventStatus.CONFIRMED,
         repeating: {
             freq: ICalEventRepeatingFreq.WEEKLY,
@@ -218,14 +242,16 @@ function createOverrideEvent(
     const end = buildUTCDate(override.entry.date, timeRange.end);
     if (!start || !end) return;
 
+    const isOnline = override.entry.isOnline ?? series.masterInfo.isOnline.winner;
+
     cal.createEvent({
         id: series.uid,
         recurrenceId: recurrenceIdUTC,
         start,
         end,
-        summary: series.group.course,
+        summary: isOnline ? `[Online] ${series.group.course}` : series.group.course,
         description: buildDescription(override.entry),
-        location: override.entry.location,
+        location: isOnline ? undefined : override.entry.location,
         status: ICalEventStatus.CONFIRMED,
     });
 }
@@ -248,9 +274,9 @@ function createFlatEvent(cal: ICalCalendar, entry: TimetableEntry): void {
         id: uid,
         start,
         end,
-        summary: entry.course,
+        summary: entry.isOnline ? `[Online] ${entry.course}` : entry.course,
         description: buildDescription(entry),
-        location: entry.location,
+        location: entry.isOnline ? undefined : entry.location,
         status: ICalEventStatus.CONFIRMED,
     });
 }

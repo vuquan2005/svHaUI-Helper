@@ -26,6 +26,8 @@ export interface TimetableEntry {
     department?: string;
     /** Location (room, building, campus) */
     location?: string;
+    /** Whether the class is online */
+    isOnline?: boolean;
 }
 
 // ============================================
@@ -77,6 +79,7 @@ export interface MasterInfo {
     lecturer: MajorityVoteResult<string>;
     phone: MajorityVoteResult<string>;
     department: MajorityVoteResult<string>;
+    isOnline: MajorityVoteResult<boolean>;
 }
 
 /** RRULE parameters for a recurring event */

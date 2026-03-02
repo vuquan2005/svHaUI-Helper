@@ -13,7 +13,7 @@ import { TimetableEntry } from './types';
 
 /** Extract course info: periods, course name, class code */
 const REGEX_COURSE_INFO =
-    /^\d+\.\s*\((?<periods>[\d,]+)\)\s*-\s*(?<course>.+?)\s*\(Lớp:\s*(?<classCode>[^)]+)\)/;
+    /^\d+\.\s*(?<isonline>\(.*?\))?\((?<periods>[\d,]+)\)\s*-\s*(?<course>.+?)\s*\(Lớp:\s*(?<classCode>[^)]+)\)/;
 
 /** Extract lecturer info: name, phone, department */
 const REGEX_LECTURER =
@@ -69,7 +69,7 @@ function parseBlock(block: string): Omit<TimetableEntry, 'date'> | null {
     const infoMatch = block.match(REGEX_COURSE_INFO);
     if (!infoMatch?.groups) return null;
 
-    const { periods, course, classCode } = infoMatch.groups;
+    const { periods, course, classCode, isonline } = infoMatch.groups;
     const lecturerMatch = block.match(REGEX_LECTURER);
     const locationMatch = block.match(REGEX_LOCATION);
 
@@ -83,6 +83,7 @@ function parseBlock(block: string): Omit<TimetableEntry, 'date'> | null {
         phone: clean(lecturerMatch?.groups?.phone),
         department: clean(lecturerMatch?.groups?.department),
         location: cleanLocation(clean(locationMatch?.groups?.location)),
+        isOnline: !!isonline,
     };
 }
 
