@@ -125,6 +125,7 @@ export function computeMasterInfo(group: SeriesGroup): MasterInfo {
         lecturer: majorityVote(group.entries.map((e) => e.lecturer)),
         phone: majorityVote(group.entries.map((e) => e.phone)),
         department: majorityVote(group.entries.map((e) => e.department)),
+        isOnline: majorityVote(group.entries.map((e) => e.isOnline)),
     };
 }
 
@@ -302,7 +303,8 @@ function matchesMaster(entry: TimetableEntry, master: MasterInfo): boolean {
     const lecMatch = !master.lecturer.isConsensus || entry.lecturer === master.lecturer.winner;
     const deptMatch =
         !master.department.isConsensus || entry.department === master.department.winner;
-    return locMatch && lecMatch && deptMatch;
+    const onlineMatch = !master.isOnline.isConsensus || entry.isOnline === master.isOnline.winner;
+    return locMatch && lecMatch && deptMatch && onlineMatch;
 }
 
 /**

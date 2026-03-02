@@ -277,6 +277,7 @@ describe('detectExceptions', () => {
             lecturer: { winner: 'Nguyễn Văn A', isConsensus: true },
             phone: { winner: '0123456789', isConsensus: true },
             department: { winner: 'Khoa CNTT', isConsensus: true },
+            isOnline: { winner: undefined, isConsensus: false },
         };
 
         const exceptions = detectExceptions(idealDates, actualEntries, master);
@@ -304,6 +305,7 @@ describe('detectExceptions', () => {
             lecturer: { winner: 'Nguyễn Văn A', isConsensus: true },
             phone: { winner: '0123456789', isConsensus: true },
             department: { winner: 'Khoa CNTT', isConsensus: true },
+            isOnline: { winner: undefined, isConsensus: false },
         };
 
         const exceptions = detectExceptions(idealDates, actualEntries, master);
@@ -329,6 +331,7 @@ describe('detectExceptions', () => {
             lecturer: { winner: 'Nguyễn Văn A', isConsensus: true },
             phone: { winner: '0123456789', isConsensus: true },
             department: { winner: 'Khoa CNTT', isConsensus: true },
+            isOnline: { winner: undefined, isConsensus: false },
         };
 
         const exceptions = detectExceptions(idealDates, actualEntries, master);
