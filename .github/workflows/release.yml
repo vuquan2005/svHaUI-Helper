@@ -19,7 +19,7 @@ jobs:
           release-type: node
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Setup pnpm
