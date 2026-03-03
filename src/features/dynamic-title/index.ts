@@ -15,7 +15,63 @@ import { URL_TITLE_MAP } from './url-title-map';
 const TITLE_UPDATE_DEBOUNCE_MS = 100;
 
 // ============================================
-// Title Configuration
+// DOM Selectors
+// ============================================
+
+const DOM = {
+    /** Get panel header text */
+    panelHeader: (): string | null => {
+        const el = document.querySelector('span.k-panel-header-text:first-child');
+        return el?.textContent?.trim() || null;
+    },
+
+    /** Get subject name + class code from first table (rows 1 & 3, column 2) */
+    tableInfoPair: (): { first: string; second: string } | null => {
+        const table = document.querySelector('table:first-child');
+        if (!table) return null;
+
+        const first = table
+            .querySelector('tbody > tr:first-child > td:nth-child(2)')
+            ?.textContent?.trim();
+        const second = table
+            .querySelector('tbody > tr:nth-child(3) > td:nth-child(2)')
+            ?.textContent?.trim();
+
+        if (!first || !second) return null;
+        return { first, second };
+    },
+};
+
+// ============================================
+// Title Parsers
+// ============================================
+
+/**
+ * Parse course info from panel header
+ * "CHI TIẾT HỌC PHẦN: TÊN MÔN ( IC6005 )" -> { name: "TÊN MÔN", code: "IC6005" }
+ * "CHI TIẾT HỌC PHẦN (CDIO): TÊN MÔN ( IC6005 )" -> same result
+ */
+function parseCourseTitle(): string | null {
+    const header = DOM.panelHeader();
+    if (!header) return null;
+
+    const match = header.match(/CHI TIẾT HỌC PHẦN[^:]*:\s*(.+?)\s*\(\s*([A-Z]{2}\d+)\s*\)/);
+    if (!match) return null;
+
+    return `${match[1].trim()} (${match[2]})`;
+}
+
+/**
+ * Build a title from table info pair with a given prefix
+ * Used for both class results and friend results
+ */
+function tableTitle(prefix: string): string | null {
+    const info = DOM.tableInfoPair();
+    return info ? `${prefix} - ${info.first} - ${info.second}` : null;
+}
+
+// ============================================
+// Dynamic URL Patterns
 // ============================================
 
 interface DynamicTitleConfig {
@@ -24,119 +80,39 @@ interface DynamicTitleConfig {
     /** Icon emoji */
     icon: string;
     /** Function to generate title from DOM, returns null if DOM not ready */
-    getTitleFn: () => string | null;
+    getTitle: () => string | null;
 }
 
-// Helper functions to get data from DOM
-const DOM = {
-    /** Get panel header text */
-    panelHeader: (): string | null => {
-        const el = document.querySelector('span.k-panel-header-text:first-child');
-        return el?.textContent?.trim() || null;
-    },
-
-    /** Parse thông tin học phần từ header
-     * "CHI TIẾT HỌC PHẦN: TÊN MÔN ( IC6005 )" -> { name: "TÊN MÔN", code: "IC6005" }
-     */
-    parseCourseInfo: (header: string): { name: string; code: string } | null => {
-        // Match: "CHI TIẾT HỌC PHẦN (CDIO): TÊN MÔN ( CODE )"
-        const match = header.match(/CHI TIẾT HỌC PHẦN[^:]*:\s*(.+?)\s*\(\s*([A-Z]{2}\d+)\s*\)/);
-        if (!match) return null;
-        return { name: match[1].trim(), code: match[2] };
-    },
-
-    /** Get class info from first table */
-    classInfo: (): { subjectName: string; classCode: string } | null => {
-        const table = document.querySelector('table:first-child');
-        if (!table) return null;
-
-        const subjectName = table
-            .querySelector('tbody > tr:first-child > td:nth-child(2)')
-            ?.textContent?.trim();
-        const classCode = table
-            .querySelector('tbody > tr:nth-child(3) > td:nth-child(2)')
-            ?.textContent?.trim();
-
-        if (!subjectName || !classCode) return null;
-        return { subjectName, classCode };
-    },
-
-    /** Get friend info from first table */
-    friendInfo: (): { name: string; className: string } | null => {
-        const table = document.querySelector('table:first-child');
-        if (!table) return null;
-
-        const name = table
-            .querySelector('tbody > tr:first-child > td:nth-child(2)')
-            ?.textContent?.trim();
-        const className = table
-            .querySelector('tbody > tr:nth-child(3) > td:nth-child(2)')
-            ?.textContent?.trim();
-
-        if (!name || !className) return null;
-        return { name, className };
-    },
-};
-
-// Dynamic URL patterns (need to parse context from DOM)
 const DYNAMIC_URL_PATTERNS: DynamicTitleConfig[] = [
-    // CDIO course details
+    // Course details (CDIO & regular)
     {
-        pattern: /^\/training\/viewmodulescdiosv\//,
+        pattern: /^\/training\/view(?:modulescdiosv|courseindustry2)\//,
         icon: '📖',
-        getTitleFn: () => {
-            const header = DOM.panelHeader();
-            if (!header) return null;
-            const info = DOM.parseCourseInfo(header);
-            return info ? `${info.name} (${info.code})` : null;
-        },
-    },
-    // Regular course details
-    {
-        pattern: /^\/training\/viewcourseindustry2\//,
-        icon: '📖',
-        getTitleFn: () => {
-            const header = DOM.panelHeader();
-            if (!header) return null;
-            const info = DOM.parseCourseInfo(header);
-            return info ? `${info.name} (${info.code})` : null;
-        },
+        getTitle: parseCourseTitle,
     },
     // Class exam results
     {
         pattern: /^\/student\/result\/viewexamresultclass/,
         icon: '👥',
-        getTitleFn: () => {
-            const info = DOM.classInfo();
-            return info ? `KQ thi - ${info.subjectName} - ${info.classCode}` : null;
-        },
+        getTitle: () => tableTitle('KQ thi'),
     },
     // Class academic results
     {
         pattern: /^\/student\/result\/viewstudyresultclass/,
         icon: '👥',
-        getTitleFn: () => {
-            const info = DOM.classInfo();
-            return info ? `KQ HT - ${info.subjectName} - ${info.classCode}` : null;
-        },
+        getTitle: () => tableTitle('KQ HT'),
     },
     // Friend academic results
     {
         pattern: /^\/student\/result\/viewstudyresult\?/,
         icon: '👤',
-        getTitleFn: () => {
-            const info = DOM.friendInfo();
-            return info ? `KQ - ${info.name} - ${info.className}` : null;
-        },
+        getTitle: () => tableTitle('KQ'),
     },
     // Friend exam results
     {
         pattern: /^\/student\/result\/viewexamresult\?/,
         icon: '👤',
-        getTitleFn: () => {
-            const info = DOM.friendInfo();
-            return info ? `KQ thi - ${info.name} - ${info.className}` : null;
-        },
+        getTitle: () => tableTitle('KQ thi'),
     },
 ];
 
@@ -162,7 +138,6 @@ export class DynamicTitleFeature extends Feature {
      */
     run(): void {
         this.originalTitle = document.title;
-
         this.abortController = new AbortController();
 
         observeDomUntil('.be-content', () => this.updateTitle(), {
@@ -192,27 +167,17 @@ export class DynamicTitleFeature extends Feature {
             return true;
         }
 
-        // 2. Try dynamic patterns
-        for (const config of DYNAMIC_URL_PATTERNS) {
-            if (config.pattern.test(pathAndQuery)) {
-                const title = config.getTitleFn();
-                // null = DOM not ready yet, need to continue observing
-                if (title === null) {
-                    return false;
-                }
-                this.setTitle(`${config.icon} ${title}`);
+        // 2. Try dynamic patterns (need DOM content)
+        for (const { pattern, icon, getTitle } of DYNAMIC_URL_PATTERNS) {
+            if (pattern.test(pathAndQuery)) {
+                const title = getTitle();
+                if (title === null) return false; // DOM not ready yet
+                this.setTitle(`${icon} ${title}`);
                 return true;
             }
         }
 
-        // 3. Fallback: use panel header if available
-        // const panelHeader = DOM.panelHeader();
-        // if (panelHeader) {
-        //     this.setTitle(`📄 ${panelHeader}`);
-        //     return true;
-        // }
-
-        // 4. Keep original title if nothing matches
+        // 3. No match — keep original title
         this.log.d('No matching pattern, keeping original title');
         return false;
     }
@@ -230,10 +195,8 @@ export class DynamicTitleFeature extends Feature {
      * Restore original title and stop observer
      */
     cleanup(): void {
-        // Restore original title
         document.title = this.originalTitle;
 
-        // Abort any running observation
         if (this.abortController) {
             this.abortController.abort();
             this.abortController = null;
