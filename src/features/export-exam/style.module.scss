@@ -1,0 +1,15 @@
+.container {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-left: 5px;
+  vertical-align: top;
+}
+
+.scheduleContainer {
+  float: right;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  position: relative;
+}
