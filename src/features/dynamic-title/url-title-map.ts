@@ -1,18 +1,29 @@
-export const URL_TITLE_MAP: Record<string, string> = {
-    // Trang chủ
+// ============================================
+// Static URL → Title Mapping
+// ============================================
+
+/**
+ * Static URL-to-title map. Keyed by pathname (exact match).
+ * Grouped by functional domain for easier maintenance.
+ */
+
+const home = {
     '/': '🏠 Trang chủ',
+} as const;
 
-    // Đăng nhập
+const auth = {
     '/sso': '🛡️ Xác thực captcha',
+} as const;
 
-    // Tài chính
+const finance = {
     '/student/recharge/cashinqr': '💳 Nạp tiền QR',
     '/student/recharge/cashin': '💳 Nạp tiền TK',
     '/student/recharge/inpatientpayment': '💰 Thanh toán môn',
     '/student/recharge/transactionhistory': '📜 Lịch sử GD',
     '/student/recharge/listeinvoice': '🧾 Hóa đơn ĐT',
+} as const;
 
-    // Thông tin cá nhân
+const profile = {
     '/student/userdetail/userdetail': '👤 Thông tin SV',
     '/student/userdetail/updateuser': '👤 Thông tin SV',
     '/student/userdetail/updateuserprofile': '📝 Cập nhật hồ sơ',
@@ -20,8 +31,9 @@ export const URL_TITLE_MAP: Record<string, string> = {
     '/member/changepass': '🔐 Đổi mật khẩu',
     '/student/userdetail/militaryclothes': '🎖️ ĐK Quân tư trang',
     '/student/userdetail/userrevenueslist': '📂 Giấy tờ/Hồ sơ',
+} as const;
 
-    // Đăng ký học phần
+const registration = {
     '/register/dangkyhocphan': '📝 ĐK HP dự kiến',
     '/register/': '📝 Đăng ký học phần',
     '/register/dangkyDAKLTN': '📝 ĐK ĐA/KLTN',
@@ -30,47 +42,52 @@ export const URL_TITLE_MAP: Record<string, string> = {
     '/training/viewprogram': '📚 ĐK 2 chương trình',
     '/training/listprogramtwo': '📋 DS đơn CT2',
     '/training/viewmodules2': '📊 Tiến độ CT2',
+} as const;
 
-    // Chương trình đào tạo
+const curriculum = {
     '/training/viewcourseindustry': '📚 Khung CT',
     '/training/programmodulessemester': '📅 Khung theo kỳ',
+} as const;
 
-    // Sau đại học (Thạc sĩ)
+const postgraduate = {
     '/training/viewprogramsdh': '🎓 ĐK học trước ThS',
     '/training/listprogramsdh': '📋 DS đơn ThS',
     '/training/viewmodulessdh': '📊 Tiến độ ThS',
     '/registersdh/onlineregister': '📝 ĐK HP ThS',
+} as const;
 
-    // Lịch học & TKB
+const schedule = {
     '/timestable/calendarct': '📆 Kế hoạch đầu khóa',
     '/timestable/calendarcl': '🗓️ Thời khóa biểu',
     '/timestable/timestableview': '🗓️ Lịch môn học',
+} as const;
 
-    // Lịch thi
+const exam = {
     '/student/schedulefees/examplant': '📆 Kế hoạch thi',
     '/student/schedulefees/transactionmodules': '📆 Lịch thi',
     '/student/schedulefees/testonline': '💻 Thi Online',
     '/student/schedulefees/testonlineqpan': '🛡️ Thi QP&AN Online',
     '/student/schedulefees/dakltnonline': '🛡️ BV ĐA/KLTN Online',
+} as const;
 
-    // Kết quả học tập - Cá nhân
+const results = {
     '/student/result/studyresults': '📊 KQ học tập',
     '/student/result/examresult': '📋 KQ thi',
     '/student/result/viewscorebysemester': '📈 ĐTB học kỳ',
     '/student/result/viewmodules': '📈 ĐTB tích lũy',
     '/student/result/sendreceiveapplications': '📨 Phúc khảo',
     '/student/result/sendexamreview': '👁️ Xem lại bài',
+} as const;
 
-    // Tốt nghiệp
+const graduation = {
     '/tttn/htdn/list': '🎓 Thực tập TN',
     '/student/result/graduatecal': '🎓 Xét tốt nghiệp',
     '/student/result/degreeview': '🎓 Xác nhận thông tin in bằng',
     '/student/result/degreeprint': '🖨️ Bản in bằng',
+} as const;
 
-    // Hỗ trợ việc làm
+const utilities = {
     '/student/application/advertiselist': '💼 Việc làm & HT',
-
-    // Tiện ích
     '/student/application/notifilist': '📢 Thông báo trường',
     '/student/application/messengeruserlist': '📬 Thông báo cá nhân',
     '/student/recharge/serviceonegate': '🚪 Dịch vụ một cửa',
@@ -81,10 +98,26 @@ export const URL_TITLE_MAP: Record<string, string> = {
     '/sso/qpan': '🛡️ GD QP&AN',
     '/sso/dlearning': '🌐 Đào tạo từ xa',
     '/survey': '📝 Khảo sát',
-    '/survey/view': '📝 Làm khảo sát',
+    '/survey/welcome': '📝 Giới thiệu khảo sát',
+    '/survey/view': '📝 Thực hiện khảo sát',
     '/student/evaluation/listsemester': '⭐ ĐG rèn luyện',
     '/sso/btl': '📄 KT luận văn',
     '/STSV2023/index.html': '📘 Sổ tay SV',
     '/student/application/sotayantoan': '📘 Sổ tay an toàn',
     '/student/application/hddanhgiaketquahoctap': '📘 HD đánh giá KQ',
+} as const;
+
+export const URL_TITLE_MAP: Record<string, string> = {
+    ...home,
+    ...auth,
+    ...finance,
+    ...profile,
+    ...registration,
+    ...curriculum,
+    ...postgraduate,
+    ...schedule,
+    ...exam,
+    ...results,
+    ...graduation,
+    ...utilities,
 };
