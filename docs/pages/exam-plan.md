@@ -27,7 +27,8 @@ Khu vực hiển thị danh sách toàn bộ các mã lớp độc lập mà sin
 
 ### Chi tiết kế hoạch thi
 
-Hiển thị khi truy cập đường dẫn cụ thể của môn học (URL có tham số `code`).
+Hiển thị khi truy cập đường dẫn cụ thể của môn học (URL có tham số `code`) (`/student/schedulefees/examplant?code=<Mã lớp độc lập>`).
+Mã lớp có dạng `yyyy` + `Mã học kỳ` + `Mã môn học` + `STT`, ví dụ `20251BS101001`.
 
 #### Thông báo & Tìm kiếm
 
@@ -45,7 +46,7 @@ Hiển thị khi truy cập đường dẫn cụ thể của môn học (URL có
 | **Mã lớp độc lập** | `td:nth-child(2)` | Mã định danh lớp học phần     |
 | **Tên học phần**   | `td:nth-child(3)` | Tên môn thi                   |
 | **Ngày thi**       | `td:nth-child(4)` | Ngày thi dự kiến (dd/MM/yyyy) |
-| **Ca thi**         | `td:nth-child(5)` | Giờ bắt đầu                   |
+| **Ca thi**         | `td:nth-child(5)` | Giờ bắt đầu `H'h'mm`          |
 | **Lần thi**        | `td:nth-child(6)` | Số lần thi                    |
 | **Lớp ưu tiên**    | `td:nth-child(7)` | Mã lớp hành chính/ưu tiên     |
 | **Khoa**           | `td:nth-child(8)` | Khoa quản lý môn học          |
