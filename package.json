@@ -52,6 +52,6 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "ical-generator": "^10.0.0"
+    "ical-generator": "^11.0.0"
   }
 }
