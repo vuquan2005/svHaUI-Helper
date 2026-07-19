@@ -58,7 +58,6 @@ export default defineConfig({
                 autoGrant: true,
                 fileName: getFileName(),
                 externalGlobals: {
-                    '@techstark/opencv-js': cdn.jsdelivr('cv', 'dist/opencv.min.js'),
                     'tesseract.js': cdn.jsdelivr('Tesseract', 'dist/tesseract.min.js'),
                 },
             },
