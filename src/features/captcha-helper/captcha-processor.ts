@@ -3,10 +3,8 @@
  * Manages captcha image processing with OpenCV and OCR recognition
  */
 
-import cv from '@techstark/opencv-js';
 import { CaptchaPreprocessor } from './captcha-pre-processor';
 import { OcrRecognizer } from './ocr-recognizer';
-import { waitForOpenCV } from './opencv-loader';
 
 export interface CaptchaProcessorOptions {
     /** The captcha image element */
@@ -90,21 +88,29 @@ export class CaptchaProcessor {
         if (!this.canvasEl) return;
 
         try {
-            await waitForOpenCV();
-
-            // Step 1: Preprocess image with OpenCV
+            // Step 1: Preprocess image using Canvas/JS
             const preprocessor = new CaptchaPreprocessor();
-            const src = cv.imread(this.imgEl);
-            const dst = preprocessor.process(src);
+            const { width, height, data } = preprocessor.process(this.imgEl);
 
             // Resize canvas to match processed image
-            this.canvasEl.width = dst.cols;
-            this.canvasEl.height = dst.rows;
+            this.canvasEl.width = width;
+            this.canvasEl.height = height;
 
-            cv.imshow(this.canvasEl, dst);
+            // Draw binary Uint8Array back to canvas
+            const ctx = this.canvasEl.getContext('2d');
+            if (ctx) {
+                const imgData = ctx.createImageData(width, height);
+                for (let i = 0; i < data.length; i++) {
+                    const val = data[i];
+                    const idx = i * 4;
+                    imgData.data[idx] = val; // R
+                    imgData.data[idx + 1] = val; // G
+                    imgData.data[idx + 2] = val; // B
+                    imgData.data[idx + 3] = 255; // A
+                }
+                ctx.putImageData(imgData, 0, 0);
+            }
 
-            src.delete();
-            dst.delete();
             this.log.d('Captcha image processed');
 
             // Step 2: Perform OCR on the processed image
