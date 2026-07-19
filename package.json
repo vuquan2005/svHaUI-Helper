@@ -1,6 +1,9 @@
 {
   "name": "svhaui-helper",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "version": "2.5.2",
   "type": "module",
   "license": "GPL-3.0-only",
