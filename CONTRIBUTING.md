@@ -14,7 +14,7 @@ Cảm ơn bạn đã quan tâm đến việc đóng góp cho **SV HaUI Helper**!
 
 ### Yêu cầu
 
-- Node.js >= 18
+- Node.js >= 24
 - pnpm >= 8 (hoặc npm/yarn)
 - Tampermonkey/Violentmonkey extension
 
