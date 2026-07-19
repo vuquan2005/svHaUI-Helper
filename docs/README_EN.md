@@ -87,7 +87,7 @@ Due to Google's new security policies, you **must manually grant permission** fo
 
 ### Requirements
 
-- [Node.js](https://nodejs.org/) >= 18
+- [Node.js](https://nodejs.org/) >= 24
 - [pnpm](https://pnpm.io/) (recommended) or npm
 
 ### Environment Setup
