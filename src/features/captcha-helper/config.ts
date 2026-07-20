@@ -80,10 +80,12 @@ export const PAGE_HANDLERS: Record<string, CaptchaPageHandler> = {
         inputSelector: '[id^="ctl"][id$="_txtimgcode"]',
         submitSelector: '[id^="ctl"][id$="_butLogin"]',
         imageSelector: '[id^="ctl"][id$="_Image1"]',
+        refreshSelector: '.form-group > a[onclick*="recaptcha"]',
     },
     register: {
         inputSelector: '[id^="ctl"][id$="_txtimgcode"]',
         submitSelector: '[id^="ctl"][id$="_btnSubmit"]',
         imageSelector: '[id^="ctl"][id$="_Image1"]',
+        refreshSelector: '.form-group > a[onclick*="recaptcha"]',
     },
 };
