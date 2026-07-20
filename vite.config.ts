@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 import monkey, { cdn } from 'vite-plugin-monkey';
 import path from 'path';
-import { version } from './package.json';
+import { version, devDependencies } from './package.json';
 
 const isMinify = process.env.MINIFY === 'true';
+const ortVersion = (devDependencies['onnxruntime-web'] || '').replace(/[\^~]/g, '');
 
 // GitHub release URLs for auto-update (only for minified version)
 const GITHUB_RELEASE_BASE = 'https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download';
@@ -51,6 +52,13 @@ export default defineConfig({
                 supportURL: 'https://github.com/vuquan2005/svHaUI-Helper/issues',
                 icon: 'https://cdn-001.haui.edu.vn//img/logo-45x45.png',
                 match: ['https://sv.haui.edu.vn/*'],
+                connect: [
+                    'cdn.jsdelivr.net',
+                    'raw.githubusercontent.com',
+                    'github.com',
+                    'objects.githubusercontent.com',
+                    'release-assets.githubusercontent.com',
+                ],
                 'run-at': 'document-end',
                 ...getUpdateUrls(),
             },
@@ -58,7 +66,7 @@ export default defineConfig({
                 autoGrant: true,
                 fileName: getFileName(),
                 externalGlobals: {
-                    'tesseract.js': cdn.jsdelivr('Tesseract', 'dist/tesseract.min.js'),
+                    'onnxruntime-web': cdn.jsdelivr('ort', 'dist/ort.wasm.min.js'),
                 },
             },
             server: {
@@ -73,5 +81,6 @@ export default defineConfig({
     define: {
         __APP_VERSION__: JSON.stringify(version),
         __BUILD_TIME__: JSON.stringify(buildTime),
+        __ORT_VERSION__: JSON.stringify(ortVersion),
     },
 });

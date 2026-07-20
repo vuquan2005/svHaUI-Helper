@@ -42,7 +42,7 @@ The project is built with a modular architecture, making it easy to extend and m
 | Feature            | Description                                               | Status |
 | ------------------ | --------------------------------------------------------- | -----: |
 | 🏷️ Dynamic Title   | Changes tab title based on the page context               |     ✅ |
-| 🔐 Captcha Helper  | Auto-solve (OpenCV + Tesseract) and fill captcha          |     ✅ |
+| 🔐 Captcha Helper  | Auto-solve (PP-OCRv4 Mobile ONNX) and fill captcha        |     ✅ |
 | 🚀 Quick Nav       | Quick switch between Study Results and Exam Results pages |     ✅ |
 | 📝 Survey Auto     | Quick evaluation (select 1-5 score for all questions)     |     ✅ |
 | 📅 Calendar Export | Export timetable to ICS format, auto-check for updates    |     ✅ |

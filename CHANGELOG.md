@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.4](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.5.3...v2.5.4) (2026-07-21)
+
+### Features & Performance
+* **captcha:** replace Tesseract.js with custom fine-tuned PP-OCRv4 Mobile ONNX engine via ONNX Runtime Web for ultra-fast (~20ms) and high-accuracy captcha recognition
+
 ## [2.5.3](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.5.2...v2.5.3) (2026-07-19)
 
 ### Refactoring & Performance

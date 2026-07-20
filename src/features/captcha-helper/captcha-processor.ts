@@ -1,6 +1,6 @@
 /**
  * Captcha Image Processor
- * Manages captcha image processing with OpenCV and OCR recognition
+ * Manages captcha image preprocessing and PP-OCRv4 ONNX recognition
  */
 
 import { CaptchaPreprocessor } from './captcha-pre-processor';
