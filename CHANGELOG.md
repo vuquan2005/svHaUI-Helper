@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.6.1...v2.7.0) (2026-07-20)
+
+
+### Features
+
+* **captcha:** auto submit captcha ([#76](https://github.com/vuquan2005/svHaUI-Helper/issues/76)) ([e4cc687](https://github.com/vuquan2005/svHaUI-Helper/commit/e4cc6879012c2fb40d6bab0692ff4d8217c8d058))
+
 ## [2.6.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.6.0...v2.6.1) (2026-07-20)
 
 
