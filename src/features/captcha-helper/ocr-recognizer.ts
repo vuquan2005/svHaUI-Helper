@@ -1,9 +1,12 @@
 /**
  * OCR Recognizer
- * Wrapper for Tesseract.js OCR engine
+ * Wrapper for PP-OCRv4 Mobile ONNX engine using ONNX Runtime Web
  */
 
-import Tesseract from 'tesseract.js';
+import * as ort from 'onnxruntime-web';
+import { fetchArrayBuffer } from '@/utils';
+import { DEFAULT_MODEL_URL, ORT_WASM_CDN_BASE, CHARACTER_DICT } from './config';
+import { prepareInputTensor, ctcDecode } from './ocr-utils';
 
 export interface OcrRecognizerOptions {
     /** Logger for debug/error messages */
@@ -11,124 +14,99 @@ export interface OcrRecognizerOptions {
         d: (...args: unknown[]) => void;
         e: (...args: unknown[]) => void;
     };
+    /** Optional ONNX model URL override */
+    modelUrl?: string;
 }
 
 /**
- * Handles OCR recognition using Tesseract.js
- * Uses lazy initialization and reuses worker for performance
+ * Handles OCR recognition using PP-OCRv4 Mobile ONNX model.
+ * Uses lazy initialization and reuses ONNX Runtime session for maximum performance.
  */
 export class OcrRecognizer {
-    private worker: Tesseract.Worker | null = null;
+    private session: ort.InferenceSession | null = null;
     private log: OcrRecognizerOptions['log'];
+    private modelUrl: string;
     private initializing: Promise<void> | null = null;
 
     constructor(options: OcrRecognizerOptions) {
         this.log = options.log;
+        this.modelUrl = options.modelUrl || DEFAULT_MODEL_URL;
     }
 
     /**
-     * Initialize Tesseract worker (lazy, only when first needed)
+     * Initialize ONNX Runtime session (lazy, only when first needed)
      */
-    private async ensureWorker(): Promise<Tesseract.Worker> {
-        if (this.worker) return this.worker;
+    private async ensureSession(): Promise<ort.InferenceSession> {
+        if (this.session) return this.session;
 
-        // Prevent multiple initializations
+        // Prevent concurrent multiple initializations
         if (this.initializing) {
             await this.initializing;
-            return this.worker!;
+            return this.session!;
         }
 
         this.initializing = (async () => {
-            this.log.d('Initializing Tesseract worker...');
+            this.log.d('Initializing ONNX Runtime session...');
 
-            // Pass logger to options (3rd arg)
-            // Pass init options to config (4th arg)
-            this.worker = await Tesseract.createWorker(
-                'eng',
-                Tesseract.OEM.LSTM_ONLY,
-                {
-                    logger: () => {},
-                },
-                {
-                    load_system_dawg: '0',
-                    load_freq_dawg: '0',
-                }
-            );
+            // Disable multi-threading in WASM to avoid COOP/COEP headers issues in browser/userscript
+            ort.env.wasm.numThreads = 1;
+            ort.env.wasm.wasmPaths = {
+                wasm: `${ORT_WASM_CDN_BASE}ort-wasm-simd-threaded.wasm`,
+                mjs: `${ORT_WASM_CDN_BASE}ort-wasm-simd-threaded.mjs`,
+            };
 
-            // Configure runtime parameters
-            await this.worker.setParameters({
-                tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyz',
-                tessedit_pageseg_mode: Tesseract.PSM.SINGLE_LINE,
+            this.log.d('Fetching ONNX model binary from:', this.modelUrl);
+            const modelBuffer = await fetchArrayBuffer(this.modelUrl);
+
+            this.session = await ort.InferenceSession.create(modelBuffer, {
+                executionProviders: ['wasm'],
             });
 
-            this.log.d('Tesseract worker initialized');
+            this.log.d('ONNX Runtime session initialized successfully');
         })();
 
         await this.initializing;
-        return this.worker!;
+        return this.session!;
     }
 
-    /** Maximum number of characters to keep */
-    private static readonly MAX_CHARS = 5;
-
     /**
-     * Recognize text from canvas element
-     * @param canvas The canvas containing the preprocessed captcha image
-     * @returns Recognized text (trimmed, filtered by confidence, max 5 chars)
+     * Recognize text from canvas element using PP-OCRv4 ONNX model
+     *
+     * @param canvas The canvas containing preprocessed captcha image
+     * @returns Recognized text string
      */
     async recognize(canvas: HTMLCanvasElement): Promise<string> {
         try {
-            const worker = await this.ensureWorker();
-            // Request blocks output to get symbol-level confidence
-            const result = await worker.recognize(canvas, {}, { blocks: true });
+            const session = await this.ensureSession();
+            const inputTensor = prepareInputTensor(canvas);
 
-            // Extract all symbols from nested structure: blocks -> paragraphs -> lines -> words -> symbols
-            const symbols: Tesseract.Symbol[] = [];
-            for (const block of result.data.blocks ?? []) {
-                for (const paragraph of block.paragraphs) {
-                    for (const line of paragraph.lines) {
-                        for (const word of line.words) {
-                            symbols.push(...word.symbols);
-                        }
-                    }
-                }
-            }
+            const inputName = session.inputNames[0];
+            const feeds: Record<string, ort.Tensor> = { [inputName]: inputTensor };
 
-            this.log.d(
-                'OCR raw symbols:',
-                symbols.map((s) => `${s.text}(${s.confidence.toFixed(1)})`).join(' ')
-            );
+            const results = await session.run(feeds);
+            const outputTensor = results[session.outputNames[0]];
 
-            let top: Tesseract.Symbol[];
+            const dims = outputTensor.dims;
+            const numFrames = Number(dims[1]);
+            const numClasses = Number(dims[2]);
+            const logits = outputTensor.data as Float32Array;
 
-            if (symbols.length <= OcrRecognizer.MAX_CHARS) {
-                top = symbols;
-            } else {
-                top = symbols
-                    .map((s, i) => ({ s, i }))
-                    .sort((a, b) => b.s.confidence - a.s.confidence)
-                    .slice(0, OcrRecognizer.MAX_CHARS)
-                    .sort((a, b) => a.i - b.i)
-                    .map((x) => x.s);
-            }
+            const text = ctcDecode(logits, numFrames, numClasses, CHARACTER_DICT);
+            this.log.d('PP-OCRv4 raw recognized text:', text);
 
-            const text = top.map((s) => s.text).join('');
             return text;
         } catch (error) {
-            this.log.e('OCR recognition failed:', error);
+            this.log.e('PP-OCRv4 ONNX recognition failed:', error);
             return '';
         }
     }
 
     /**
-     * Terminate the Tesseract worker and release resources
+     * Terminate the ONNX session and release resources
      */
     async terminate(): Promise<void> {
-        if (this.worker) {
-            await this.worker.terminate();
-            this.worker = null;
-            this.initializing = null;
-            this.log.d('Tesseract worker terminated');
-        }
+        this.session = null;
+        this.initializing = null;
+        this.log.d('ONNX session released');
     }
 }

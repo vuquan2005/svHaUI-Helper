@@ -8,6 +8,7 @@ export interface Component {
     area: number;
     rect: { x: number; y: number; width: number; height: number };
     cx: number;
+    cy: number;
     y: number;
     h: number;
     w: number;
@@ -145,6 +146,9 @@ export function getConnectedComponents(src: Uint8Array, w: number, h: number): C
             let minY = Math.floor(i / w);
             let maxY = minY;
 
+            let sumX = 0;
+            let sumY = 0;
+
             let head = 0;
             while (head < queue.length) {
                 const curr = queue[head++];
@@ -152,6 +156,9 @@ export function getConnectedComponents(src: Uint8Array, w: number, h: number): C
 
                 const cx = curr % w;
                 const cy = Math.floor(curr / w);
+
+                sumX += cx;
+                sumY += cy;
 
                 if (cx < minX) minX = cx;
                 if (cx > maxX) maxX = cx;
@@ -163,12 +170,14 @@ export function getConnectedComponents(src: Uint8Array, w: number, h: number): C
                     for (let dx = -1; dx <= 1; dx++) {
                         if (dy === 0 && dx === 0) continue;
                         const nx = cx + dx;
-                        const ny = cy + dy;
-                        if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                            const nidx = ny * w + nx;
-                            if (src[nidx] === 255 && visited[nidx] === 0) {
-                                visited[nidx] = 1;
-                                queue.push(nidx);
+                        if (nx >= 0 && nx < w) {
+                            const ny = cy + dy;
+                            if (ny >= 0 && ny < h) {
+                                const nidx = ny * w + nx;
+                                if (src[nidx] === 255 && visited[nidx] === 0) {
+                                    visited[nidx] = 1;
+                                    queue.push(nidx);
+                                }
                             }
                         }
                     }
@@ -177,12 +186,14 @@ export function getConnectedComponents(src: Uint8Array, w: number, h: number): C
 
             const rectW = maxX - minX + 1;
             const rectH = maxY - minY + 1;
+            const area = pixels.length;
 
             components.push({
                 id: componentId++,
-                area: pixels.length,
+                area,
                 rect: { x: minX, y: minY, width: rectW, height: rectH },
-                cx: minX + rectW / 2,
+                cx: sumX / area,
+                cy: sumY / area,
                 y: minY,
                 h: rectH,
                 w: rectW,
@@ -218,5 +229,143 @@ export function dilate3x3(src: Uint8Array, w: number, h: number): Uint8Array {
             }
         }
     }
+    return dst;
+}
+
+/**
+ * Performs Morphological Dilation with 5x5 Rect kernel (radius 2)
+ */
+export function dilate5x5(src: Uint8Array, w: number, h: number): Uint8Array {
+    const dst = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) {
+        const rowOffset = y * w;
+        for (let x = 0; x < w; x++) {
+            if (src[rowOffset + x] === 255) {
+                for (let dy = -2; dy <= 2; dy++) {
+                    const ny = y + dy;
+                    if (ny >= 0 && ny < h) {
+                        const targetRowOffset = ny * w;
+                        for (let dx = -2; dx <= 2; dx++) {
+                            const nx = x + dx;
+                            if (nx >= 0 && nx < w) {
+                                dst[targetRowOffset + nx] = 255;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return dst;
+}
+
+/**
+ * Inpaints areas defined by mask (value > 0) in single-channel image src using distance-weighted averaging.
+ */
+export function inpaintTelea(
+    src: Uint8Array,
+    mask: Uint8Array,
+    w: number,
+    h: number,
+    radius: number = 3
+): Uint8Array {
+    const dst = new Uint8Array(src);
+    const isNoise = new Uint8Array(w * h);
+    let noiseCount = 0;
+
+    for (let i = 0; i < mask.length; i++) {
+        if (mask[i] > 0) {
+            isNoise[i] = 1;
+            noiseCount++;
+        }
+    }
+
+    if (noiseCount === 0) return dst;
+
+    const queue: number[] = [];
+    const inQueue = new Uint8Array(w * h);
+
+    for (let y = 0; y < h; y++) {
+        const rowOffset = y * w;
+        for (let x = 0; x < w; x++) {
+            const idx = rowOffset + x;
+            if (isNoise[idx] === 1) {
+                let hasCleanNeighbor = false;
+                for (let dy = -1; dy <= 1; dy++) {
+                    const ny = y + dy;
+                    if (ny >= 0 && ny < h) {
+                        const nRow = ny * w;
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const nx = x + dx;
+                            if (nx >= 0 && nx < w) {
+                                if (isNoise[nRow + nx] === 0) {
+                                    hasCleanNeighbor = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (hasCleanNeighbor) break;
+                }
+                if (hasCleanNeighbor) {
+                    queue.push(idx);
+                    inQueue[idx] = 1;
+                }
+            }
+        }
+    }
+
+    let head = 0;
+    const r2 = radius * radius;
+
+    while (head < queue.length) {
+        const curr = queue[head++];
+        const cx = curr % w;
+        const cy = Math.floor(curr / w);
+
+        let sumVal = 0;
+        let sumWeight = 0;
+
+        for (let dy = -radius; dy <= radius; dy++) {
+            const ny = cy + dy;
+            if (ny < 0 || ny >= h) continue;
+            const nRow = ny * w;
+            for (let dx = -radius; dx <= radius; dx++) {
+                const nx = cx + dx;
+                if (nx < 0 || nx >= w) continue;
+
+                const distSq = dx * dx + dy * dy;
+                if (distSq > 0 && distSq <= r2) {
+                    const nidx = nRow + nx;
+                    if (isNoise[nidx] === 0) {
+                        const weight = 1 / Math.sqrt(distSq);
+                        sumVal += dst[nidx] * weight;
+                        sumWeight += weight;
+                    }
+                }
+            }
+        }
+
+        if (sumWeight > 0) {
+            dst[curr] = Math.round(sumVal / sumWeight);
+        }
+        isNoise[curr] = 0;
+
+        for (let dy = -1; dy <= 1; dy++) {
+            const ny = cy + dy;
+            if (ny < 0 || ny >= h) continue;
+            const nRow = ny * w;
+            for (let dx = -1; dx <= 1; dx++) {
+                const nx = cx + dx;
+                if (nx < 0 || nx >= w) continue;
+                const nidx = nRow + nx;
+                if (isNoise[nidx] === 1 && inQueue[nidx] === 0) {
+                    queue.push(nidx);
+                    inQueue[nidx] = 1;
+                }
+            }
+        }
+    }
+
     return dst;
 }

@@ -1,6 +1,4 @@
 // Version is injected from package.json via vite.config.ts
-declare const __APP_VERSION__: string;
-declare const __BUILD_TIME__: string;
 
 console.log(
     `%c 🎓 SV HaUI Helper %c 🚀 v${__APP_VERSION__} %c 🕒 ${__BUILD_TIME__} %c 👨‍💻 VuQuan %c` +
