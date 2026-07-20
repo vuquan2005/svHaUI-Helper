@@ -160,9 +160,6 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
     private setupCaptchaProcessor(): void {
         if (!this.imgEl) return;
 
-        let reloadCount = 0;
-        const MAX_RETRIES = 3;
-
         this.captchaProcessor = new CaptchaProcessor({
             imgEl: this.imgEl,
             onTextRecognized: (text) => {
@@ -175,19 +172,13 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
                 this.log.i('Captcha auto-filled:', normalized);
 
                 if (normalized.length === CAPTCHA_LENGTH) {
-                    reloadCount = 0;
                     this.log.i('Captcha valid (5 chars), auto-submitting...');
                     this.submitEl?.click();
-                } else if (reloadCount < MAX_RETRIES) {
-                    reloadCount++;
-                    this.log.w(
-                        `Captcha invalid (${normalized.length}/${CAPTCHA_LENGTH}), auto reloading (${reloadCount}/${MAX_RETRIES})...`
-                    );
-                    this.triggerCaptchaReload();
                 } else {
                     this.log.w(
-                        `Max captcha retries reached (${MAX_RETRIES}). Please try manually.`
+                        `Captcha invalid (${normalized.length}/${CAPTCHA_LENGTH}), auto reloading...`
                     );
+                    this.triggerCaptchaReload();
                 }
             },
             log: this.log,
