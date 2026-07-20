@@ -50,10 +50,7 @@ export class OcrRecognizer {
 
             // Disable multi-threading in WASM to avoid COOP/COEP headers issues in browser/userscript
             ort.env.wasm.numThreads = 1;
-            ort.env.wasm.wasmPaths = {
-                wasm: `${ORT_WASM_CDN_BASE}ort-wasm-simd-threaded.wasm`,
-                mjs: `${ORT_WASM_CDN_BASE}ort-wasm-simd-threaded.mjs`,
-            };
+            ort.env.wasm.wasmPaths = ORT_WASM_CDN_BASE;
 
             this.log.d('Fetching ONNX model binary from:', this.modelUrl);
             const modelBuffer = await fetchArrayBuffer(this.modelUrl);
@@ -76,15 +73,17 @@ export class OcrRecognizer {
      * @returns Recognized text string
      */
     async recognize(canvas: HTMLCanvasElement): Promise<string> {
+        let inputTensor: ort.Tensor | null = null;
+        let outputTensor: ort.Tensor | null = null;
         try {
             const session = await this.ensureSession();
-            const inputTensor = prepareInputTensor(canvas);
+            inputTensor = prepareInputTensor(canvas);
 
             const inputName = session.inputNames[0];
             const feeds: Record<string, ort.Tensor> = { [inputName]: inputTensor };
 
             const results = await session.run(feeds);
-            const outputTensor = results[session.outputNames[0]];
+            outputTensor = results[session.outputNames[0]];
 
             const dims = outputTensor.dims;
             const numFrames = Number(dims[1]);
@@ -98,6 +97,9 @@ export class OcrRecognizer {
         } catch (error) {
             this.log.e('PP-OCRv4 ONNX recognition failed:', error);
             return '';
+        } finally {
+            inputTensor?.dispose();
+            outputTensor?.dispose();
         }
     }
 
@@ -105,7 +107,14 @@ export class OcrRecognizer {
      * Terminate the ONNX session and release resources
      */
     async terminate(): Promise<void> {
-        this.session = null;
+        if (this.session) {
+            try {
+                await this.session.release();
+            } catch (error) {
+                this.log.e('Failed to release ONNX session:', error);
+            }
+            this.session = null;
+        }
         this.initializing = null;
         this.log.d('ONNX session released');
     }
