@@ -4,7 +4,7 @@
  */
 
 import { Feature, type StorageListenerId } from '@/core';
-import { URL_PATTERNS, PAGE_HANDLERS } from './config';
+import { URL_PATTERNS, PAGE_HANDLERS, CAPTCHA_LENGTH } from './config';
 import type { CaptchaPageHandler, CaptchaStorageSchema } from './types';
 import { CaptchaInputHandler } from './input-handler';
 import { CaptchaProcessor } from './captcha-processor';
@@ -17,6 +17,7 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
     private inputEl: HTMLInputElement | null = null;
     private submitEl: HTMLElement | null = null;
     private imgEl: HTMLImageElement | null = null;
+    private refreshEl: HTMLElement | null = null;
 
     private currentHandler: CaptchaPageHandler | null = null;
     private inputHandler: CaptchaInputHandler | null = null;
@@ -124,6 +125,16 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
             }
         }
 
+        // Find refresh link/button (optional)
+        if (this.currentHandler.refreshSelector) {
+            this.refreshEl = document.querySelector<HTMLElement>(
+                this.currentHandler.refreshSelector
+            );
+            if (this.refreshEl) {
+                this.log.d('Captcha refresh element found:', this.refreshEl.tagName);
+            }
+        }
+
         return true;
     }
 
@@ -149,21 +160,51 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
     private setupCaptchaProcessor(): void {
         if (!this.imgEl) return;
 
+        let reloadCount = 0;
+        const MAX_RETRIES = 3;
+
         this.captchaProcessor = new CaptchaProcessor({
             imgEl: this.imgEl,
             onTextRecognized: (text) => {
-                if (this.inputEl) {
-                    // Normalize: lowercase, keep only alphanumeric
-                    const normalized = text.toLowerCase().replace(/[^a-z0-9]/g, '');
-                    this.inputEl.value = normalized;
-                    this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-                    this.log.i('Captcha auto-filled:', normalized);
+                if (!this.inputEl) return;
+
+                // Normalize: lowercase, keep only alphanumeric
+                const normalized = text.toLowerCase().replace(/[^a-z0-9]/g, '');
+                this.inputEl.value = normalized;
+                this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                this.log.i('Captcha auto-filled:', normalized);
+
+                if (normalized.length === CAPTCHA_LENGTH) {
+                    reloadCount = 0;
+                    this.log.i('Captcha valid (5 chars), auto-submitting...');
+                    this.submitEl?.click();
+                } else if (reloadCount < MAX_RETRIES) {
+                    reloadCount++;
+                    this.log.w(
+                        `Captcha invalid (${normalized.length}/${CAPTCHA_LENGTH}), auto reloading (${reloadCount}/${MAX_RETRIES})...`
+                    );
+                    this.triggerCaptchaReload();
+                } else {
+                    this.log.w(
+                        `Max captcha retries reached (${MAX_RETRIES}). Please try manually.`
+                    );
                 }
             },
             log: this.log,
         });
 
         this.captchaProcessor.setup();
+    }
+
+    /**
+     * Trigger captcha reload via refresh element or image click
+     */
+    private triggerCaptchaReload(): void {
+        if (this.refreshEl) {
+            this.refreshEl.click();
+        } else if (this.imgEl) {
+            this.imgEl.click();
+        }
     }
 
     /**
@@ -192,6 +233,7 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
         this.inputEl = null;
         this.submitEl = null;
         this.imgEl = null;
+        this.refreshEl = null;
         this.currentHandler = null;
     }
 }

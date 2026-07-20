@@ -12,6 +12,8 @@ export interface CaptchaPageHandler {
     submitSelector: string;
     /** Optional: selector for captcha image (for future auto-solve) */
     imageSelector?: string;
+    /** Optional: selector for captcha refresh link/button */
+    refreshSelector?: string;
 }
 
 /**
