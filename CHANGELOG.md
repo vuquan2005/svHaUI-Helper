@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.6.0...v2.6.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* fix WASM out of memory by using single-threaded ONNX Runtime ([#74](https://github.com/vuquan2005/svHaUI-Helper/issues/74)) ([a98ff85](https://github.com/vuquan2005/svHaUI-Helper/commit/a98ff852d7aaad2a3fa1eaea5d7fdf93e43e3f2f))
+
 ## [2.6.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.5.2...v2.6.0) (2026-07-20)
 
 
