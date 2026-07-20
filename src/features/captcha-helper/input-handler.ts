@@ -129,7 +129,7 @@ export class CaptchaInputHandler {
     private submit(): void {
         const value = this.inputEl.value.trim();
 
-        if (value.length < CAPTCHA_LENGTH) {
+        if (value.length === CAPTCHA_LENGTH) {
             this.log.d(`Need ${CAPTCHA_LENGTH} chars, got ${value.length}`);
             return;
         }
