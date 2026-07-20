@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.5.2...v2.6.0) (2026-07-20)
+
+
+### Features
+
+* **captcha:** replace Tesseract.js with PP-OCRv4 Mobile ONNX engine ([#72](https://github.com/vuquan2005/svHaUI-Helper/issues/72)) ([26065f2](https://github.com/vuquan2005/svHaUI-Helper/commit/26065f2f21d93a78178bff511e6a5c2165bd4c84))
+
 ## [2.5.4](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.5.3...v2.5.4) (2026-07-21)
 
 ### Features & Performance
