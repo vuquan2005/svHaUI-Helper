@@ -8,6 +8,7 @@ import { URL_PATTERNS, PAGE_HANDLERS, CAPTCHA_LENGTH } from './config';
 import type { CaptchaPageHandler, CaptchaStorageSchema } from './types';
 import { CaptchaInputHandler } from './input-handler';
 import { CaptchaProcessor } from './captcha-processor';
+import { isElementVisible } from '@/utils';
 
 // ============================================
 // CaptchaHelper Feature
@@ -101,36 +102,49 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
 
         // Find input element
         this.inputEl = document.querySelector<HTMLInputElement>(this.currentHandler.inputSelector);
-        if (!this.inputEl) {
-            this.log.w('Captcha input not found:', this.currentHandler.inputSelector);
+        if (!this.inputEl || !isElementVisible(this.inputEl)) {
+            this.log.d(
+                'Captcha input not found or not visible:',
+                this.currentHandler.inputSelector
+            );
+            this.inputEl = null;
             return false;
         }
         this.log.d('Captcha input found:', this.inputEl.getAttribute('id'));
 
         // Find submit button
         this.submitEl = document.querySelector<HTMLElement>(this.currentHandler.submitSelector);
-        if (!this.submitEl) {
-            this.log.w('Submit button not found:', this.currentHandler.submitSelector);
+        if (!this.submitEl || !isElementVisible(this.submitEl)) {
+            this.log.d(
+                'Submit button not found or not visible:',
+                this.currentHandler.submitSelector
+            );
+            this.submitEl = null;
             return false;
         }
         this.log.d('Submit button found:', this.submitEl.getAttribute('id'));
 
         // Find captcha image (optional)
         if (this.currentHandler.imageSelector) {
-            this.imgEl = document.querySelector<HTMLImageElement>(
-                this.currentHandler.imageSelector
-            );
-            if (this.imgEl) {
+            const img = document.querySelector<HTMLImageElement>(this.currentHandler.imageSelector);
+            if (img && isElementVisible(img)) {
+                this.imgEl = img;
                 this.log.d('Captcha image found:', this.imgEl.getAttribute('id'));
+            } else if (img) {
+                this.log.d(
+                    'Captcha image found but not visible:',
+                    this.currentHandler.imageSelector
+                );
             }
         }
 
         // Find refresh link/button (optional)
         if (this.currentHandler.refreshSelector) {
-            this.refreshEl = document.querySelector<HTMLElement>(
+            const refresh = document.querySelector<HTMLElement>(
                 this.currentHandler.refreshSelector
             );
-            if (this.refreshEl) {
+            if (refresh && isElementVisible(refresh)) {
+                this.refreshEl = refresh;
                 this.log.d('Captcha refresh element found:', this.refreshEl.tagName);
             }
         }
@@ -163,7 +177,8 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
         this.captchaProcessor = new CaptchaProcessor({
             imgEl: this.imgEl,
             onTextRecognized: (text) => {
-                if (!this.inputEl) return;
+                if (!this.inputEl || !isElementVisible(this.inputEl)) return;
+                if (!this.submitEl || !isElementVisible(this.submitEl)) return;
 
                 // Normalize: lowercase, keep only alphanumeric
                 const normalized = text.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -191,9 +206,9 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
      * Trigger captcha reload via refresh element or image click
      */
     private triggerCaptchaReload(): void {
-        if (this.refreshEl) {
+        if (this.refreshEl && isElementVisible(this.refreshEl)) {
             this.refreshEl.click();
-        } else if (this.imgEl) {
+        } else if (this.imgEl && isElementVisible(this.imgEl)) {
             this.imgEl.click();
         }
     }
