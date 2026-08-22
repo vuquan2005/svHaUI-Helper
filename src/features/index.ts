@@ -11,6 +11,7 @@ import { SurveyAutofillFeature } from './survey-autofill';
 import { RemoveSnowfallFeature } from './misc';
 import { ExportTimetableFeature } from './export-timetable';
 import { GradePredictionFeature } from './grade-prediction';
+import { HomeShortcutsFeature } from './home-shortcuts';
 
 // Add new features here
 export const allFeatures: Feature<any>[] = [
@@ -21,4 +22,5 @@ export const allFeatures: Feature<any>[] = [
     new SurveyAutofillFeature(),
     new RemoveSnowfallFeature(),
     new ExportTimetableFeature(),
+    new HomeShortcutsFeature(),
 ];
