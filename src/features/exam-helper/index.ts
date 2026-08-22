@@ -1,15 +1,10 @@
 /**
- * Export Exam Feature
- * Exports exam schedule to ICS (iCalendar) format by combining data from two pages:
- * - Exam Plan (/student/schedulefees/examplant): has class codes (mã lớp)
- * - Exam Schedule (/student/schedulefees/transactionmodules): has room, SBD, position
- *
- * Features:
- * - "📥 Tải lịch thi" button on both pages
- * - "🔄 Cập nhật dữ liệu" force update on exam plan page
- * - Auto-update plan data: daily during exam period, weekly otherwise
- * - Batch fetching to avoid server overload
- * - Stable ICS UIDs using classCode for event deduplication
+ * Exam Helper Feature
+ * Comprehensive exam management for HaUI students:
+ * - Aggregates & displays unified exam plans on /student/schedulefees/examplant
+ * - Enhances official exam schedule with countdown badges & highlighting on /student/schedulefees/transactionmodules
+ * - Injects an upcoming exam alert widget on Homepage (/ or /home)
+ * - Exports exam calendar events to standard ICS format with stable UIDs
  */
 
 import { Feature } from '@/core';
@@ -36,6 +31,9 @@ import {
     setStatusText,
     ExamUIRefs,
 } from './ui';
+import { createPlanSummaryTable } from './ui/plan-table-view';
+import { enhanceScheduleTable } from './ui/schedule-enhancer';
+import { createHomeExamWidget } from './ui/home-exam-widget';
 import { detectCurrentSemester } from '../export-timetable/semester-config';
 
 // ============================================
@@ -52,18 +50,20 @@ const AUTO_UPDATE_NORMAL_MS = 3 * 24 * 60 * 60 * 1000;
 // Feature Implementation
 // ============================================
 
-export class ExportExamFeature extends Feature<ExportExamStorage> {
+export class ExamHelperFeature extends Feature<ExportExamStorage> {
     private uiRefs: ExamUIRefs | null = null;
     private abortController: AbortController | null = null;
 
     constructor() {
         super({
-            id: 'export-exam',
-            name: 'Export Exam',
-            description: 'Xuất lịch thi sang file ICS',
+            id: 'exam-helper',
+            name: 'Exam Helper',
+            description: 'Kế hoạch thi, lịch thi đếm ngược và xuất lịch thi sang file ICS',
             urlMatch: [
                 { name: 'exam-plan', pattern: '/student/schedulefees/examplant' },
                 { name: 'exam-schedule', pattern: '/student/schedulefees/transactionmodules' },
+                { name: 'home-root', pattern: /^\/$/ },
+                { name: 'home-path', pattern: /^\/home$/ },
             ],
         });
     }
@@ -76,11 +76,13 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
             await this.runOnExamPlanPage();
         } else if (pageName === 'exam-schedule') {
             await this.runOnExamSchedulePage();
+        } else if (pageName === 'home-root' || pageName === 'home-path') {
+            await this.runOnHomePage();
         }
     }
 
     // ============================================
-    // Exam Plan Page
+    // Exam Plan Page (/student/schedulefees/examplant)
     // ============================================
 
     private async runOnExamPlanPage(): Promise<void> {
@@ -100,7 +102,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
                 this.uiRefs.container.classList.add(`${this.id}-injected`);
 
                 anchor.appendChild(this.uiRefs.container);
-                this.log.i('UI injected on exam plan page');
+                this.log.i('UI buttons injected on exam plan page');
                 return true;
             },
             {
@@ -110,7 +112,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
         );
 
         if (result.success) {
-            // Initial data load or auto-update
+            // Initial data load or auto-update & render table
             await this.ensurePlanData();
         } else if (result.code !== 'ABORT') {
             this.log.w('Could not find injection point on exam plan page');
@@ -118,9 +120,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
     }
 
     /**
-     * Ensure plan data is available:
-     * - First time: fetch all
-     * - Auto-update: refresh current semester if interval elapsed
+     * Ensure plan data is available and render the summary table.
      */
     private async ensurePlanData(): Promise<void> {
         const [planEntries, lastFetchTime, lastAutoUpdate] = await Promise.all([
@@ -136,6 +136,9 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
             return;
         }
 
+        // Render summary table with existing data
+        this.renderPlanSummaryTable(planEntries);
+
         // Check if auto-update is needed
         if (this.shouldAutoUpdate(lastAutoUpdate)) {
             this.log.i('Auto-update triggered');
@@ -148,6 +151,44 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
         if (lastTime && this.uiRefs?.statusText) {
             const formatted = new Date(lastTime).toLocaleDateString('vi-VN');
             setStatusText(this.uiRefs.statusText, `${count} môn · Cập nhật: ${formatted}`);
+        }
+    }
+
+    /**
+     * Render or re-render the aggregated plan summary table.
+     */
+    private renderPlanSummaryTable(entries: ExamPlanEntry[]): void {
+        const existing = document.querySelector<HTMLElement>(`.${this.id}-plan-summary`);
+        existing?.remove();
+
+        if (entries.length === 0) return;
+
+        const tablePanel = createPlanSummaryTable(entries, {
+            onDownloadSingle: (entry) => this.handleDownloadSingleCourse(entry),
+        });
+        tablePanel.classList.add(`${this.id}-plan-summary`);
+
+        // Inject below the search box or main container
+        const insertTarget =
+            document.querySelector<HTMLElement>('div#ctl03_ctl00_viewResult') ||
+            document.querySelector<HTMLElement>('div.kGrid') ||
+            document.querySelector<HTMLElement>('div.panel-body');
+
+        if (insertTarget && insertTarget.parentElement) {
+            insertTarget.parentElement.insertBefore(tablePanel, insertTarget.nextSibling);
+            this.log.i(`Rendered summary table with ${entries.length} exam plans`);
+        }
+    }
+
+    /**
+     * Download ICS for a single course from the plan table.
+     */
+    private handleDownloadSingleCourse(entry: ExamPlanEntry): void {
+        const events = planEntriesToEvents([entry]);
+        const icsContent = generateExamICS(events, `Lịch thi - ${entry.course}`);
+        if (icsContent) {
+            const filename = `LichThi_${entry.classCode}.ics`;
+            downloadExamICSFile(icsContent, filename);
         }
     }
 
@@ -176,6 +217,8 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
             if (this.uiRefs.statusText) {
                 setStatusText(this.uiRefs.statusText, `${entries.length} môn · Vừa cập nhật`);
             }
+
+            this.renderPlanSummaryTable(entries);
         } catch (error) {
             this.log.e('Failed to fetch all plans:', error);
             setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
@@ -197,18 +240,15 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
 
             const semesterId = detectCurrentSemester();
 
-            // Get current semester class codes from existing data
             const currentCodes = filterClassCodesBySemester(
                 existingEntries.map((e) => e.classCode),
                 semesterId
             );
 
-            // Also check the current page for any new class codes
             const pageItems = parseExamPlanList(document);
             const pageCodes = pageItems.map((item) => item.classCode);
             const newCurrentCodes = filterClassCodesBySemester(pageCodes, semesterId);
 
-            // Combine unique codes
             const allCodes = [...new Set([...currentCodes, ...newCurrentCodes])];
 
             if (allCodes.length === 0) {
@@ -217,10 +257,8 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
                 return;
             }
 
-            // Fetch updated data for current semester
             const freshEntries = await fetchExamPlansByClassCodes(allCodes);
 
-            // Replace current semester entries, keep others
             const existingOtherSemester = existingEntries.filter(
                 (e) => !e.classCode.startsWith(semesterId)
             );
@@ -236,7 +274,6 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
 
             if (this.uiRefs.updateBtn) {
                 setUpdateBtnState(this.uiRefs.updateBtn, 'done');
-                // Reset button after 3s
                 setTimeout(() => {
                     if (this.uiRefs?.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'ready');
                 }, 3000);
@@ -244,6 +281,8 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
             if (this.uiRefs.statusText) {
                 setStatusText(this.uiRefs.statusText, `${merged.length} môn · Vừa cập nhật`);
             }
+
+            this.renderPlanSummaryTable(merged);
         } catch (error) {
             this.log.e('Failed to update current semester plans:', error);
             if (this.uiRefs?.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'error');
@@ -253,7 +292,6 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
 
     /**
      * Handle "📥 Tải lịch thi" from the Exam Plan page.
-     * Uses only plan data (no schedule info available here).
      */
     private async handleDownloadFromPlan(): Promise<void> {
         if (!this.uiRefs) return;
@@ -263,7 +301,6 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
 
             let planEntries = await this.storage.get('planEntries');
 
-            // If no data, fetch first
             if (!planEntries || planEntries.length === 0) {
                 await this.fetchAndSaveAllPlans();
                 planEntries = await this.storage.get('planEntries');
@@ -310,7 +347,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
     }
 
     // ============================================
-    // Exam Schedule Page
+    // Exam Schedule Page (/student/schedulefees/transactionmodules)
     // ============================================
 
     private async runOnExamSchedulePage(): Promise<void> {
@@ -347,16 +384,17 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
         );
 
         if (result.success) {
-            // Cache current schedule entries from DOM
+            // Enhance schedule table with countdown badges & cache entries
             const table = document.querySelector<HTMLTableElement>(
                 'table.table.table-bordered.table-striped'
             );
             if (table) {
+                enhanceScheduleTable(table);
                 const scheduleEntries = parseExamScheduleFromDOM(table);
                 if (scheduleEntries.length > 0) {
                     await this.storage.set('scheduleEntries', scheduleEntries);
                     await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
-                    this.log.d(`Cached ${scheduleEntries.length} schedule entries`);
+                    this.log.d(`Enhanced & cached ${scheduleEntries.length} schedule entries`);
                 }
             }
 
@@ -368,7 +406,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
     }
 
     /**
-     * Auto-update plan data if interval has elapsed (runs from schedule page too).
+     * Auto-update plan data if interval has elapsed.
      */
     private async autoUpdatePlanIfNeeded(): Promise<void> {
         const [planEntries, lastAutoUpdate] = await Promise.all([
@@ -376,10 +414,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
             this.storage.get('lastAutoUpdate'),
         ]);
 
-        if (!planEntries || planEntries.length === 0) {
-            // No data at all — will fetch when user clicks download
-            return;
-        }
+        if (!planEntries || planEntries.length === 0) return;
 
         if (this.shouldAutoUpdate(lastAutoUpdate)) {
             this.log.i('Auto-update plan data from schedule page');
@@ -389,7 +424,6 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
 
     /**
      * Handle "📥 Tải lịch thi" from the Exam Schedule page.
-     * Parses schedule DOM + merges with plan data from storage.
      */
     private async handleDownloadFromSchedule(): Promise<void> {
         if (!this.uiRefs) return;
@@ -397,7 +431,6 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
         try {
             setDownloadBtnState(this.uiRefs.downloadBtn, 'downloading');
 
-            // Parse schedule entries from current page
             const table = document.querySelector<HTMLTableElement>(
                 'table.table.table-bordered.table-striped'
             );
@@ -418,10 +451,8 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
             await this.storage.set('scheduleEntries', scheduleEntries);
             await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
 
-            // Get plan data from storage
             let planEntries = await this.storage.get('planEntries');
 
-            // If no plan data, fetch it first
             if (!planEntries || planEntries.length === 0) {
                 this.log.i('No plan data — fetching before merge');
                 if (this.uiRefs.statusText) {
@@ -431,11 +462,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
                 planEntries = await this.storage.get('planEntries');
             }
 
-            if (!planEntries || planEntries.length === 0) {
-                this.log.w('Could not fetch plan data, continuing with fallback UIDs');
-            }
-
-            // Merge schedule + plan (with fallback UIDs)
+            // Merge schedule + plan (with cascade matching & fallback UIDs)
             const { events, unmatched } = mergeExamData(scheduleEntries, planEntries ?? []);
 
             if (unmatched.length > 0) {
@@ -475,13 +502,56 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
     }
 
     // ============================================
+    // Home Page (/ or /home)
+    // ============================================
+
+    private async runOnHomePage(): Promise<void> {
+        const [scheduleEntries, planEntries] = await Promise.all([
+            this.storage.get('scheduleEntries'),
+            this.storage.get('planEntries'),
+        ]);
+
+        const widget = createHomeExamWidget(scheduleEntries, planEntries);
+        if (!widget) return;
+
+        widget.classList.add(`${this.id}-home-widget`);
+
+        observeDomUntil(
+            'div.cttsv-dashboard, div.be-content',
+            () => {
+                const dashboard = document.querySelector('div.cttsv-dashboard');
+                if (!dashboard) return false;
+
+                // Avoid injecting twice
+                if (dashboard.querySelector(`.${this.id}-home-widget`)) return true;
+
+                // Insert right before the overview section or action grid
+                const overviewSection = dashboard.querySelector('section.cttsv-overview-section');
+                const actionGrid = dashboard.querySelector(
+                    'section.cttsv-action-grid, div.cttsv-action-grid'
+                );
+                const target = overviewSection || actionGrid;
+
+                if (target) {
+                    dashboard.insertBefore(widget, target);
+                } else {
+                    dashboard.appendChild(widget);
+                }
+
+                this.log.i('Home exam widget injected');
+                return true;
+            },
+            {
+                signal: this.abortController?.signal,
+                timeoutMs: 8000,
+            }
+        );
+    }
+
+    // ============================================
     // Helpers
     // ============================================
 
-    /**
-     * Determine if auto-update should run based on elapsed time.
-     * Uses shorter interval during exam period (1 day) and longer outside (3 days).
-     */
     private shouldAutoUpdate(lastAutoUpdate: string | undefined): boolean {
         if (!lastAutoUpdate) return true;
 
@@ -491,16 +561,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
         return elapsed >= interval;
     }
 
-    /**
-     * Simple heuristic to check if we're currently in an exam period.
-     * Exam periods typically fall near the end of each term.
-     * We check if any plan entry has an exam date within the next 30 days.
-     *
-     * Falls back to "not in exam period" if no data is available.
-     */
     private isExamPeriod(): boolean {
-        // Simple month-based heuristic:
-        // Exam periods roughly: Jan, Jun-Jul, Dec (end of semesters)
         const month = new Date().getMonth() + 1;
         return [1, 6, 7, 12].includes(month);
     }
@@ -515,7 +576,9 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
             this.abortController = null;
         }
 
-        const elements = document.querySelectorAll(`.${this.id}-injected`);
+        const elements = document.querySelectorAll(
+            `.${this.id}-injected, .${this.id}-plan-summary, .${this.id}-home-widget`
+        );
         elements.forEach((el) => el.remove());
 
         this.uiRefs = null;

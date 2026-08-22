@@ -12,7 +12,7 @@ import { RemoveSnowfallFeature } from './misc';
 import { ExportTimetableFeature } from './export-timetable';
 import { GradePredictionFeature } from './grade-prediction';
 import { HomeShortcutsFeature } from './home-shortcuts';
-import { ExportExamFeature } from './export-exam';
+import { ExamHelperFeature } from './exam-helper';
 
 // Add new features here
 export const allFeatures: Feature<any>[] = [
@@ -24,5 +24,5 @@ export const allFeatures: Feature<any>[] = [
     new RemoveSnowfallFeature(),
     new ExportTimetableFeature(),
     new HomeShortcutsFeature(),
-    new ExportExamFeature(),
+    new ExamHelperFeature(),
 ];
