@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.8.0...v2.9.0) (2026-08-22)
+
+
+### Features
+
+* **home:** add more shortcuts and compact dashboard action grid ([#86](https://github.com/vuquan2005/svHaUI-Helper/issues/86)) ([c86084d](https://github.com/vuquan2005/svHaUI-Helper/commit/c86084d0840d4a9bd28a993a7c98be7dfb8d067c))
+
 ## [2.8.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.7.1...v2.8.0) (2026-08-22)
 
 
