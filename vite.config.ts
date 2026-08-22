@@ -60,6 +60,12 @@ export default defineConfig({
                     'release-assets.githubusercontent.com',
                 ],
                 'run-at': 'document-end',
+                resource: {
+                    OCR_MODEL:
+                        'https://github.com/vuquan2005/svHaUI-Helper/releases/download/model-v0.0.2/model_quant.onnx',
+                    ORT_WASM_SIMD: `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ortVersion}/dist/ort-wasm-simd.wasm`,
+                    ORT_WASM: `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ortVersion}/dist/ort-wasm.wasm`,
+                },
                 ...getUpdateUrls(),
             },
             build: {
