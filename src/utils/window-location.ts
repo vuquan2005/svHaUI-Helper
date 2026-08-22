@@ -2,7 +2,11 @@
  * Wrapper for window.location with normalization methods
  */
 export class WindowLocationWrapper {
-    constructor(private readonly location: Location = window.location) {}
+    constructor(
+        private readonly location: Location = typeof window !== 'undefined'
+            ? window.location
+            : ({} as Location)
+    ) {}
 
     /**
      * Normalized Href (origin + normalized url)
