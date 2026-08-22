@@ -43,6 +43,7 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 | ------------------ | -------------------------------------------------------------------------- | ---------: |
 | 🏷️ Dynamic Title   | Thay đổi tiêu đề tab theo trang                                            |         ✅ |
 | 🔐 Captcha Helper  | Tự động nhận diện (Transfer learning PP-OCRv4 Mobile ONNX) và nhập captcha |         ✅ |
+| 📊 Grade Helper    | Tô màu điểm số, chỉnh sửa điểm giả lập và dự đoán mục tiêu GPA tốt nghiệp  |         ✅ |
 | 🚀 Quick Nav       | Điều hướng nhanh giữa trang Điểm TX và Điểm thi                            |         ✅ |
 | 📝 Survey Auto     | Đánh giá nhanh (chọn 1-5 điểm cho toàn bộ câu hỏi)                         |         ✅ |
 | 📅 Calendar Export | Xuất thời khóa biểu sang file ICS, theo dõi cập nhật                       |         ✅ |

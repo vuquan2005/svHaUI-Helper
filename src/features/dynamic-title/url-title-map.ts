@@ -35,6 +35,7 @@ const profile = {
 
 const registration = {
     '/register/dangkyhocphan': '📝 ĐK HP dự kiến',
+    '/register': '📝 Đăng ký học phần',
     '/register/': '📝 Đăng ký học phần',
     '/register/dangkyDAKLTN': '📝 ĐK ĐA/KLTN',
     '/training/removeclasslist': '❌ Rút HP',
