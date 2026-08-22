@@ -4,6 +4,7 @@
  */
 
 import * as ort from 'onnxruntime-web';
+import { GM_getResourceURL } from '$';
 import { fetchArrayBuffer } from '@/utils';
 import { DEFAULT_MODEL_URL, ORT_WASM_CDN_BASE, CHARACTER_DICT } from './config';
 import { prepareInputTensor, ctcDecode } from './ocr-utils';
@@ -50,10 +51,34 @@ export class OcrRecognizer {
 
             // Disable multi-threading in WASM to avoid COOP/COEP headers issues in browser/userscript
             ort.env.wasm.numThreads = 1;
-            ort.env.wasm.wasmPaths = ORT_WASM_CDN_BASE;
 
-            this.log.d('Fetching ONNX model binary from:', this.modelUrl);
-            const modelBuffer = await fetchArrayBuffer(this.modelUrl);
+            let wasmPaths: string | Record<string, string> = ORT_WASM_CDN_BASE;
+            let targetModelUrl = this.modelUrl;
+
+            try {
+                if (typeof GM_getResourceURL === 'function') {
+                    const wasmSimdUrl = GM_getResourceURL('ORT_WASM_SIMD');
+                    const wasmUrl = GM_getResourceURL('ORT_WASM');
+                    const resourceModelUrl = GM_getResourceURL('OCR_MODEL');
+
+                    if (wasmSimdUrl && wasmUrl) {
+                        wasmPaths = {
+                            'ort-wasm-simd.wasm': wasmSimdUrl,
+                            'ort-wasm.wasm': wasmUrl,
+                        };
+                    }
+                    if (resourceModelUrl && this.modelUrl === DEFAULT_MODEL_URL) {
+                        targetModelUrl = resourceModelUrl;
+                    }
+                }
+            } catch (err) {
+                this.log.d('GM_getResourceURL fallback triggered:', err);
+            }
+
+            ort.env.wasm.wasmPaths = wasmPaths;
+
+            this.log.d('Fetching ONNX model binary from:', targetModelUrl);
+            const modelBuffer = await fetchArrayBuffer(targetModelUrl);
 
             this.session = await ort.InferenceSession.create(modelBuffer, {
                 executionProviders: ['wasm'],
