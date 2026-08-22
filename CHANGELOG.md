@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.7.0...v2.7.1) (2026-08-22)
+
+
+### Performance Improvements
+
+* **captcha:** cache ONNX model and WASM binaries ([#81](https://github.com/vuquan2005/svHaUI-Helper/issues/81)) ([b6eebb1](https://github.com/vuquan2005/svHaUI-Helper/commit/b6eebb1882c3ea98a76117f0b85f9e854d132e53))
+
 ## [2.7.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.6.1...v2.7.0) (2026-07-20)
 
 
