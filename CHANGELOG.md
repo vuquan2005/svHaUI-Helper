@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.8.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.7.1...v2.8.0) (2026-08-22)
+
+
+### Features
+
+* **grade:** add grade prediction and gpa simulation feature ([#85](https://github.com/vuquan2005/svHaUI-Helper/issues/85)) ([8eb6c16](https://github.com/vuquan2005/svHaUI-Helper/commit/8eb6c160c58d710309405644acaf11df068ba37e))
+
+
+### Bug Fixes
+
+* **captcha:** prevent auto-submitting hidden captcha elements ([#83](https://github.com/vuquan2005/svHaUI-Helper/issues/83)) ([e183702](https://github.com/vuquan2005/svHaUI-Helper/commit/e1837027e842dfddb0eeb3b45716dc38e6d2c0f3))
+
 ## [2.7.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.7.0...v2.7.1) (2026-08-22)
 
 
