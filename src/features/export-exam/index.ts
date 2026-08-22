@@ -13,6 +13,7 @@
  */
 
 import { Feature } from '@/core';
+import { observeDomUntil } from '@/utils/dom';
 import { ExportExamStorage, ExamPlanEntry } from './types';
 import { parseExamScheduleFromDOM } from './exam-schedule-parser';
 import {
@@ -44,8 +45,8 @@ import { detectCurrentSemester } from '../export-timetable/semester-config';
 /** Auto-update interval during exam period: 1 day */
 const AUTO_UPDATE_EXAM_PERIOD_MS = 1 * 24 * 60 * 60 * 1000;
 
-/** Auto-update interval outside exam period: 7 days */
-const AUTO_UPDATE_NORMAL_MS = 7 * 24 * 60 * 60 * 1000;
+/** Auto-update interval outside exam period: 3 days */
+const AUTO_UPDATE_NORMAL_MS = 3 * 24 * 60 * 60 * 1000;
 
 // ============================================
 // Feature Implementation
@@ -53,6 +54,7 @@ const AUTO_UPDATE_NORMAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export class ExportExamFeature extends Feature<ExportExamStorage> {
     private uiRefs: ExamUIRefs | null = null;
+    private abortController: AbortController | null = null;
 
     constructor() {
         super({
@@ -67,6 +69,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
     }
 
     async run(): Promise<void> {
+        this.abortController = new AbortController();
         const pageName = this.matchResult?.matchName;
 
         if (pageName === 'exam-plan') {
@@ -81,24 +84,37 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
     // ============================================
 
     private async runOnExamPlanPage(): Promise<void> {
-        // Find a suitable place to inject UI (next to the submit button)
-        const anchor = document.querySelector<HTMLElement>('div.box_tracuu');
-        if (!anchor) {
+        const result = await observeDomUntil(
+            'div.box_tracuu',
+            () => {
+                const anchor = document.querySelector<HTMLElement>('div.box_tracuu');
+                if (!anchor) return false;
+
+                // Avoid injecting twice
+                if (anchor.querySelector(`.${this.id}-injected`)) return true;
+
+                this.uiRefs = createExamPlanUI({
+                    onDownloadExam: () => this.handleDownloadFromPlan(),
+                    onForceUpdate: () => this.handleForceUpdate(),
+                });
+                this.uiRefs.container.classList.add(`${this.id}-injected`);
+
+                anchor.appendChild(this.uiRefs.container);
+                this.log.i('UI injected on exam plan page');
+                return true;
+            },
+            {
+                signal: this.abortController?.signal,
+                timeoutMs: 8000,
+            }
+        );
+
+        if (result.success) {
+            // Initial data load or auto-update
+            await this.ensurePlanData();
+        } else if (result.code !== 'ABORT') {
             this.log.w('Could not find injection point on exam plan page');
-            return;
         }
-
-        this.uiRefs = createExamPlanUI({
-            onDownloadExam: () => this.handleDownloadFromPlan(),
-            onForceUpdate: () => this.handleForceUpdate(),
-        });
-
-        // Append to box_tracuu so buttons appear after the "Submit" button
-        anchor.appendChild(this.uiRefs.container);
-        this.log.i('UI injected on exam plan page');
-
-        // Initial data load or auto-update
-        await this.ensurePlanData();
     }
 
     /**
@@ -298,26 +314,57 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
     // ============================================
 
     private async runOnExamSchedulePage(): Promise<void> {
-        // Find panel heading container and inject UI (similar to grade-navigation)
-        const anchor =
-            document.querySelector<HTMLElement>('div.panel-heading.panel-heading-divider') ||
-            document.querySelector<HTMLElement>('div.panel.panel-default > div.panel-heading');
+        const result = await observeDomUntil(
+            'div.panel-heading.panel-heading-divider, div.panel.panel-default > div.panel-heading',
+            () => {
+                const anchor =
+                    document.querySelector<HTMLElement>(
+                        'div.panel-heading.panel-heading-divider'
+                    ) ||
+                    document.querySelector<HTMLElement>(
+                        'div.panel.panel-default > div.panel-heading'
+                    );
 
-        if (!anchor) {
+                if (!anchor) return false;
+
+                // Avoid duplicate injection
+                if (anchor.querySelector(`.${this.id}-injected`)) return true;
+
+                this.uiRefs = createExamScheduleUI({
+                    onDownloadExam: () => this.handleDownloadFromSchedule(),
+                });
+                this.uiRefs.container.classList.add(`${this.id}-injected`);
+
+                // Insert at the beginning, CSS will float it to the right
+                anchor.insertBefore(this.uiRefs.container, anchor.firstChild);
+                this.log.i('UI injected on exam schedule page');
+                return true;
+            },
+            {
+                signal: this.abortController?.signal,
+                timeoutMs: 8000,
+            }
+        );
+
+        if (result.success) {
+            // Cache current schedule entries from DOM
+            const table = document.querySelector<HTMLTableElement>(
+                'table.table.table-bordered.table-striped'
+            );
+            if (table) {
+                const scheduleEntries = parseExamScheduleFromDOM(table);
+                if (scheduleEntries.length > 0) {
+                    await this.storage.set('scheduleEntries', scheduleEntries);
+                    await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
+                    this.log.d(`Cached ${scheduleEntries.length} schedule entries`);
+                }
+            }
+
+            // Also run auto-update check for plan data
+            await this.autoUpdatePlanIfNeeded();
+        } else if (result.code !== 'ABORT') {
             this.log.w('Could not find injection point on exam schedule page');
-            return;
         }
-
-        this.uiRefs = createExamScheduleUI({
-            onDownloadExam: () => this.handleDownloadFromSchedule(),
-        });
-
-        // Insert at the beginning, CSS will float it to the right
-        anchor.insertBefore(this.uiRefs.container, anchor.firstChild);
-        this.log.i('UI injected on exam schedule page');
-
-        // Also run auto-update check for plan data
-        await this.autoUpdatePlanIfNeeded();
     }
 
     /**
@@ -367,6 +414,10 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
                 return;
             }
 
+            // Update schedule cache
+            await this.storage.set('scheduleEntries', scheduleEntries);
+            await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
+
             // Get plan data from storage
             let planEntries = await this.storage.get('planEntries');
 
@@ -381,42 +432,21 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
             }
 
             if (!planEntries || planEntries.length === 0) {
-                alert('Không thể tải dữ liệu kế hoạch thi. Vui lòng vào trang Kế hoạch thi trước.');
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
-                return;
+                this.log.w('Could not fetch plan data, continuing with fallback UIDs');
             }
 
-            // Merge schedule + plan
-            const { events, unmatched } = mergeExamData(scheduleEntries, planEntries);
+            // Merge schedule + plan (with fallback UIDs)
+            const { events, unmatched } = mergeExamData(scheduleEntries, planEntries ?? []);
 
             if (unmatched.length > 0) {
                 this.log.w(
-                    `${unmatched.length} schedule entries could not be matched with plan data`
+                    `${unmatched.length} schedule entries using fallback UID:`,
+                    unmatched.map((u) => u.course)
                 );
-                // Try re-fetching plan data for unmatched entries
-                if (this.uiRefs.statusText) {
-                    setStatusText(
-                        this.uiRefs.statusText,
-                        `${unmatched.length} môn thiếu dữ liệu, đang cập nhật...`
-                    );
-                }
-                await this.fetchAndSaveAllPlans();
-                planEntries = await this.storage.get('planEntries');
-
-                if (planEntries) {
-                    // Re-merge with updated data
-                    const retryResult = mergeExamData(scheduleEntries, planEntries);
-                    events.length = 0;
-                    events.push(...retryResult.events);
-
-                    if (retryResult.unmatched.length > 0) {
-                        this.log.w(`Still ${retryResult.unmatched.length} unmatched after refresh`);
-                    }
-                }
             }
 
             if (events.length === 0) {
-                alert('Không thể ghép dữ liệu lịch thi. Vui lòng cập nhật dữ liệu kế hoạch thi.');
+                alert('Không thể tạo dữ liệu lịch thi.');
                 setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
                 return;
             }
@@ -450,7 +480,7 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
 
     /**
      * Determine if auto-update should run based on elapsed time.
-     * Uses shorter interval during exam period (1 day) and longer outside (7 days).
+     * Uses shorter interval during exam period (1 day) and longer outside (3 days).
      */
     private shouldAutoUpdate(lastAutoUpdate: string | undefined): boolean {
         if (!lastAutoUpdate) return true;
@@ -480,7 +510,14 @@ export class ExportExamFeature extends Feature<ExportExamStorage> {
     // ============================================
 
     cleanup(): void {
-        this.uiRefs?.container.remove();
+        if (this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
+        }
+
+        const elements = document.querySelectorAll(`.${this.id}-injected`);
+        elements.forEach((el) => el.remove());
+
         this.uiRefs = null;
     }
 }

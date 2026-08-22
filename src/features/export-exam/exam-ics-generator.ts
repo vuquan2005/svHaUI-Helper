@@ -53,6 +53,33 @@ function addMinutes(startTime: string, durationMinutes: number): string {
 }
 
 // ============================================
+// Normalization & Fallback Helpers
+// ============================================
+
+/**
+ * Normalizes course name for flexible matching (removes accents, punctuation, lowercases).
+ */
+export function normalizeCourseName(name: string): string {
+    return name
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Generate a deterministic fallback classCode when not found in plan.
+ * Uses normalized course name + schedule exam date.
+ */
+export function generateFallbackClassCode(courseName: string, examDate: string): string {
+    const slug = normalizeCourseName(courseName) || 'course';
+    const dateFormatted = examDate.replace(/[^\d]/g, '');
+    return `${slug}-${dateFormatted}`;
+}
+
+// ============================================
 // Matching Key
 // ============================================
 
@@ -71,7 +98,13 @@ function matchKey(examDate: string, examTime: string): string {
 
 /**
  * Merge exam schedule entries with plan entries.
- * Matching is done by examDate + examTime (ca thi).
+ * Uses a cascade matching strategy:
+ * 1. Exact match by examDate + examTime
+ * 2. Match by normalized course name + attempt
+ * 3. Match by normalized course name
+ * 4. Fallback: Generate fallback classCode using schedule's actual date
+ *
+ * Always uses the Schedule's examDate & examTime as the single source of truth for time.
  *
  * @param scheduleEntries - Parsed from schedule page
  * @param planEntries - Cached from plan page
@@ -81,26 +114,46 @@ export function mergeExamData(
     scheduleEntries: ExamScheduleEntry[],
     planEntries: ExamPlanEntry[]
 ): { events: ExamEvent[]; unmatched: ExamScheduleEntry[] } {
-    // Build a lookup map from plan: key → ExamPlanEntry
-    const planMap = new Map<string, ExamPlanEntry>();
+    // 1. Exact lookup map by examDate + examTime
+    const exactPlanMap = new Map<string, ExamPlanEntry>();
     for (const plan of planEntries) {
         const key = matchKey(plan.examDate, plan.examTime);
-        planMap.set(key, plan);
+        exactPlanMap.set(key, plan);
+    }
+
+    // 2. Course name + attempt lookup map
+    const courseAttemptPlanMap = new Map<string, ExamPlanEntry>();
+    for (const plan of planEntries) {
+        const key = `${normalizeCourseName(plan.course)}|${plan.attempt}`;
+        courseAttemptPlanMap.set(key, plan);
+    }
+
+    // 3. Course name alone lookup map
+    const coursePlanMap = new Map<string, ExamPlanEntry>();
+    for (const plan of planEntries) {
+        const key = normalizeCourseName(plan.course);
+        coursePlanMap.set(key, plan);
     }
 
     const events: ExamEvent[] = [];
     const unmatched: ExamScheduleEntry[] = [];
 
     for (const schedule of scheduleEntries) {
-        const key = matchKey(schedule.examDate, schedule.examTime);
-        const plan = planMap.get(key);
+        const exactKey = matchKey(schedule.examDate, schedule.examTime);
+        const courseAttemptKey = `${normalizeCourseName(schedule.course)}|${schedule.attempt}`;
+        const courseKey = normalizeCourseName(schedule.course);
+
+        const plan =
+            exactPlanMap.get(exactKey) ||
+            courseAttemptPlanMap.get(courseAttemptKey) ||
+            coursePlanMap.get(courseKey);
 
         if (plan) {
             events.push({
                 classCode: plan.classCode,
-                course: schedule.course, // Use schedule's course name (more reliable display)
-                examDate: schedule.examDate,
-                examTime: schedule.examTime,
+                course: schedule.course, // Schedule has the official course title
+                examDate: schedule.examDate, // Always prioritize schedule's actual exam date
+                examTime: schedule.examTime, // Always prioritize schedule's actual exam time
                 attempt: schedule.attempt,
                 sbd: schedule.sbd,
                 position: schedule.position,
@@ -110,6 +163,18 @@ export function mergeExamData(
             });
         } else {
             unmatched.push(schedule);
+            // Fallback: Create event with deterministic classCode using schedule's actual date
+            events.push({
+                classCode: generateFallbackClassCode(schedule.course, schedule.examDate),
+                course: schedule.course,
+                examDate: schedule.examDate,
+                examTime: schedule.examTime,
+                attempt: schedule.attempt,
+                sbd: schedule.sbd,
+                position: schedule.position,
+                room: schedule.room,
+                building: schedule.building,
+            });
         }
     }
 

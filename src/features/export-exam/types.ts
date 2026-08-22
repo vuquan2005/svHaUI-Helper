@@ -97,9 +97,13 @@ export interface ExamEvent {
 export interface ExportExamStorage {
     /** Cached exam plan entries from all fetched class codes */
     planEntries?: ExamPlanEntry[];
-    /** ISO datetime of last full fetch */
+    /** Cached exam schedule entries from /student/schedulefees/transactionmodules */
+    scheduleEntries?: ExamScheduleEntry[];
+    /** ISO datetime of last full fetch of plan entries */
     lastFetchTime?: string;
     /** ISO datetime of last auto-update check */
     lastAutoUpdate?: string;
+    /** ISO datetime of last schedule fetch */
+    lastScheduleFetchTime?: string;
     [key: string]: unknown;
 }
