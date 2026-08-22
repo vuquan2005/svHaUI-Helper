@@ -3,7 +3,7 @@
  * Manages input events, normalization, and form submission
  */
 
-import { normalizeCaptchaInput, normalizeCaptchaInputUndo } from '@/utils';
+import { normalizeCaptchaInput, normalizeCaptchaInputUndo, isElementVisible } from '@/utils';
 import { DEBOUNCE_DELAY_MS, CAPTCHA_LENGTH } from './config';
 
 export interface InputHandlerOptions {
@@ -50,7 +50,9 @@ export class CaptchaInputHandler {
         this.inputEl.addEventListener('input', this.handleInput);
         this.inputEl.addEventListener('keydown', this.handleKeyDown);
         this.inputEl.addEventListener('blur', this.handleBlur);
-        this.inputEl.focus();
+        if (isElementVisible(this.inputEl)) {
+            this.inputEl.focus();
+        }
     }
 
     /**
@@ -127,9 +129,13 @@ export class CaptchaInputHandler {
      * Submit form if input meets requirements
      */
     private submit(): void {
+        if (!isElementVisible(this.inputEl) || !isElementVisible(this.submitEl)) {
+            return;
+        }
+
         const value = this.inputEl.value.trim();
 
-        if (value.length === CAPTCHA_LENGTH) {
+        if (value.length !== CAPTCHA_LENGTH) {
             this.log.d(`Need ${CAPTCHA_LENGTH} chars, got ${value.length}`);
             return;
         }

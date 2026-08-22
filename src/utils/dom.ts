@@ -136,3 +136,33 @@ export function observeDomUntil(
         observer.observe(element, config);
     });
 }
+
+/**
+ * Checks if a DOM element is currently visible in the document.
+ * Returns false if element is null/undefined, disconnected from DOM, or hidden via CSS.
+ *
+ * @param el - The HTML element to check
+ * @returns true if the element is visible
+ */
+export function isElementVisible(el: HTMLElement | null | undefined): boolean {
+    if (!el || !el.isConnected) return false;
+
+    if (typeof el.checkVisibility === 'function') {
+        return el.checkVisibility({
+            checkOpacity: false,
+            checkVisibilityCSS: true,
+        });
+    }
+
+    if (typeof window !== 'undefined') {
+        const style = window.getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden') return false;
+    }
+
+    if (typeof el.getBoundingClientRect === 'function') {
+        const rect = el.getBoundingClientRect();
+        if (rect.width <= 0 && rect.height <= 0) return false;
+    }
+
+    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+}
