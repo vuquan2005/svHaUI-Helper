@@ -18,6 +18,57 @@ export interface UnifiedUpcomingExam {
 }
 
 /**
+ * Extracts and unifies upcoming exams from schedule and plan entries.
+ */
+export function getUpcomingExamsList(
+    scheduleEntries?: ExamScheduleEntry[],
+    planEntries?: ExamPlanEntry[],
+    now: Date = new Date(),
+    maxDays = 14
+): Array<{ exam: UnifiedUpcomingExam; countdown: ReturnType<typeof getExamCountdown> }> {
+    const rawMap = new Map<string, UnifiedUpcomingExam>();
+
+    // 1. Add from plan entries first (has all current semester courses)
+    if (planEntries && planEntries.length > 0) {
+        for (const p of planEntries) {
+            rawMap.set(p.course.trim().toLowerCase(), {
+                course: p.course,
+                examDate: p.examDate,
+                examTime: p.examTime,
+            });
+        }
+    }
+
+    // 2. Overlay / Merge with schedule entries (provides room, building, sbd)
+    if (scheduleEntries && scheduleEntries.length > 0) {
+        for (const s of scheduleEntries) {
+            const key = s.course.trim().toLowerCase();
+            const existing = rawMap.get(key);
+            rawMap.set(key, {
+                course: s.course,
+                examDate: s.examDate,
+                examTime: s.examTime,
+                room: s.room || existing?.room,
+                building: s.building || existing?.building,
+                sbd: s.sbd || existing?.sbd,
+            });
+        }
+    }
+
+    const rawList = Array.from(rawMap.values());
+    if (rawList.length === 0) return [];
+
+    return rawList
+        .map((exam) => {
+            const countdown = getExamCountdown(exam.examDate, exam.examTime, now);
+            return { exam, countdown };
+        })
+        .filter(({ countdown }) => countdown.direction === 1 && countdown.days <= maxDays)
+        .sort((a, b) => a.countdown.diffMs - b.countdown.diffMs)
+        .slice(0, 4);
+}
+
+/**
  * Creates the Home Upcoming Exams Widget if there are exams within the next 14 days.
  *
  * @param scheduleEntries - Cached schedule entries (has room/SBD)
@@ -28,42 +79,7 @@ export function createHomeExamWidget(
     scheduleEntries?: ExamScheduleEntry[],
     planEntries?: ExamPlanEntry[]
 ): HTMLDivElement | null {
-    const rawList: UnifiedUpcomingExam[] = [];
-
-    // Prioritize schedule entries (has room/SBD)
-    if (scheduleEntries && scheduleEntries.length > 0) {
-        for (const s of scheduleEntries) {
-            rawList.push({
-                course: s.course,
-                examDate: s.examDate,
-                examTime: s.examTime,
-                room: s.room,
-                building: s.building,
-                sbd: s.sbd,
-            });
-        }
-    } else if (planEntries && planEntries.length > 0) {
-        for (const p of planEntries) {
-            rawList.push({
-                course: p.course,
-                examDate: p.examDate,
-                examTime: p.examTime,
-            });
-        }
-    }
-
-    if (rawList.length === 0) return null;
-
-    // Filter upcoming exams (next 14 days)
-    const upcomingList = rawList
-        .map((exam) => {
-            const countdown = getExamCountdown(exam.examDate, exam.examTime);
-            return { exam, countdown };
-        })
-        .filter(({ countdown }) => countdown.direction === 1 && countdown.days <= 14)
-        .sort((a, b) => a.countdown.diffMs - b.countdown.diffMs)
-        .slice(0, 4); // Show top 4 closest exams
-
+    const upcomingList = getUpcomingExamsList(scheduleEntries, planEntries);
     if (upcomingList.length === 0) return null;
 
     const widget = document.createElement('div');

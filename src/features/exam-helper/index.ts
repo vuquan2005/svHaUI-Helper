@@ -671,30 +671,34 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         ]);
 
         const widget = createHomeExamWidget(scheduleEntries, planEntries);
-        if (!widget) return;
+        if (!widget) {
+            this.log.d('No upcoming exams for home widget');
+            return;
+        }
 
         widget.classList.add(`${this.id}-home-widget`);
 
         observeDomUntil(
-            'div.cttsv-dashboard, div.be-content',
+            '.be-content, div.cttsv-dashboard, div.main-content',
             () => {
-                const dashboard = document.querySelector('div.cttsv-dashboard');
+                const dashboard =
+                    document.querySelector('div.cttsv-dashboard') ||
+                    document.querySelector('.be-content') ||
+                    document.querySelector('div.main-content');
                 if (!dashboard) return false;
 
                 // Avoid injecting twice
-                if (dashboard.querySelector(`.${this.id}-home-widget`)) return true;
+                if (document.querySelector(`.${this.id}-home-widget`)) return true;
 
                 // Insert right before the overview section or action grid
-                const overviewSection = dashboard.querySelector('section.cttsv-overview-section');
-                const actionGrid = dashboard.querySelector(
-                    'section.cttsv-action-grid, div.cttsv-action-grid'
-                );
-                const target = overviewSection || actionGrid;
+                const target =
+                    dashboard.querySelector('section.cttsv-overview-section') ||
+                    dashboard.querySelector('section.cttsv-action-grid, div.cttsv-action-grid');
 
                 if (target) {
                     dashboard.insertBefore(widget, target);
                 } else {
-                    dashboard.appendChild(widget);
+                    dashboard.prepend(widget);
                 }
 
                 this.log.i('Home exam widget injected');
