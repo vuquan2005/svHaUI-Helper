@@ -59,7 +59,7 @@ describe('mergeExamData', () => {
         },
     ];
 
-    it('merges exact date + time matches correctly', () => {
+    it('merges exact date + time matches and includes remaining unassigned plan courses', () => {
         const schedule: ExamScheduleEntry[] = [
             {
                 course: 'Lập trình Web',
@@ -75,11 +75,19 @@ describe('mergeExamData', () => {
 
         const { events, unmatched } = mergeExamData(schedule, mockPlan);
         expect(unmatched).toHaveLength(0);
-        expect(events).toHaveLength(1);
+        // 1 matched with schedule + 1 remaining from plan
+        expect(events).toHaveLength(2);
+
+        // First event: matched with schedule details
         expect(events[0].classCode).toBe('20251IT6015001');
         expect(events[0].room).toBe('402');
         expect(events[0].sbd).toBe('15');
         expect(events[0].department).toBe('CNTT');
+
+        // Second event: from plan, not yet assigned room
+        expect(events[1].classCode).toBe('20251IT6020001');
+        expect(events[1].course).toBe('Cơ sở dữ liệu');
+        expect(events[1].room).toBeUndefined();
     });
 
     it('matches by course name when exam date/time has been changed in official schedule', () => {
@@ -98,7 +106,6 @@ describe('mergeExamData', () => {
 
         const { events, unmatched } = mergeExamData(schedule, mockPlan);
         expect(unmatched).toHaveLength(0);
-        expect(events).toHaveLength(1);
         expect(events[0].classCode).toBe('20251IT6020001');
         expect(events[0].examDate).toBe('27/06/2026'); // prioritizes schedule's actual date
         expect(events[0].examTime).toBe('13h30'); // prioritizes schedule's actual time
@@ -120,7 +127,8 @@ describe('mergeExamData', () => {
 
         const { events, unmatched } = mergeExamData(schedule, mockPlan);
         expect(unmatched).toHaveLength(1);
-        expect(events).toHaveLength(1);
+        // 1 fallback schedule + 2 unassigned plan entries
+        expect(events).toHaveLength(3);
         expect(events[0].classCode).toBe('toancaocap-30062026');
         expect(events[0].course).toBe('Toán cao cấp');
     });
@@ -146,10 +154,11 @@ describe('generateExamICS', () => {
         const ics = generateExamICS(events, 'Lịch thi test');
         expect(ics).toContain('BEGIN:VCALENDAR');
         expect(ics).toContain('SUMMARY:[THI] Lập trình Web');
-        expect(ics).toContain('UID:exam-20251IT6015001-1@haui');
+        expect(ics).toContain('UID:exam-20251IT6015001-1@svhaui.helper');
         expect(ics).toContain('LOCATION:402 - A1');
         expect(ics).toContain('Mã lớp: 20251IT6015001');
         expect(ics).toContain('SBD: 15');
+        expect(ics).toContain('Khoa: CNTT');
         expect(ics).toContain('END:VCALENDAR');
     });
 

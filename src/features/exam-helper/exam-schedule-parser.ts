@@ -123,3 +123,30 @@ export function parseExamScheduleFromDOM(tableEl: HTMLTableElement): ExamSchedul
 
     return entries;
 }
+
+/**
+ * Fetch and parse exam schedule directly from the server.
+ * Can be called from any page (Home, Exam Plan, etc.) in the background.
+ */
+export async function fetchExamScheduleFromWeb(): Promise<ExamScheduleEntry[]> {
+    try {
+        const response = await fetch('/student/schedulefees/transactionmodules', {
+            headers: {
+                Accept: 'text/html,application/xhtml+xml',
+            },
+        });
+
+        if (!response.ok) return [];
+
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const table = findExamScheduleTable(doc);
+        if (!table) return [];
+
+        return parseExamScheduleFromDOM(table);
+    } catch {
+        return [];
+    }
+}

@@ -9,8 +9,12 @@
 
 import { Feature } from '@/core';
 import { observeDomUntil } from '@/utils/dom';
-import { ExportExamStorage, ExamPlanEntry } from './types';
-import { parseExamScheduleFromDOM, findExamScheduleTable } from './exam-schedule-parser';
+import { ExportExamStorage, ExamPlanEntry, ExamScheduleEntry } from './types';
+import {
+    parseExamScheduleFromDOM,
+    findExamScheduleTable,
+    fetchExamScheduleFromWeb,
+} from './exam-schedule-parser';
 import {
     parseExamPlanList,
     fetchAllExamPlansBatched,
@@ -95,7 +99,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 if (anchor.querySelector(`.${this.id}-injected`)) return true;
 
                 this.uiRefs = createExamPlanUI({
-                    onDownloadExam: () => this.handleDownloadFromPlan(),
+                    onDownloadExam: () => this.handleUnifiedDownload(),
                     onForceUpdate: () => this.handleForceUpdate(),
                 });
                 this.uiRefs.container.classList.add(`${this.id}-injected`);
@@ -428,43 +432,73 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
     }
 
     /**
-     * Handle "📥 Tải lịch thi" from the Exam Plan page.
+     * Unified Smart Download handler.
+     * Operates consistently from any page (Home, Exam Plan, Exam Schedule).
+     * Two-way merges all upcoming schedule + plan entries to produce a complete ICS.
      */
-    private async handleDownloadFromPlan(): Promise<void> {
+    private async handleUnifiedDownload(): Promise<void> {
         if (!this.uiRefs) return;
 
         try {
             setDownloadBtnState(this.uiRefs.downloadBtn, 'downloading');
+            if (this.uiRefs.statusText) {
+                setStatusText(this.uiRefs.statusText, 'Đang chuẩn bị file lịch thi...');
+            }
 
+            // 1. Get Schedule Entries (from current DOM if on schedule page, or storage/web)
+            let scheduleEntries: ExamScheduleEntry[] = [];
+            const scheduleTable = findExamScheduleTable();
+            if (scheduleTable) {
+                scheduleEntries = parseExamScheduleFromDOM(scheduleTable);
+                await this.storage.set('scheduleEntries', scheduleEntries);
+                await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
+            } else {
+                scheduleEntries = (await this.storage.get('scheduleEntries')) ?? [];
+                if (scheduleEntries.length === 0) {
+                    scheduleEntries = await fetchExamScheduleFromWeb();
+                    if (scheduleEntries.length > 0) {
+                        await this.storage.set('scheduleEntries', scheduleEntries);
+                        await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
+                    }
+                }
+            }
+
+            // 2. Get Plan Entries (from storage or background fetch)
             let planEntries = await this.storage.get('planEntries');
-
             if (!planEntries || planEntries.length === 0) {
+                if (this.uiRefs.statusText) {
+                    setStatusText(this.uiRefs.statusText, 'Đang nạp kế hoạch thi...');
+                }
                 await this.fetchAndSaveAllPlans();
                 planEntries = await this.storage.get('planEntries');
             }
 
-            if (!planEntries || planEntries.length === 0) {
-                alert('Không có dữ liệu lịch thi. Vui lòng thử cập nhật lại.');
+            // 3. Filter only upcoming entries
+            const upcomingSchedules = (scheduleEntries ?? []).filter(
+                (e) => getExamCountdown(e.examDate, e.examTime).direction === 1
+            );
+            const upcomingPlans = (planEntries ?? []).filter(
+                (e) => getExamCountdown(e.examDate, e.examTime).direction === 1
+            );
+
+            if (upcomingSchedules.length === 0 && upcomingPlans.length === 0) {
+                alert('Tất cả các môn thi đều đã diễn ra. Không có môn nào sắp tới để xuất.');
+                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
+                if (this.uiRefs.statusText) setStatusText(this.uiRefs.statusText, '');
+                return;
+            }
+
+            // 4. Two-way Merge
+            const { events } = mergeExamData(upcomingSchedules, upcomingPlans);
+
+            if (events.length === 0) {
+                alert('Không thể tạo dữ liệu lịch thi.');
                 setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
                 return;
             }
 
-            // Filter only upcoming (not yet passed) exams
-            const upcomingPlans = planEntries.filter(
-                (e) => getExamCountdown(e.examDate, e.examTime).direction === 1
-            );
-
-            if (upcomingPlans.length === 0) {
-                alert(
-                    'Tất cả các môn thi trong kế hoạch đều đã diễn ra. Không có môn nào sắp tới để xuất.'
-                );
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-                return;
-            }
-
-            const events = planEntriesToEvents(upcomingPlans);
+            // 5. Generate & Download ICS
             const icsContent = generateExamICS(events);
-
             if (!icsContent) {
                 alert('Không thể tạo file lịch thi.');
                 setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
@@ -475,10 +509,15 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             const filename = `LichThi_${semesterId}.ics`;
             downloadExamICSFile(icsContent, filename);
 
-            this.log.i(`Downloaded upcoming exam ICS: ${filename} (${events.length} events)`);
+            this.log.i(
+                `Downloaded unified upcoming exam ICS: ${filename} (${events.length} events)`
+            );
+            if (this.uiRefs.statusText) {
+                setStatusText(this.uiRefs.statusText, '');
+            }
             setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
         } catch (error) {
-            this.log.e('Download from plan failed:', error);
+            this.log.e('Unified download failed:', error);
             alert('Tải lịch thi thất bại. Xem console để biết chi tiết.');
             setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
         }
@@ -518,7 +557,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 if (anchor.querySelector(`.${this.id}-injected`)) return true;
 
                 this.uiRefs = createExamScheduleUI({
-                    onDownloadExam: () => this.handleDownloadFromSchedule(),
+                    onDownloadExam: () => this.handleUnifiedDownload(),
                 });
                 this.uiRefs.container.classList.add(`${this.id}-injected`);
 
@@ -570,96 +609,6 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         }
     }
 
-    /**
-     * Handle "📥 Tải lịch thi" from the Exam Schedule page.
-     */
-    private async handleDownloadFromSchedule(): Promise<void> {
-        if (!this.uiRefs) return;
-
-        try {
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'downloading');
-
-            const table = findExamScheduleTable();
-            if (!table) {
-                alert('Không tìm thấy bảng lịch thi trên trang.');
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-                return;
-            }
-
-            const scheduleEntries = parseExamScheduleFromDOM(table);
-            if (scheduleEntries.length === 0) {
-                alert('Không có dữ liệu lịch thi để xuất.');
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-                return;
-            }
-
-            // Update schedule cache
-            await this.storage.set('scheduleEntries', scheduleEntries);
-            await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
-
-            // Filter only upcoming (not yet passed) schedule entries
-            const upcomingSchedules = scheduleEntries.filter(
-                (e) => getExamCountdown(e.examDate, e.examTime).direction === 1
-            );
-
-            if (upcomingSchedules.length === 0) {
-                alert(
-                    'Tất cả các môn trong lịch thi đều đã diễn ra. Không có môn nào sắp tới để xuất.'
-                );
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-                return;
-            }
-
-            let planEntries = await this.storage.get('planEntries');
-
-            if (!planEntries || planEntries.length === 0) {
-                this.log.i('No plan data — fetching before merge');
-                if (this.uiRefs.statusText) {
-                    setStatusText(this.uiRefs.statusText, 'Đang tải dữ liệu kế hoạch thi...');
-                }
-                await this.fetchAndSaveAllPlans();
-                planEntries = await this.storage.get('planEntries');
-            }
-
-            // Merge schedule + plan (with cascade matching & fallback UIDs)
-            const { events, unmatched } = mergeExamData(upcomingSchedules, planEntries ?? []);
-
-            if (unmatched.length > 0) {
-                this.log.w(
-                    `${unmatched.length} schedule entries using fallback UID:`,
-                    unmatched.map((u) => u.course)
-                );
-            }
-
-            if (events.length === 0) {
-                alert('Không thể tạo dữ liệu lịch thi.');
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
-                return;
-            }
-
-            const icsContent = generateExamICS(events);
-            if (!icsContent) {
-                alert('Không thể tạo file lịch thi.');
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-                return;
-            }
-
-            const semesterId = detectExamSemester();
-            const filename = `LichThi_${semesterId}.ics`;
-            downloadExamICSFile(icsContent, filename);
-
-            this.log.i(`Downloaded upcoming exam ICS: ${filename} (${events.length} events)`);
-            if (this.uiRefs.statusText) {
-                setStatusText(this.uiRefs.statusText, '');
-            }
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-        } catch (error) {
-            this.log.e('Download from schedule failed:', error);
-            alert('Tải lịch thi thất bại. Xem console để biết chi tiết.');
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-        }
-    }
-
     // ============================================
     // Home Page (/ or /home)
     // ============================================
@@ -670,7 +619,9 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             this.storage.get('planEntries'),
         ]);
 
-        const widget = createHomeExamWidget(scheduleEntries, planEntries);
+        const widget = createHomeExamWidget(scheduleEntries, planEntries, {
+            onDownloadClick: () => this.handleUnifiedDownload(),
+        });
         if (!widget) {
             this.log.d('No upcoming exams for home widget');
             return;

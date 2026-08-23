@@ -137,6 +137,7 @@ export function mergeExamData(
 
     const events: ExamEvent[] = [];
     const unmatched: ExamScheduleEntry[] = [];
+    const matchedPlanSet = new Set<ExamPlanEntry>();
 
     for (const schedule of scheduleEntries) {
         const exactKey = matchKey(schedule.examDate, schedule.examTime);
@@ -149,6 +150,7 @@ export function mergeExamData(
             coursePlanMap.get(courseKey);
 
         if (plan) {
+            matchedPlanSet.add(plan);
             events.push({
                 classCode: plan.classCode,
                 course: schedule.course, // Schedule has the official course title
@@ -174,6 +176,20 @@ export function mergeExamData(
                 position: schedule.position,
                 room: schedule.room,
                 building: schedule.building,
+            });
+        }
+    }
+
+    // Two-way merge: Append remaining plan entries not yet assigned rooms in schedule
+    for (const plan of planEntries) {
+        if (!matchedPlanSet.has(plan)) {
+            events.push({
+                classCode: plan.classCode,
+                course: plan.course,
+                examDate: plan.examDate,
+                examTime: plan.examTime,
+                attempt: plan.attempt,
+                department: plan.department,
             });
         }
     }
@@ -218,16 +234,22 @@ function buildExamDescription(event: ExamEvent): string {
         parts.push(`Vị trí: ${event.position}`);
     }
 
+    if (event.attempt) {
+        parts.push(`Lần thi: ${event.attempt}`);
+    }
+
+    if (event.department) {
+        parts.push(`Khoa: ${event.department}`);
+    }
+
+    if (!event.room && !event.building) {
+        parts.push(`Trạng thái: (Đang chờ trường xếp phòng thi)`);
+    }
+
     if (event.room && event.building) {
         parts.push(`Phòng: ${event.room} - ${event.building}`);
     } else if (event.room) {
         parts.push(`Phòng: ${event.room}`);
-    }
-
-    parts.push(`Lần thi: ${event.attempt}`);
-
-    if (event.department) {
-        parts.push(`Khoa: ${event.department}`);
     }
 
     return parts.join('\n');
@@ -246,7 +268,7 @@ function buildExamLocation(event: ExamEvent): string | undefined {
 /**
  * Create an ICS event from an ExamEvent.
  */
-function createExamEvent(cal: ICalCalendar, event: ExamEvent): void {
+function createExamEvent(cal: ICalCalendar, event: ExamEvent, usedUids: Set<string>): void {
     const startTime = parseExamTime(event.examTime);
     if (!startTime) return;
 
@@ -256,14 +278,19 @@ function createExamEvent(cal: ICalCalendar, event: ExamEvent): void {
     const end = buildUTCDate(event.examDate, endTime);
     if (!start || !end) return;
 
-    // UID format: exam-{classCode}-{attempt}@haui
-    const uid = `exam-${event.classCode}-${event.attempt}@haui`;
+    // Stable UID format: exam-{classCode}-{attempt}@svhaui.helper
+    const baseUid = `exam-${event.classCode}-${event.attempt}@svhaui.helper`;
+    const dateCompact = event.examDate.replace(/[^\d]/g, '');
+    const uid = usedUids.has(baseUid) ? `${baseUid}-${dateCompact}` : baseUid;
+    usedUids.add(uid);
+
+    const titlePrefix = event.attempt > 1 ? `[Thi Lần ${event.attempt}]` : '[THI]';
 
     cal.createEvent({
         id: uid,
         start,
         end,
-        summary: `[THI] ${event.course}`,
+        summary: `${titlePrefix} ${event.course}`,
         description: buildExamDescription(event),
         location: buildExamLocation(event),
         status: ICalEventStatus.CONFIRMED,
@@ -293,8 +320,9 @@ export function generateExamICS(
     });
     cal.method(ICalCalendarMethod.PUBLISH);
 
+    const usedUids = new Set<string>();
     for (const event of events) {
-        createExamEvent(cal, event);
+        createExamEvent(cal, event, usedUids);
     }
 
     return cal.toString();

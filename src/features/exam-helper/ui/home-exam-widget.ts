@@ -68,16 +68,22 @@ export function getUpcomingExamsList(
         .slice(0, 4);
 }
 
+export interface HomeExamWidgetCallbacks {
+    onDownloadClick?: () => void;
+}
+
 /**
  * Creates the Home Upcoming Exams Widget if there are exams within the next 14 days.
  *
  * @param scheduleEntries - Cached schedule entries (has room/SBD)
  * @param planEntries - Cached plan entries (fallback if schedule not yet available)
+ * @param callbacks - Optional action callbacks (e.g. onDownloadClick)
  * @returns HTMLDivElement or null if no upcoming exams
  */
 export function createHomeExamWidget(
     scheduleEntries?: ExamScheduleEntry[],
-    planEntries?: ExamPlanEntry[]
+    planEntries?: ExamPlanEntry[],
+    callbacks: HomeExamWidgetCallbacks = {}
 ): HTMLDivElement | null {
     const upcomingList = getUpcomingExamsList(scheduleEntries, planEntries);
     if (upcomingList.length === 0) return null;
@@ -93,13 +99,30 @@ export function createHomeExamWidget(
     title.className = styles.widgetTitle;
     title.innerHTML = `📢 Lịch thi sắp tới (${upcomingList.length} môn)`;
 
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+
+    if (callbacks.onDownloadClick) {
+        const downloadBtn = document.createElement('button');
+        downloadBtn.type = 'button';
+        downloadBtn.className = 'btn btn-xs btn-primary';
+        downloadBtn.innerHTML = '📥 Tải lịch';
+        downloadBtn.title = 'Tải file ICS cho lịch thi sắp tới';
+        downloadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            callbacks.onDownloadClick?.();
+        });
+        actions.appendChild(downloadBtn);
+    }
+
     const viewAll = document.createElement('a');
     viewAll.className = styles.viewAllLink;
     viewAll.href = '/student/schedulefees/transactionmodules';
-    viewAll.innerHTML = 'Xem chi tiết &rarr;';
+    viewAll.innerHTML = 'Chi tiết &rarr;';
+    actions.appendChild(viewAll);
 
     header.appendChild(title);
-    header.appendChild(viewAll);
+    header.appendChild(actions);
     widget.appendChild(header);
 
     // List
