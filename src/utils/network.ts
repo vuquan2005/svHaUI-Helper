@@ -3,7 +3,7 @@
  * Handles cross-origin network requests and binary array buffer fetching
  */
 
-import { GM_xmlhttpRequest } from '$';
+import { GM, GM_xmlhttpRequest } from '$';
 
 /**
  * Downloads a resource as an ArrayBuffer, using GM_xmlhttpRequest if available to bypass CORS restrictions.
@@ -12,9 +12,27 @@ import { GM_xmlhttpRequest } from '$';
  * @returns Promise resolving to the ArrayBuffer content
  */
 export async function fetchArrayBuffer(url: string): Promise<ArrayBuffer> {
-    if (typeof GM_xmlhttpRequest === 'function') {
+    const gmXhr =
+        (typeof GM_xmlhttpRequest === 'function' ? GM_xmlhttpRequest : undefined) ??
+        (typeof GM !== 'undefined' && typeof GM?.xmlHttpRequest === 'function'
+            ? GM.xmlHttpRequest
+            : undefined) ??
+        (typeof window !== 'undefined' &&
+        typeof (window as unknown as { GM_xmlhttpRequest?: typeof GM_xmlhttpRequest })
+            .GM_xmlhttpRequest === 'function'
+            ? (window as unknown as { GM_xmlhttpRequest: typeof GM_xmlhttpRequest })
+                  .GM_xmlhttpRequest
+            : undefined) ??
+        (typeof window !== 'undefined' &&
+        typeof (window as unknown as { GM?: { xmlHttpRequest?: typeof GM_xmlhttpRequest } }).GM
+            ?.xmlHttpRequest === 'function'
+            ? (window as unknown as { GM: { xmlHttpRequest: typeof GM_xmlhttpRequest } }).GM
+                  .xmlHttpRequest
+            : undefined);
+
+    if (gmXhr) {
         return new Promise((resolve, reject) => {
-            GM_xmlhttpRequest({
+            gmXhr({
                 method: 'GET',
                 url,
                 responseType: 'arraybuffer',

@@ -75,6 +75,11 @@ export class OcrRecognizer {
                 this.log.d('GM_getResourceURL fallback triggered:', err);
             }
 
+            // In local dev mode, load model directly from Vite dev server with CORS enabled
+            if (import.meta.env.DEV && targetModelUrl === DEFAULT_MODEL_URL) {
+                targetModelUrl = 'http://127.0.0.1:5173/model_quant.onnx';
+            }
+
             ort.env.wasm.wasmPaths = wasmPaths;
 
             this.log.d('Fetching ONNX model binary from:', targetModelUrl);
