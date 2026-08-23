@@ -214,3 +214,49 @@ export function updateHomeExamWidget(
         }
     }
 }
+
+/**
+ * Mounts the upcoming exams widget into the home dashboard DOM.
+ * Strictly guards against unauthenticated / login views (div.splash-container).
+ *
+ * @param widget - The widget element to mount
+ * @param root - The root document or container to search within (defaults to document)
+ * @returns boolean indicating whether the widget was successfully mounted
+ */
+export function mountHomeExamWidget(
+    widget: HTMLElement,
+    root: Document | HTMLElement = typeof document !== 'undefined' ? document : ({} as Document)
+): boolean {
+    if (!root || typeof root.querySelector !== 'function') return false;
+
+    // 1. Guard: Never mount on unauthenticated / login page
+    if (
+        root.querySelector('div.splash-container') ||
+        root.querySelector('input#ctl00_inpUserName')
+    ) {
+        return false;
+    }
+
+    // 2. Locate the main dashboard container
+    const dashboard =
+        root.querySelector('div.cttsv-dashboard') ||
+        root.querySelector('.be-content') ||
+        root.querySelector('div.main-content');
+    if (!dashboard) return false;
+
+    // 3. Avoid injecting duplicate widgets
+    if (widget.isConnected || dashboard.querySelector(`.${styles.homeExamWidget}`)) {
+        return true;
+    }
+
+    // 4. Target insertion point: overview section or action grid
+    const target =
+        dashboard.querySelector('section.cttsv-overview-section') ||
+        dashboard.querySelector('section.cttsv-action-grid, div.cttsv-action-grid');
+
+    // Strictly require a valid dashboard section to prevent injecting into unexpected views
+    if (!target) return false;
+
+    dashboard.insertBefore(widget, target);
+    return true;
+}
