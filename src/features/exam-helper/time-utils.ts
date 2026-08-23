@@ -6,6 +6,33 @@ import { parseExamTime } from './exam-ics-generator';
 
 export type ExamUrgency = 'urgent' | 'warning' | 'notice' | 'normal' | 'passed';
 
+/**
+ * Detect current semester specifically for Exam features.
+ * Unlike Timetable (which looks 1 month ahead for registration),
+ * Exam features lag 1 month to cover extended/retake exam sessions:
+ * - Sep - Feb (Months 9, 10, 11, 12, 1, 2) → Term 1 (e.g. 20251)
+ * - Mar - Jul (Months 3, 4, 5, 6, 7) → Term 2 (e.g. 20252)
+ * - Aug (Month 8) → Term 4 (Summer, e.g. 20254)
+ */
+export function detectExamSemester(now: Date = new Date()): string {
+    const month = now.getMonth() + 1; // 1-12
+    const year = now.getFullYear();
+
+    if (month >= 9) {
+        // Sep-Dec → Term 1 of academic year starting this year
+        return `${year}1`;
+    } else if (month <= 2) {
+        // Jan-Feb → End of Term 1, academic year started last year
+        return `${year - 1}1`;
+    } else if (month >= 3 && month <= 7) {
+        // Mar-Jul → Term 2, academic year started last year
+        return `${year - 1}2`;
+    } else {
+        // Aug (Month 8) → Term 4 (Summer), academic year started last year
+        return `${year - 1}4`;
+    }
+}
+
 export interface CountdownInfo {
     /** Time difference in ms */
     diffMs: number;

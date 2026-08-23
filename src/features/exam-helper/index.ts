@@ -33,8 +33,7 @@ import {
 import { createPlanSummaryTable, createStreamingPlanTable } from './ui/plan-table-view';
 import { enhanceScheduleTable } from './ui/schedule-enhancer';
 import { createHomeExamWidget } from './ui/home-exam-widget';
-import { getExamCountdown } from './time-utils';
-import { detectCurrentSemester } from '../export-timetable/semester-config';
+import { getExamCountdown, detectExamSemester } from './time-utils';
 
 // ============================================
 // Constants
@@ -457,7 +456,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 return;
             }
 
-            const semesterId = detectCurrentSemester();
+            const semesterId = detectExamSemester();
             const filename = `LichThi_${semesterId}.ics`;
             downloadExamICSFile(icsContent, filename);
 
@@ -634,7 +633,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 return;
             }
 
-            const semesterId = detectCurrentSemester();
+            const semesterId = detectExamSemester();
             const filename = `LichThi_${semesterId}.ics`;
             downloadExamICSFile(icsContent, filename);
 
