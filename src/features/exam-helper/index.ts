@@ -36,7 +36,7 @@ import {
 } from './ui';
 import { createPlanSummaryTable, createStreamingPlanTable } from './ui/plan-table-view';
 import { enhanceScheduleTable } from './ui/schedule-enhancer';
-import { createHomeExamWidget } from './ui/home-exam-widget';
+import { createHomeExamWidget, updateHomeExamWidget } from './ui/home-exam-widget';
 import { getExamCountdown, detectExamSemester } from './time-utils';
 
 // ============================================
@@ -436,55 +436,59 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
      * Operates consistently from any page (Home, Exam Plan, Exam Schedule).
      * Two-way merges all upcoming schedule + plan entries to produce a complete ICS.
      */
-    private async handleUnifiedDownload(): Promise<void> {
-        if (!this.uiRefs) return;
+    private async handleUnifiedDownload(buttonEl?: HTMLButtonElement): Promise<void> {
+        let origBtnHtml = '';
+        if (buttonEl) {
+            buttonEl.disabled = true;
+            origBtnHtml = buttonEl.innerHTML;
+            buttonEl.innerHTML = '⏳ Đang tải...';
+        }
+        if (this.uiRefs?.downloadBtn) {
+            setDownloadBtnState(this.uiRefs.downloadBtn, 'downloading');
+        }
+        if (this.uiRefs?.statusText) {
+            setStatusText(this.uiRefs.statusText, 'Đang chuẩn bị file lịch thi...');
+        }
 
         try {
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'downloading');
-            if (this.uiRefs.statusText) {
-                setStatusText(this.uiRefs.statusText, 'Đang chuẩn bị file lịch thi...');
-            }
-
-            // 1. Get Schedule Entries (from current DOM if on schedule page, or storage/web)
+            // 1. Get Real-time Schedule Entries (from current DOM if on schedule page, or single direct web fetch)
             let scheduleEntries: ExamScheduleEntry[] = [];
             const scheduleTable = findExamScheduleTable();
             if (scheduleTable) {
                 scheduleEntries = parseExamScheduleFromDOM(scheduleTable);
-                await this.storage.set('scheduleEntries', scheduleEntries);
-                await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
             } else {
-                scheduleEntries = (await this.storage.get('scheduleEntries')) ?? [];
-                if (scheduleEntries.length === 0) {
-                    scheduleEntries = await fetchExamScheduleFromWeb();
-                    if (scheduleEntries.length > 0) {
-                        await this.storage.set('scheduleEntries', scheduleEntries);
-                        await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
-                    }
-                }
+                scheduleEntries = await fetchExamScheduleFromWeb();
             }
 
-            // 2. Get Plan Entries (from storage or background fetch)
-            let planEntries = await this.storage.get('planEntries');
-            if (!planEntries || planEntries.length === 0) {
-                if (this.uiRefs.statusText) {
+            // 2. Get Plan Entries (check freshness in storage or background fetch)
+            const [planEntries, lastAutoUpdate] = await Promise.all([
+                this.storage.get('planEntries'),
+                this.storage.get('lastAutoUpdate'),
+            ]);
+
+            let activePlanEntries = planEntries ?? [];
+            if (activePlanEntries.length === 0) {
+                if (this.uiRefs?.statusText) {
                     setStatusText(this.uiRefs.statusText, 'Đang nạp kế hoạch thi...');
                 }
                 await this.fetchAndSaveAllPlans();
-                planEntries = await this.storage.get('planEntries');
+                activePlanEntries = (await this.storage.get('planEntries')) ?? [];
+            } else if (this.shouldAutoUpdate(lastAutoUpdate)) {
+                // If plan is stale, refresh current semester in background
+                await this.updateCurrentSemesterPlans(activePlanEntries);
+                activePlanEntries = (await this.storage.get('planEntries')) ?? activePlanEntries;
             }
 
             // 3. Filter only upcoming entries
-            const upcomingSchedules = (scheduleEntries ?? []).filter(
+            const upcomingSchedules = scheduleEntries.filter(
                 (e) => getExamCountdown(e.examDate, e.examTime).direction === 1
             );
-            const upcomingPlans = (planEntries ?? []).filter(
+            const upcomingPlans = activePlanEntries.filter(
                 (e) => getExamCountdown(e.examDate, e.examTime).direction === 1
             );
 
             if (upcomingSchedules.length === 0 && upcomingPlans.length === 0) {
                 alert('Tất cả các môn thi đều đã diễn ra. Không có môn nào sắp tới để xuất.');
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-                if (this.uiRefs.statusText) setStatusText(this.uiRefs.statusText, '');
                 return;
             }
 
@@ -493,7 +497,6 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
 
             if (events.length === 0) {
                 alert('Không thể tạo dữ liệu lịch thi.');
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
                 return;
             }
 
@@ -501,7 +504,6 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             const icsContent = generateExamICS(events);
             if (!icsContent) {
                 alert('Không thể tạo file lịch thi.');
-                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
                 return;
             }
 
@@ -512,14 +514,20 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             this.log.i(
                 `Downloaded unified upcoming exam ICS: ${filename} (${events.length} events)`
             );
-            if (this.uiRefs.statusText) {
-                setStatusText(this.uiRefs.statusText, '');
-            }
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
         } catch (error) {
             this.log.e('Unified download failed:', error);
             alert('Tải lịch thi thất bại. Xem console để biết chi tiết.');
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
+        } finally {
+            if (buttonEl) {
+                buttonEl.disabled = false;
+                buttonEl.innerHTML = origBtnHtml || '📥 Tải lịch';
+            }
+            if (this.uiRefs?.downloadBtn) {
+                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
+            }
+            if (this.uiRefs?.statusText) {
+                setStatusText(this.uiRefs.statusText, '');
+            }
         }
     }
 
@@ -579,9 +587,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 enhanceScheduleTable(table);
                 const scheduleEntries = parseExamScheduleFromDOM(table);
                 if (scheduleEntries.length > 0) {
-                    await this.storage.set('scheduleEntries', scheduleEntries);
-                    await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
-                    this.log.d(`Enhanced & cached ${scheduleEntries.length} schedule entries`);
+                    this.log.d(`Enhanced ${scheduleEntries.length} schedule entries`);
                 }
             }
 
@@ -614,14 +620,52 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
     // ============================================
 
     private async runOnHomePage(): Promise<void> {
-        const [scheduleEntries, planEntries] = await Promise.all([
-            this.storage.get('scheduleEntries'),
-            this.storage.get('planEntries'),
-        ]);
+        const planEntries = (await this.storage.get('planEntries')) ?? [];
 
-        const widget = createHomeExamWidget(scheduleEntries, planEntries, {
-            onDownloadClick: () => this.handleUnifiedDownload(),
+        const syncHomeData = async (
+            widgetEl: HTMLElement,
+            syncBtn?: HTMLButtonElement
+        ): Promise<void> => {
+            let origText = '';
+            if (syncBtn) {
+                syncBtn.disabled = true;
+                origText = syncBtn.innerHTML;
+                syncBtn.innerHTML = '⏳ Đang đồng bộ...';
+            }
+
+            try {
+                // Fetch real-time schedule & check plan updates
+                const [freshSchedules, currentPlans, lastAutoUpdate] = await Promise.all([
+                    fetchExamScheduleFromWeb(),
+                    this.storage.get('planEntries'),
+                    this.storage.get('lastAutoUpdate'),
+                ]);
+
+                let activePlans = currentPlans ?? [];
+                if (this.shouldAutoUpdate(lastAutoUpdate) && activePlans.length > 0) {
+                    await this.updateCurrentSemesterPlans(activePlans);
+                    activePlans = (await this.storage.get('planEntries')) ?? activePlans;
+                }
+
+                updateHomeExamWidget(widgetEl, freshSchedules, activePlans);
+                this.log.i('Home exam widget synchronized');
+            } catch (err) {
+                this.log.e('Failed to synchronize home exam widget:', err);
+            } finally {
+                if (syncBtn) {
+                    syncBtn.disabled = false;
+                    syncBtn.innerHTML = origText || '🔄 Đồng bộ';
+                }
+            }
+        };
+
+        const widget = createHomeExamWidget([], planEntries, {
+            onDownloadClick: (btn) => this.handleUnifiedDownload(btn),
+            onSyncClick: (btn) => {
+                if (widget) syncHomeData(widget, btn);
+            },
         });
+
         if (!widget) {
             this.log.d('No upcoming exams for home widget');
             return;
@@ -653,6 +697,9 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 }
 
                 this.log.i('Home exam widget injected');
+
+                // Real-time background sync of schedule rooms/SBD right after mount
+                syncHomeData(widget);
                 return true;
             },
             {
