@@ -1,13 +1,16 @@
 /**
  * Exam Helper - Schedule Enhancer Component
- * Enhances the native exam schedule table on /student/schedulefees/transactionmodules
- * by adding countdown badges and visual highlighting.
+ * Enhances the native exam schedule table on /student/schedulefees/transactionmodules:
+ * - Inverts row order (reverses school default order so newest/closest exams are on top)
+ * - Renumbers STT
+ * - Adds countdown badges and visual highlighting
  */
 
 import { getExamCountdown } from '../time-utils';
 import { getBadgeClass, getRowClass } from './plan-table-view';
 import styles from '../style.module.scss';
 
+const COL_INDEX = 1;
 const COL_DATE = 3;
 const COL_TIME = 4;
 
@@ -17,11 +20,27 @@ const COL_TIME = 4;
  * @param tableEl - The schedule table element
  */
 export function enhanceScheduleTable(tableEl: HTMLTableElement): void {
-    const rows = Array.from(tableEl.querySelectorAll<HTMLTableRowElement>('tbody > tr'));
-    if (rows.length === 0) return;
+    const tbody = tableEl.querySelector('tbody');
+    if (!tbody) return;
 
-    for (const row of rows) {
-        // Skip if already enhanced
+    // 1. Invert rows (reverse default order) if not already inverted
+    if (tableEl.dataset.examInverted !== 'true') {
+        tableEl.dataset.examInverted = 'true';
+        const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+        if (rows.length > 1) {
+            rows.reverse().forEach((row, idx) => {
+                const sttCell = row.querySelector(`td:nth-child(${COL_INDEX})`);
+                if (sttCell) {
+                    sttCell.textContent = String(idx + 1);
+                }
+                tbody.appendChild(row);
+            });
+        }
+    }
+
+    // 2. Add badges and row highlights
+    const currentRows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+    for (const row of currentRows) {
         if (row.dataset.examEnhanced === 'true') continue;
         row.dataset.examEnhanced = 'true';
 
