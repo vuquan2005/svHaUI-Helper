@@ -642,7 +642,11 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 ]);
 
                 let activePlans = currentPlans ?? [];
-                if (this.shouldAutoUpdate(lastAutoUpdate) && activePlans.length > 0) {
+                if (activePlans.length === 0) {
+                    // Initial fetch of all plans if storage is empty
+                    await this.fetchAndSaveAllPlans();
+                    activePlans = (await this.storage.get('planEntries')) ?? [];
+                } else if (this.shouldAutoUpdate(lastAutoUpdate)) {
                     await this.updateCurrentSemesterPlans(activePlans);
                     activePlans = (await this.storage.get('planEntries')) ?? activePlans;
                 }
@@ -662,7 +666,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         const widget = createHomeExamWidget([], planEntries, {
             onDownloadClick: (btn) => this.handleUnifiedDownload(btn),
             onSyncClick: (btn) => {
-                if (widget) syncHomeData(widget, btn);
+                syncHomeData(widget, btn);
             },
         });
 

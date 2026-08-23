@@ -1,6 +1,6 @@
 /**
  * Exam Helper - Home Exam Widget Component
- * Injects a sleek "Upcoming Exams" widget on HaUI's Homepage when exams are near.
+ * Injects an always-visible "Upcoming Exams" widget on HaUI's Homepage.
  */
 
 import { ExamScheduleEntry, ExamPlanEntry } from '../types';
@@ -74,21 +74,18 @@ export interface HomeExamWidgetCallbacks {
 }
 
 /**
- * Creates the Home Upcoming Exams Widget if there are exams within the next 14 days.
+ * Creates the Home Upcoming Exams Widget (always visible).
  *
  * @param scheduleEntries - Cached schedule entries (has room/SBD)
  * @param planEntries - Cached plan entries (fallback if schedule not yet available)
  * @param callbacks - Optional action callbacks (e.g. onDownloadClick, onSyncClick)
- * @returns HTMLDivElement or null if no upcoming exams
+ * @returns HTMLDivElement of the widget
  */
 export function createHomeExamWidget(
     scheduleEntries?: ExamScheduleEntry[],
     planEntries?: ExamPlanEntry[],
     callbacks: HomeExamWidgetCallbacks = {}
-): HTMLDivElement | null {
-    const upcomingList = getUpcomingExamsList(scheduleEntries, planEntries);
-    if (upcomingList.length === 0) return null;
-
+): HTMLDivElement {
     const widget = document.createElement('div');
     widget.className = styles.homeExamWidget;
 
@@ -98,15 +95,15 @@ export function createHomeExamWidget(
 
     const title = document.createElement('h4');
     title.className = styles.widgetTitle;
-    title.innerHTML = `📢 Lịch thi sắp tới (${upcomingList.length} môn)`;
 
     const actions = document.createElement('div');
+    actions.className = 'widget-actions';
     actions.style.cssText = 'display: flex; gap: 8px; align-items: center;';
 
     if (callbacks.onSyncClick) {
         const syncBtn = document.createElement('button');
         syncBtn.type = 'button';
-        syncBtn.className = 'btn btn-xs btn-default';
+        syncBtn.className = 'btn btn-xs btn-default home-sync-btn';
         syncBtn.innerHTML = '🔄 Đồng bộ';
         syncBtn.title = 'Đồng bộ lại lịch thi và phòng thi mới nhất';
         syncBtn.addEventListener('click', (e) => {
@@ -119,7 +116,7 @@ export function createHomeExamWidget(
     if (callbacks.onDownloadClick) {
         const downloadBtn = document.createElement('button');
         downloadBtn.type = 'button';
-        downloadBtn.className = 'btn btn-xs btn-primary';
+        downloadBtn.className = 'btn btn-xs btn-primary home-download-btn';
         downloadBtn.innerHTML = '📥 Tải lịch';
         downloadBtn.title = 'Tải file ICS cho lịch thi sắp tới';
         downloadBtn.addEventListener('click', (e) => {
@@ -139,39 +136,19 @@ export function createHomeExamWidget(
     header.appendChild(actions);
     widget.appendChild(header);
 
-    // List
-    const list = document.createElement('div');
-    list.className = styles.examList;
+    // Body (List / Empty State)
+    const listContainer = document.createElement('div');
+    listContainer.className = styles.examList;
+    widget.appendChild(listContainer);
 
-    for (const { exam, countdown } of upcomingList) {
-        const card = document.createElement('div');
-        card.className = styles.examCard;
+    // Initial render of content
+    updateHomeExamWidget(widget, scheduleEntries, planEntries);
 
-        const badgeClass = getBadgeClass(countdown.urgency);
-
-        let locationHtml = '';
-        if (exam.room && exam.building) {
-            locationHtml = `<div class="${styles.examLocation}">📍 Phòng: <strong>${exam.room} - ${exam.building}</strong> ${exam.sbd ? `(SBD: ${exam.sbd})` : ''}</div>`;
-        }
-
-        card.innerHTML = `
-            <div class="${styles.courseName}">${exam.course}</div>
-            <div class="${styles.examMeta}">
-                <span>🗓️ ${exam.examTime} ngày ${exam.examDate}</span>
-                <span class="${styles.badge} ${badgeClass}">${countdown.shortLabel}</span>
-            </div>
-            ${locationHtml}
-        `;
-
-        list.appendChild(card);
-    }
-
-    widget.appendChild(list);
     return widget;
 }
 
 /**
- * Updates the exam cards inside an existing HomeExamWidget.
+ * Updates the exam cards and title inside an existing HomeExamWidget.
  */
 export function updateHomeExamWidget(
     widget: HTMLElement,
@@ -181,30 +158,59 @@ export function updateHomeExamWidget(
     const upcomingList = getUpcomingExamsList(scheduleEntries, planEntries);
     const listContainer = widget.querySelector(`.${styles.examList}`);
     const title = widget.querySelector(`.${styles.widgetTitle}`);
-    if (title) {
-        title.innerHTML = `📢 Lịch thi sắp tới (${upcomingList.length} môn)`;
-    }
-    if (!listContainer) return;
+    const downloadBtn = widget.querySelector<HTMLButtonElement>('.home-download-btn');
 
-    listContainer.innerHTML = '';
-    for (const { exam, countdown } of upcomingList) {
-        const card = document.createElement('div');
-        card.className = styles.examCard;
-        const badgeClass = getBadgeClass(countdown.urgency);
-
-        let locationHtml = '';
-        if (exam.room && exam.building) {
-            locationHtml = `<div class="${styles.examLocation}">📍 Phòng: <strong>${exam.room} - ${exam.building}</strong> ${exam.sbd ? `(SBD: ${exam.sbd})` : ''}</div>`;
+    if (upcomingList.length > 0) {
+        if (title) {
+            title.innerHTML = `📢 Lịch thi sắp tới (${upcomingList.length} môn)`;
+        }
+        if (downloadBtn) {
+            downloadBtn.style.display = '';
         }
 
-        card.innerHTML = `
-            <div class="${styles.courseName}">${exam.course}</div>
-            <div class="${styles.examMeta}">
-                <span>🗓️ ${exam.examTime} ngày ${exam.examDate}</span>
-                <span class="${styles.badge} ${badgeClass}">${countdown.shortLabel}</span>
-            </div>
-            ${locationHtml}
-        `;
-        listContainer.appendChild(card);
+        if (listContainer) {
+            listContainer.innerHTML = '';
+            for (const { exam, countdown } of upcomingList) {
+                const card = document.createElement('div');
+                card.className = styles.examCard;
+                const badgeClass = getBadgeClass(countdown.urgency);
+
+                let locationHtml = '';
+                if (exam.room && exam.building) {
+                    locationHtml = `<div class="${styles.examLocation}">📍 Phòng: <strong>${exam.room} - ${exam.building}</strong> ${exam.sbd ? `(SBD: ${exam.sbd})` : ''}</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="${styles.courseName}">${exam.course}</div>
+                    <div class="${styles.examMeta}">
+                        <span>🗓️ ${exam.examTime} ngày ${exam.examDate}</span>
+                        <span class="${styles.badge} ${badgeClass}">${countdown.shortLabel}</span>
+                    </div>
+                    ${locationHtml}
+                `;
+                listContainer.appendChild(card);
+            }
+        }
+    } else {
+        if (title) {
+            title.innerHTML = '📢 Lịch thi & Kế hoạch thi';
+        }
+        // If there are no upcoming exams, keep download button available if plan has entries, or hide
+        if (downloadBtn) {
+            downloadBtn.style.display = planEntries && planEntries.length > 0 ? '' : 'none';
+        }
+
+        if (listContainer) {
+            const message =
+                planEntries && planEntries.length > 0
+                    ? '✨ Hiện tại không có môn thi nào diễn ra trong 14 ngày tới.'
+                    : '📭 Chưa có dữ liệu lịch thi. Hãy bấm "Đồng bộ" để tải tự động.';
+
+            listContainer.innerHTML = `
+                <div class="${styles.emptyState}">
+                    <span>${message}</span>
+                </div>
+            `;
+        }
     }
 }
