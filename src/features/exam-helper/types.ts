@@ -99,6 +99,8 @@ export interface ExportExamStorage {
     planEntries?: ExamPlanEntry[];
     /** Cached exam schedule entries from /student/schedulefees/transactionmodules */
     scheduleEntries?: ExamScheduleEntry[];
+    /** All class codes that have been checked/fetched (including non-exam classes like PE/labs) */
+    fetchedClassCodes?: string[];
     /** ISO datetime of last full fetch of plan entries */
     lastFetchTime?: string;
     /** ISO datetime of last auto-update check */

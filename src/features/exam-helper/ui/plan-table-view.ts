@@ -186,14 +186,20 @@ export function createStreamingPlanTable(
     tableWrap.appendChild(table);
     panel.appendChild(tableWrap);
 
-    let currentRowCount = 0;
+    const allCurrentEntries: ExamPlanEntry[] = [];
+
+    const renderTable = (entries: ExamPlanEntry[]): void => {
+        tbody.innerHTML = '';
+        const sorted = sortPlanEntries(entries);
+        sorted.forEach((entry, idx) => {
+            const row = createPlanTableRow(entry, idx + 1, callbacks.onDownloadSingle);
+            tbody.appendChild(row);
+        });
+    };
 
     const appendEntries = (newEntries: ExamPlanEntry[]): void => {
-        for (const entry of newEntries) {
-            currentRowCount++;
-            const row = createPlanTableRow(entry, currentRowCount, callbacks.onDownloadSingle);
-            tbody.appendChild(row);
-        }
+        allCurrentEntries.push(...newEntries);
+        renderTable(allCurrentEntries);
     };
 
     const setProgress = (loadedCount: number, totalCount: number): void => {
@@ -202,12 +208,9 @@ export function createStreamingPlanTable(
     };
 
     const finalize = (allEntries: ExamPlanEntry[]): void => {
-        tbody.innerHTML = '';
-        const sorted = sortPlanEntries(allEntries);
-        sorted.forEach((entry, idx) => {
-            const row = createPlanTableRow(entry, idx + 1, callbacks.onDownloadSingle);
-            tbody.appendChild(row);
-        });
+        allCurrentEntries.length = 0;
+        allCurrentEntries.push(...allEntries);
+        renderTable(allCurrentEntries);
 
         badgeSpan.textContent = `${allEntries.length} môn`;
         badgeSpan.style.background = '#0284c7';

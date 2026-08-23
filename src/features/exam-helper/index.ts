@@ -141,8 +141,9 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
      * Ensure plan data is available and render the summary table.
      */
     private async ensurePlanData(): Promise<void> {
-        const [planEntries, lastFetchTime, lastAutoUpdate] = await Promise.all([
+        const [planEntries, fetchedClassCodes, lastFetchTime, lastAutoUpdate] = await Promise.all([
             this.storage.get('planEntries'),
+            this.storage.get('fetchedClassCodes'),
             this.storage.get('lastFetchTime'),
             this.storage.get('lastAutoUpdate'),
         ]);
@@ -151,33 +152,35 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         const pageCodes = pageItems.map((item) => item.classCode);
 
         // First time: no data at all -> progressive fetch all page codes
-        if (!planEntries || planEntries.length === 0) {
+        if (!fetchedClassCodes && (!planEntries || planEntries.length === 0)) {
             this.log.i('No plan data found — progressive fetching all');
             await this.fetchAndSaveAllPlans();
             return;
         }
 
-        // Check if there are missing codes (e.g. previous fetch interrupted mid-way)
-        const savedCodeSet = new Set(planEntries.map((e) => e.classCode));
-        const missingCodes = pageCodes.filter((code) => !savedCodeSet.has(code));
+        // Check if there are missing codes (codes on page that have NEVER been fetched)
+        const checkedCodeSet = new Set(
+            fetchedClassCodes ?? planEntries?.map((e) => e.classCode) ?? []
+        );
+        const missingCodes = pageCodes.filter((code) => !checkedCodeSet.has(code));
 
         if (missingCodes.length > 0) {
             this.log.i(`Found ${missingCodes.length} missing plan codes — resuming fetch`);
-            await this.fetchMissingPlans(planEntries, missingCodes);
+            await this.fetchMissingPlans(planEntries ?? [], fetchedClassCodes ?? [], missingCodes);
             return;
         }
 
         // Render summary table with existing data
-        this.renderPlanSummaryTable(planEntries);
+        this.renderPlanSummaryTable(planEntries ?? []);
 
         // Check if auto-update is needed
         if (this.shouldAutoUpdate(lastAutoUpdate)) {
             this.log.i('Auto-update triggered');
-            await this.updateCurrentSemesterPlans(planEntries);
+            await this.updateCurrentSemesterPlans(planEntries ?? []);
             return;
         }
 
-        const count = planEntries.length;
+        const count = planEntries?.length ?? 0;
         const lastTime = lastAutoUpdate ?? lastFetchTime;
         if (lastTime && this.uiRefs?.statusText) {
             const formatted = new Date(lastTime).toLocaleDateString('vi-VN');
@@ -216,6 +219,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
      */
     private async fetchMissingPlans(
         existingEntries: ExamPlanEntry[],
+        existingFetchedCodes: string[],
         missingCodes: string[]
     ): Promise<void> {
         if (!this.uiRefs) return;
@@ -255,9 +259,12 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             );
 
             const merged = [...existingEntries, ...freshEntries];
+            const allFetchedCodes = [...new Set([...existingFetchedCodes, ...missingCodes])];
+
             controller.finalize(merged);
 
             await this.storage.set('planEntries', merged);
+            await this.storage.set('fetchedClassCodes', allFetchedCodes);
             const now = new Date().toISOString();
             await this.storage.set('lastAutoUpdate', now);
 
@@ -287,6 +294,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             }
 
             const pageItems = parseExamPlanList(document);
+            const pageCodes = pageItems.map((item) => item.classCode);
             const totalExpected = pageItems.length;
 
             // Create streaming table controller and mount immediately
@@ -310,6 +318,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             controller.finalize(entries);
 
             await this.storage.set('planEntries', entries);
+            await this.storage.set('fetchedClassCodes', pageCodes);
             const now = new Date().toISOString();
             await this.storage.set('lastFetchTime', now);
             await this.storage.set('lastAutoUpdate', now);
@@ -338,6 +347,8 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         try {
             if (this.uiRefs.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'updating');
             if (this.uiRefs.statusText) setStatusText(this.uiRefs.statusText, 'Đang cập nhật...');
+
+            const [fetchedClassCodes] = await Promise.all([this.storage.get('fetchedClassCodes')]);
 
             const pageItems = parseExamPlanList(document);
             const pageCodes = pageItems.map((item) => item.classCode);
@@ -387,8 +398,12 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             const targetCodeSet = new Set(targetCodes);
             const existingOther = existingEntries.filter((e) => !targetCodeSet.has(e.classCode));
             const merged = [...existingOther, ...freshEntries];
+            const allFetchedCodes = [
+                ...new Set([...(fetchedClassCodes ?? pageCodes), ...targetCodes]),
+            ];
 
             await this.storage.set('planEntries', merged);
+            await this.storage.set('fetchedClassCodes', allFetchedCodes);
             const now = new Date().toISOString();
             await this.storage.set('lastAutoUpdate', now);
 
