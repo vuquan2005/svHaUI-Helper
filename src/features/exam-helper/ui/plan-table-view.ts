@@ -1,6 +1,7 @@
 /**
  * Exam Helper - Plan Table View Component
  * Renders an aggregated summary table of all exam plans on the /examplant page.
+ * Supports static rendering and progressive streaming rendering.
  */
 
 import { ExamPlanEntry } from '../types';
@@ -9,6 +10,17 @@ import styles from '../style.module.scss';
 
 export interface PlanTableViewCallbacks {
     onDownloadSingle?: (entry: ExamPlanEntry) => void;
+}
+
+export interface PlanTableController {
+    /** The DOM element of the panel */
+    panel: HTMLDivElement;
+    /** Appends newly fetched batch of entries */
+    appendEntries: (newEntries: ExamPlanEntry[]) => void;
+    /** Updates progress badge/text in the header */
+    setProgress: (loadedCount: number, totalCount: number) => void;
+    /** Re-sorts all entries chronologically and finalizes the table */
+    finalize: (allEntries: ExamPlanEntry[]) => void;
 }
 
 /**
@@ -47,7 +59,66 @@ export function getRowClass(urgency: ExamUrgency): string {
 }
 
 /**
- * Create the aggregated exam plan summary panel.
+ * Creates a single table row for an ExamPlanEntry.
+ */
+export function createPlanTableRow(
+    entry: ExamPlanEntry,
+    index: number,
+    onDownloadSingle?: (entry: ExamPlanEntry) => void
+): HTMLTableRowElement {
+    const countdown = getExamCountdown(entry.examDate, entry.examTime);
+    const row = document.createElement('tr');
+    const rowHighlight = getRowClass(countdown.urgency);
+    if (rowHighlight) {
+        row.className = rowHighlight;
+    }
+
+    const badgeCls = getBadgeClass(countdown.urgency);
+
+    row.innerHTML = `
+        <td style="text-align: center; font-weight: 600;">${index}</td>
+        <td style="font-family: monospace; font-weight: 500;">${entry.classCode}</td>
+        <td style="font-weight: 600; color: #1e293b;">${entry.course}</td>
+        <td style="text-align: center;">${entry.examDate}</td>
+        <td style="text-align: center; font-weight: 500;">${entry.examTime}</td>
+        <td style="text-align: center;">Lần ${entry.attempt}</td>
+        <td style="text-align: center;">
+            <span class="${styles.badge} ${badgeCls}" title="${countdown.label}">${countdown.shortLabel}</span>
+        </td>
+        <td style="text-align: center; font-size: 12px; color: #64748b;">${entry.department || '--'}</td>
+        ${
+            onDownloadSingle
+                ? `<td style="text-align: center;">
+                    <button type="button" class="btn btn-xs btn-default single-ics-btn" title="Tải file ICS cho môn này">📥</button>
+                   </td>`
+                : ''
+        }
+    `;
+
+    if (onDownloadSingle) {
+        const btn = row.querySelector('.single-ics-btn');
+        btn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            onDownloadSingle(entry);
+        });
+    }
+
+    return row;
+}
+
+/**
+ * Sorts exam entries chronologically (closest first).
+ */
+export function sortPlanEntries(entries: ExamPlanEntry[]): ExamPlanEntry[] {
+    return [...entries].sort((a, b) => {
+        const dateA = a.examDate.split('/').reverse().join('') + a.examTime.padStart(5, '0');
+        const dateB = b.examDate.split('/').reverse().join('') + b.examTime.padStart(5, '0');
+        return dateA.localeCompare(dateB);
+    });
+}
+
+/**
+ * Create the aggregated exam plan summary panel (static).
  *
  * @param entries - All cached exam plan entries
  * @param callbacks - Optional callbacks (e.g., download single course ICS)
@@ -57,6 +128,22 @@ export function createPlanSummaryTable(
     entries: ExamPlanEntry[],
     callbacks: PlanTableViewCallbacks = {}
 ): HTMLDivElement {
+    const controller = createStreamingPlanTable(entries.length, callbacks);
+    controller.finalize(entries);
+    return controller.panel;
+}
+
+/**
+ * Create a streaming plan table controller for progressive rendering.
+ *
+ * @param totalExpected - Expected total number of courses
+ * @param callbacks - Optional callbacks
+ * @returns PlanTableController
+ */
+export function createStreamingPlanTable(
+    totalExpected: number,
+    callbacks: PlanTableViewCallbacks = {}
+): PlanTableController {
     const panel = document.createElement('div');
     panel.className = styles.planSummaryPanel;
 
@@ -65,9 +152,14 @@ export function createPlanSummaryTable(
     header.className = styles.panelHead;
 
     const title = document.createElement('h3');
-    title.innerHTML = `📋 Kế hoạch thi tổng hợp <span class="badge" style="background:#0284c7;color:#fff;">${entries.length} môn</span>`;
-    header.appendChild(title);
+    const badgeSpan = document.createElement('span');
+    badgeSpan.className = 'badge';
+    badgeSpan.style.cssText = 'background: #eab308; color: #fff; margin-left: 6px;';
+    badgeSpan.textContent = totalExpected > 0 ? `Đang tải (0/${totalExpected})...` : 'Đang tải...';
 
+    title.innerHTML = '📋 Kế hoạch thi tổng hợp ';
+    title.appendChild(badgeSpan);
+    header.appendChild(title);
     panel.appendChild(header);
 
     // Responsive table wrapper
@@ -95,57 +187,40 @@ export function createPlanSummaryTable(
     `;
 
     const tbody = table.querySelector('tbody')!;
-
-    // Sort entries by exam date & time (closest first)
-    const sortedEntries = [...entries].sort((a, b) => {
-        const dateA = a.examDate.split('/').reverse().join('') + a.examTime.padStart(5, '0');
-        const dateB = b.examDate.split('/').reverse().join('') + b.examTime.padStart(5, '0');
-        return dateA.localeCompare(dateB);
-    });
-
-    sortedEntries.forEach((entry, idx) => {
-        const countdown = getExamCountdown(entry.examDate, entry.examTime);
-        const row = document.createElement('tr');
-        const rowHighlight = getRowClass(countdown.urgency);
-        if (rowHighlight) {
-            row.className = rowHighlight;
-        }
-
-        const badgeCls = getBadgeClass(countdown.urgency);
-
-        row.innerHTML = `
-            <td style="text-align: center; font-weight: 600;">${idx + 1}</td>
-            <td style="font-family: monospace; font-weight: 500;">${entry.classCode}</td>
-            <td style="font-weight: 600; color: #1e293b;">${entry.course}</td>
-            <td style="text-align: center;">${entry.examDate}</td>
-            <td style="text-align: center; font-weight: 500;">${entry.examTime}</td>
-            <td style="text-align: center;">Lần ${entry.attempt}</td>
-            <td style="text-align: center;">
-                <span class="${styles.badge} ${badgeCls}" title="${countdown.label}">${countdown.shortLabel}</span>
-            </td>
-            <td style="text-align: center; font-size: 12px; color: #64748b;">${entry.department || '--'}</td>
-            ${
-                callbacks.onDownloadSingle
-                    ? `<td style="text-align: center;">
-                        <button type="button" class="btn btn-xs btn-default single-ics-btn" title="Tải file ICS cho môn này">📥</button>
-                       </td>`
-                    : ''
-            }
-        `;
-
-        if (callbacks.onDownloadSingle) {
-            const btn = row.querySelector('.single-ics-btn');
-            btn?.addEventListener('click', (e) => {
-                e.stopPropagation();
-                callbacks.onDownloadSingle!(entry);
-            });
-        }
-
-        tbody.appendChild(row);
-    });
-
     tableWrap.appendChild(table);
     panel.appendChild(tableWrap);
 
-    return panel;
+    let currentRowCount = 0;
+
+    const appendEntries = (newEntries: ExamPlanEntry[]): void => {
+        for (const entry of newEntries) {
+            currentRowCount++;
+            const row = createPlanTableRow(entry, currentRowCount, callbacks.onDownloadSingle);
+            tbody.appendChild(row);
+        }
+    };
+
+    const setProgress = (loadedCount: number, totalCount: number): void => {
+        badgeSpan.textContent = `Đang tải (${loadedCount}/${totalCount})...`;
+        badgeSpan.style.background = '#eab308';
+    };
+
+    const finalize = (allEntries: ExamPlanEntry[]): void => {
+        tbody.innerHTML = '';
+        const sorted = sortPlanEntries(allEntries);
+        sorted.forEach((entry, idx) => {
+            const row = createPlanTableRow(entry, idx + 1, callbacks.onDownloadSingle);
+            tbody.appendChild(row);
+        });
+
+        badgeSpan.textContent = `${allEntries.length} môn`;
+        badgeSpan.style.background = '#0284c7';
+    };
+
+    return {
+        panel,
+        appendEntries,
+        setProgress,
+        finalize,
+    };
 }

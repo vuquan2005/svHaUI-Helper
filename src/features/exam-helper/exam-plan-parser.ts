@@ -182,6 +182,12 @@ async function fetchExamPlanDetail(classCode: string): Promise<ExamPlanEntry[]> 
     return parseExamPlanDetail(html);
 }
 
+export type BatchProgressCallback<R> = (
+    newItems: R[],
+    loadedCount: number,
+    totalCount: number
+) => void;
+
 /**
  * Utility to delay execution.
  */
@@ -196,22 +202,32 @@ function delay(ms: number): Promise<void> {
  * @param batchSize - Max concurrent requests per batch
  * @param batchDelay - Delay between batches in ms
  * @param fn - Async function to apply to each item
+ * @param onProgress - Optional callback invoked after each batch completes
  * @returns Flattened results
  */
 async function processBatched<T, R>(
     items: T[],
     batchSize: number,
     batchDelay: number,
-    fn: (item: T) => Promise<R[]>
+    fn: (item: T) => Promise<R[]>,
+    onProgress?: BatchProgressCallback<R>
 ): Promise<R[]> {
     const results: R[] = [];
+    let completedCount = 0;
 
     for (let i = 0; i < items.length; i += batchSize) {
         const batch = items.slice(i, i + batchSize);
         const batchResults = await Promise.all(batch.map(fn));
 
+        const batchFlat: R[] = [];
         for (const r of batchResults) {
             results.push(...r);
+            batchFlat.push(...r);
+        }
+
+        completedCount += batch.length;
+        if (onProgress) {
+            onProgress(batchFlat, Math.min(completedCount, items.length), items.length);
         }
 
         // Delay between batches (skip delay after last batch)
@@ -228,25 +244,32 @@ async function processBatched<T, R>(
  * 1. Getting the list of class codes from the plan page
  * 2. Fetching detail for each code in batches
  *
+ * @param onProgress - Optional callback for progressive streaming updates
  * @returns All ExamPlanEntry items
  */
-export async function fetchAllExamPlansBatched(): Promise<ExamPlanEntry[]> {
+export async function fetchAllExamPlansBatched(
+    onProgress?: BatchProgressCallback<ExamPlanEntry>
+): Promise<ExamPlanEntry[]> {
     const listItems = await fetchExamPlanList();
     if (listItems.length === 0) return [];
 
     const classCodes = listItems.map((item) => item.classCode);
-    return processBatched(classCodes, BATCH_SIZE, BATCH_DELAY_MS, fetchExamPlanDetail);
+    return processBatched(classCodes, BATCH_SIZE, BATCH_DELAY_MS, fetchExamPlanDetail, onProgress);
 }
 
 /**
  * Fetch exam plan details for specific class codes (used for force update).
  *
  * @param classCodes - Array of class codes to fetch
+ * @param onProgress - Optional callback for progressive streaming updates
  * @returns ExamPlanEntry items for those codes
  */
-export async function fetchExamPlansByClassCodes(classCodes: string[]): Promise<ExamPlanEntry[]> {
+export async function fetchExamPlansByClassCodes(
+    classCodes: string[],
+    onProgress?: BatchProgressCallback<ExamPlanEntry>
+): Promise<ExamPlanEntry[]> {
     if (classCodes.length === 0) return [];
-    return processBatched(classCodes, BATCH_SIZE, BATCH_DELAY_MS, fetchExamPlanDetail);
+    return processBatched(classCodes, BATCH_SIZE, BATCH_DELAY_MS, fetchExamPlanDetail, onProgress);
 }
 
 /**

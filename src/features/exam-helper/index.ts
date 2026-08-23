@@ -31,7 +31,7 @@ import {
     setStatusText,
     ExamUIRefs,
 } from './ui';
-import { createPlanSummaryTable } from './ui/plan-table-view';
+import { createPlanSummaryTable, createStreamingPlanTable } from './ui/plan-table-view';
 import { enhanceScheduleTable } from './ui/schedule-enhancer';
 import { createHomeExamWidget } from './ui/home-exam-widget';
 import { detectCurrentSemester } from '../export-timetable/semester-config';
@@ -120,6 +120,25 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
     }
 
     /**
+     * Mounts the summary table panel into DOM at the standard location.
+     */
+    private mountPlanSummaryPanel(panel: HTMLElement): void {
+        const existing = document.querySelector<HTMLElement>(`.${this.id}-plan-summary`);
+        existing?.remove();
+
+        panel.classList.add(`${this.id}-plan-summary`);
+
+        const insertTarget =
+            document.querySelector<HTMLElement>('div#ctl03_ctl00_viewResult') ||
+            document.querySelector<HTMLElement>('div.kGrid') ||
+            document.querySelector<HTMLElement>('div.panel-body');
+
+        if (insertTarget && insertTarget.parentElement) {
+            insertTarget.parentElement.insertBefore(panel, insertTarget.nextSibling);
+        }
+    }
+
+    /**
      * Ensure plan data is available and render the summary table.
      */
     private async ensurePlanData(): Promise<void> {
@@ -129,9 +148,9 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             this.storage.get('lastAutoUpdate'),
         ]);
 
-        // First time: no data at all
+        // First time: no data at all -> progressive fetch
         if (!planEntries || planEntries.length === 0) {
-            this.log.i('No plan data found — fetching all');
+            this.log.i('No plan data found — progressive fetching all');
             await this.fetchAndSaveAllPlans();
             return;
         }
@@ -155,29 +174,17 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
     }
 
     /**
-     * Render or re-render the aggregated plan summary table.
+     * Render static plan summary table.
      */
     private renderPlanSummaryTable(entries: ExamPlanEntry[]): void {
-        const existing = document.querySelector<HTMLElement>(`.${this.id}-plan-summary`);
-        existing?.remove();
-
         if (entries.length === 0) return;
 
         const tablePanel = createPlanSummaryTable(entries, {
             onDownloadSingle: (entry) => this.handleDownloadSingleCourse(entry),
         });
-        tablePanel.classList.add(`${this.id}-plan-summary`);
 
-        // Inject below the search box or main container
-        const insertTarget =
-            document.querySelector<HTMLElement>('div#ctl03_ctl00_viewResult') ||
-            document.querySelector<HTMLElement>('div.kGrid') ||
-            document.querySelector<HTMLElement>('div.panel-body');
-
-        if (insertTarget && insertTarget.parentElement) {
-            insertTarget.parentElement.insertBefore(tablePanel, insertTarget.nextSibling);
-            this.log.i(`Rendered summary table with ${entries.length} exam plans`);
-        }
+        this.mountPlanSummaryPanel(tablePanel);
+        this.log.i(`Rendered summary table with ${entries.length} exam plans`);
     }
 
     /**
@@ -193,7 +200,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
     }
 
     /**
-     * Fetch all exam plan data and save to storage.
+     * Fetch all exam plan data progressively and save to storage.
      */
     private async fetchAndSaveAllPlans(): Promise<void> {
         if (!this.uiRefs) return;
@@ -201,10 +208,27 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         try {
             setDownloadBtnState(this.uiRefs.downloadBtn, 'loading');
             if (this.uiRefs.statusText) {
-                setStatusText(this.uiRefs.statusText, 'Đang tải dữ liệu lần đầu...');
+                setStatusText(this.uiRefs.statusText, 'Đang chuẩn bị dữ liệu...');
             }
 
-            const entries = await fetchAllExamPlansBatched();
+            const pageItems = parseExamPlanList(document);
+            const totalExpected = pageItems.length;
+
+            // Create streaming table controller and mount immediately
+            const controller = createStreamingPlanTable(totalExpected, {
+                onDownloadSingle: (entry) => this.handleDownloadSingleCourse(entry),
+            });
+            this.mountPlanSummaryPanel(controller.panel);
+
+            const entries = await fetchAllExamPlansBatched((batch, loaded, total) => {
+                controller.appendEntries(batch);
+                controller.setProgress(loaded, total);
+                if (this.uiRefs?.statusText) {
+                    setStatusText(this.uiRefs.statusText, `Đang tải: ${loaded}/${total} môn...`);
+                }
+            });
+
+            controller.finalize(entries);
 
             await this.storage.set('planEntries', entries);
             const now = new Date().toISOString();
@@ -217,8 +241,6 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             if (this.uiRefs.statusText) {
                 setStatusText(this.uiRefs.statusText, `${entries.length} môn · Vừa cập nhật`);
             }
-
-            this.renderPlanSummaryTable(entries);
         } catch (error) {
             this.log.e('Failed to fetch all plans:', error);
             setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
@@ -229,7 +251,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
     }
 
     /**
-     * Update only classes belonging to the current semester.
+     * Update only classes belonging to the current semester with progressive updates.
      */
     private async updateCurrentSemesterPlans(existingEntries: ExamPlanEntry[]): Promise<void> {
         if (!this.uiRefs) return;
@@ -257,7 +279,17 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 return;
             }
 
-            const freshEntries = await fetchExamPlansByClassCodes(allCodes);
+            const freshEntries = await fetchExamPlansByClassCodes(
+                allCodes,
+                (_batch, loaded, total) => {
+                    if (this.uiRefs?.statusText) {
+                        setStatusText(
+                            this.uiRefs.statusText,
+                            `Đang cập nhật: ${loaded}/${total} môn...`
+                        );
+                    }
+                }
+            );
 
             const existingOtherSemester = existingEntries.filter(
                 (e) => !e.classCode.startsWith(semesterId)
