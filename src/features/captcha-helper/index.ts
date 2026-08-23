@@ -1,6 +1,12 @@
 /**
  * Captcha Helper Feature
- * Assists with captcha input: normalize input, auto-submit on blur/Enter
+ * Assists with captcha input: normalize input, auto-submit on blur/Enter, and PP-OCRv4 auto solving.
+ *
+ * NOTE ON ARCHITECTURE & SYSTEM CONTEXT:
+ * - Hệ thống HaUI sử dụng kiến trúc MPA (Multi-Page Application) / ASP.NET Web Forms với cơ chế Full Page Reload & Postback (không phải SPA).
+ * - Vòng đời thực thi được làm mới hoàn toàn sau mỗi lần chuyển trang hoặc submit form.
+ * - Quy trình xác thực (SSO/Login): Bước nhập Captcha là bước thứ hai sau khi tài khoản và mật khẩu đã được nhập/xác nhận hợp lệ từ bước trước.
+ *   Do đó, khi Captcha giải thành công 5 ký tự có thể trigger auto-submit ngay mà không lo race condition với trường mật khẩu.
  */
 
 import { Feature, type StorageListenerId } from '@/core';
@@ -65,13 +71,17 @@ export class CaptchaHelperFeature extends Feature<CaptchaStorageSchema> {
             this.log.d('Settings loaded:', { isUndoTelex: this.isUndoTelex });
         }
 
-        this.undoTelexListenerId = await this.storage.onValueChange(
-            'undoTelex',
-            (_key, _old, newVal) => {
-                this.isUndoTelex = !!newVal;
-                this.log.d('Settings updated:', { isUndoTelex: this.isUndoTelex });
-            }
-        );
+        try {
+            this.undoTelexListenerId = await this.storage.onValueChange(
+                'undoTelex',
+                (_key, _old, newVal) => {
+                    this.isUndoTelex = !!newVal;
+                    this.log.d('Settings updated:', { isUndoTelex: this.isUndoTelex });
+                }
+            );
+        } catch (err) {
+            this.log.d('Storage change listener unavailable:', err);
+        }
     }
 
     /**

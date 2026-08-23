@@ -18,6 +18,16 @@ export type ValueChangeHandler<T> = (
     remote?: boolean
 ) => void;
 
+const fallbackListeners = new Map<
+    number,
+    {
+        key: string;
+        callback: ValueChangeHandler<unknown>;
+        domHandler?: (e: StorageEvent) => void;
+    }
+>();
+let fallbackListenerIdSeq = 1;
+
 /**
  * Low-level Storage API wrapper that provides a unified interface for GM4/GM3 APIs.
  * Prioritizes GM4 (GM.*) API, falls back to GM3 (GM_*) when needed.
@@ -63,7 +73,25 @@ const StorageAPI = {
             return;
         }
         if (typeof window !== 'undefined' && window.localStorage) {
+            const oldValueRaw = window.localStorage.getItem(key);
+            let oldValue: unknown = undefined;
+            if (oldValueRaw !== null) {
+                try {
+                    oldValue = JSON.parse(oldValueRaw);
+                } catch {
+                    oldValue = oldValueRaw;
+                }
+            }
             window.localStorage.setItem(key, JSON.stringify(value));
+            fallbackListeners.forEach(({ key: watchedKey, callback }) => {
+                if (watchedKey === key) {
+                    try {
+                        callback(key, oldValue, value, false);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            });
             return;
         }
         throw new Error('GM.setValue/GM_setValue is not available!');
@@ -82,7 +110,25 @@ const StorageAPI = {
             return;
         }
         if (typeof window !== 'undefined' && window.localStorage) {
+            const oldValueRaw = window.localStorage.getItem(key);
+            let oldValue: unknown = undefined;
+            if (oldValueRaw !== null) {
+                try {
+                    oldValue = JSON.parse(oldValueRaw);
+                } catch {
+                    oldValue = oldValueRaw;
+                }
+            }
             window.localStorage.removeItem(key);
+            fallbackListeners.forEach(({ key: watchedKey, callback }) => {
+                if (watchedKey === key) {
+                    try {
+                        callback(key, oldValue, undefined, false);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            });
             return;
         }
         throw new Error('GM.deleteValue/GM_deleteValue is not available!');
@@ -201,6 +247,34 @@ const StorageAPI = {
             return GM_addValueChangeListener(key, callback);
         }
 
+        if (typeof window !== 'undefined' && window.localStorage) {
+            const id = fallbackListenerIdSeq++;
+            const domHandler = (e: StorageEvent) => {
+                if (e.key === key) {
+                    let oldVal: T | undefined = undefined;
+                    let newVal: T | undefined = undefined;
+                    try {
+                        if (e.oldValue !== null) oldVal = JSON.parse(e.oldValue);
+                    } catch {
+                        oldVal = e.oldValue as unknown as T;
+                    }
+                    try {
+                        if (e.newValue !== null) newVal = JSON.parse(e.newValue);
+                    } catch {
+                        newVal = e.newValue as unknown as T;
+                    }
+                    callback(key, oldVal, newVal, true);
+                }
+            };
+            window.addEventListener('storage', domHandler);
+            fallbackListeners.set(id, {
+                key,
+                callback: callback as ValueChangeHandler<unknown>,
+                domHandler,
+            });
+            return id as unknown as GmValueListenerId;
+        }
+
         throw new Error('GM.addValueChangeListener/GM_addValueChangeListener is not available!');
     },
 
@@ -209,6 +283,15 @@ const StorageAPI = {
      * @param listenerId - The listener ID to remove
      */
     async removeValueChangeListener(listenerId: GmValueListenerId): Promise<void> {
+        if (typeof listenerId === 'number' && fallbackListeners.has(listenerId)) {
+            const entry = fallbackListeners.get(listenerId);
+            if (entry?.domHandler && typeof window !== 'undefined') {
+                window.removeEventListener('storage', entry.domHandler);
+            }
+            fallbackListeners.delete(listenerId);
+            return;
+        }
+
         if (GM?.removeValueChangeListener) {
             GM.removeValueChangeListener(listenerId);
             return;
@@ -218,10 +301,6 @@ const StorageAPI = {
             GM_removeValueChangeListener(listenerId);
             return;
         }
-
-        throw new Error(
-            'GM.removeValueChangeListener/GM_removeValueChangeListener is not available!'
-        );
     },
 };
 

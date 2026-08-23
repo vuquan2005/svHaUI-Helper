@@ -80,6 +80,9 @@ export default defineConfig({
             },
         }),
     ],
+    server: {
+        cors: true,
+    },
     build: {
         minify: isMinify ? 'esbuild' : false,
         emptyOutDir: false,

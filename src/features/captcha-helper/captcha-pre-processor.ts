@@ -3,7 +3,7 @@ import {
     otsuThreshold,
     getConnectedComponents,
     dilate5x5,
-    inpaintTelea,
+    inpaintFast,
     Component,
 } from './image-utils';
 
@@ -126,7 +126,7 @@ export class CaptchaPreprocessor {
         }
 
         // Inpaint to remove salt noise
-        const denoisedGray = inpaintTelea(grayImg, noiseMask, width, height, 3);
+        const denoisedGray = inpaintFast(grayImg, noiseMask, width, height);
 
         const cleanedImg = new Uint8Array(width * height);
         for (let i = 0; i < grayImg.length; i++) {

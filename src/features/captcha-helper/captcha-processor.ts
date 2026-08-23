@@ -1,6 +1,13 @@
 /**
  * Captcha Image Processor
- * Manages captcha image preprocessing and PP-OCRv4 ONNX recognition
+ * Manages captcha image preprocessing and PP-OCRv4 ONNX recognition.
+ *
+ * NOTE:
+ * - Chạy trong môi trường MPA (ASP.NET Web Forms postback).
+ * - Pipeline xử lý gồm:
+ *   1. Chờ ảnh captcha tải xong (hoặc lấy ảnh có sẵn nếu complete).
+ *   2. Tiền xử lý ảnh (bóc kênh Saturation, Otsu, Connected Components, Telea inpainting) -> vẽ ra canvas.
+ *   3. Nhận diện chữ qua mô hình PP-OCRv4 ONNX Runtime (WASM).
  */
 
 import { CaptchaPreprocessor } from './captcha-pre-processor';
