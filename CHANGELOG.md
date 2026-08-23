@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.11.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.10.0...v2.11.0) (2026-08-23)
+
+
+### Features
+
+* **exam-helper:** enable full background plan sync on home sync button click ([#89](https://github.com/vuquan2005/svHaUI-Helper/issues/89)) ([a785fe3](https://github.com/vuquan2005/svHaUI-Helper/commit/a785fe3d603940d37c209b5db07d480b3d55242f))
+
+
+### Bug Fixes
+
+* **exam-helper:** prevent injecting home widget on login page ([#92](https://github.com/vuquan2005/svHaUI-Helper/issues/92)) ([1b29b0c](https://github.com/vuquan2005/svHaUI-Helper/commit/1b29b0cc0a9e5e5aba736464cdda4552d14ae187))
+
+
+### Performance Improvements
+
+* **captcha:** optimize inpainting with inpaintFast and fix vite dev environment ([#91](https://github.com/vuquan2005/svHaUI-Helper/issues/91)) ([59ff699](https://github.com/vuquan2005/svHaUI-Helper/commit/59ff699ab40e9ed38517bc752fbece26a49c5300))
+
 ## [2.10.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.9.0...v2.10.0) (2026-08-23)
 
 
