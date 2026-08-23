@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.9.0...v2.10.0) (2026-08-23)
+
+
+### Features
+
+* **exam-helper:** add exam plan streaming, schedule countdown, home widget, and unified ICS export ([#35](https://github.com/vuquan2005/svHaUI-Helper/issues/35)) ([0aa9bf4](https://github.com/vuquan2005/svHaUI-Helper/commit/0aa9bf4bea9550703f50f3b3bbfa0029020db277))
+
 ## [2.9.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.8.0...v2.9.0) (2026-08-22)
 
 
