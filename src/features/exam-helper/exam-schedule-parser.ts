@@ -35,6 +35,47 @@ const COL = {
 } as const;
 
 // ============================================
+// Table Locator
+// ============================================
+
+/**
+ * Find the actual exam schedule table on the page.
+ * Distinguishes the exam schedule table from the student info table.
+ *
+ * @param container - Root container (document or HTMLElement)
+ * @returns The exam schedule HTMLTableElement or null
+ */
+export function findExamScheduleTable(
+    container: Document | HTMLElement = document
+): HTMLTableElement | null {
+    // 1. Try finding table containing .kTableHeader row
+    const headerRow = container.querySelector('tr.kTableHeader');
+    if (headerRow) {
+        const table = headerRow.closest('table');
+        if (table) return table as HTMLTableElement;
+    }
+
+    // 2. Try finding all candidate tables and match by header text
+    const tables = Array.from(
+        container.querySelectorAll<HTMLTableElement>('div.kGrid table, table.table.table-bordered')
+    );
+
+    for (const table of tables) {
+        const text = table.textContent ?? '';
+        if (text.includes('Môn thi') && (text.includes('Ngày thi') || text.includes('Ngày thi'))) {
+            return table;
+        }
+    }
+
+    // 3. Fallback: table with the most columns/rows (usually the second table)
+    if (tables.length >= 2) {
+        return tables[1];
+    }
+
+    return tables[0] ?? null;
+}
+
+// ============================================
 // Parser
 // ============================================
 
@@ -46,7 +87,9 @@ const COL = {
  */
 export function parseExamScheduleFromDOM(tableEl: HTMLTableElement): ExamScheduleEntry[] {
     const entries: ExamScheduleEntry[] = [];
-    const rows = Array.from(tableEl.querySelectorAll('tbody > tr'));
+    const rows = Array.from(tableEl.querySelectorAll('tbody > tr')).filter(
+        (r) => !r.classList.contains('kTableHeader')
+    );
 
     for (const row of rows) {
         const cells = row.querySelectorAll('td');

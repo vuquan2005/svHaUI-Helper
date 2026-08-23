@@ -10,7 +10,7 @@
 import { Feature } from '@/core';
 import { observeDomUntil } from '@/utils/dom';
 import { ExportExamStorage, ExamPlanEntry } from './types';
-import { parseExamScheduleFromDOM } from './exam-schedule-parser';
+import { parseExamScheduleFromDOM, findExamScheduleTable } from './exam-schedule-parser';
 import {
     parseExamPlanList,
     fetchAllExamPlansBatched,
@@ -535,9 +535,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
 
         if (result.success) {
             // Enhance schedule table with countdown badges & cache entries
-            const table = document.querySelector<HTMLTableElement>(
-                'table.table.table-bordered.table-striped'
-            );
+            const table = findExamScheduleTable();
             if (table) {
                 enhanceScheduleTable(table);
                 const scheduleEntries = parseExamScheduleFromDOM(table);
@@ -581,9 +579,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         try {
             setDownloadBtnState(this.uiRefs.downloadBtn, 'downloading');
 
-            const table = document.querySelector<HTMLTableElement>(
-                'table.table.table-bordered.table-striped'
-            );
+            const table = findExamScheduleTable();
             if (!table) {
                 alert('Không tìm thấy bảng lịch thi trên trang.');
                 setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');

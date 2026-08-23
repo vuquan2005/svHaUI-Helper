@@ -26,7 +26,9 @@ export function enhanceScheduleTable(tableEl: HTMLTableElement): void {
     // 1. Invert rows (reverse default order) if not already inverted
     if (tableEl.dataset.examInverted !== 'true') {
         tableEl.dataset.examInverted = 'true';
-        const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+        const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr')).filter(
+            (r) => !r.classList.contains('kTableHeader')
+        );
         if (rows.length > 1) {
             rows.reverse().forEach((row, idx) => {
                 const sttCell = row.querySelector(`td:nth-child(${COL_INDEX})`);
@@ -39,7 +41,9 @@ export function enhanceScheduleTable(tableEl: HTMLTableElement): void {
     }
 
     // 2. Add badges and row highlights
-    const currentRows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+    const currentRows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr')).filter(
+        (r) => !r.classList.contains('kTableHeader')
+    );
     for (const row of currentRows) {
         if (row.dataset.examEnhanced === 'true') continue;
         row.dataset.examEnhanced = 'true';
