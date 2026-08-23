@@ -35,6 +35,17 @@ const StorageAPI = {
         if (typeof GM_getValue === 'function') {
             return GM_getValue(key, defaultValue);
         }
+        if (typeof window !== 'undefined' && window.localStorage) {
+            const raw = window.localStorage.getItem(key);
+            if (raw !== null) {
+                try {
+                    return JSON.parse(raw);
+                } catch {
+                    return raw as unknown as T;
+                }
+            }
+            return defaultValue as T;
+        }
         throw new Error('GM.getValue/GM_getValue is not available!');
     },
 
@@ -49,6 +60,10 @@ const StorageAPI = {
         }
         if (typeof GM_setValue === 'function') {
             GM_setValue(key, value);
+            return;
+        }
+        if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem(key, JSON.stringify(value));
             return;
         }
         throw new Error('GM.setValue/GM_setValue is not available!');
@@ -66,6 +81,10 @@ const StorageAPI = {
             GM_deleteValue(key);
             return;
         }
+        if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.removeItem(key);
+            return;
+        }
         throw new Error('GM.deleteValue/GM_deleteValue is not available!');
     },
 
@@ -78,6 +97,9 @@ const StorageAPI = {
         }
         if (typeof GM_listValues === 'function') {
             return GM_listValues();
+        }
+        if (typeof window !== 'undefined' && window.localStorage) {
+            return Object.keys(window.localStorage);
         }
         throw new Error('GM.listValues/GM_listValues is not available!');
     },
