@@ -17,6 +17,7 @@ import {
 } from './exam-schedule-parser';
 import {
     parseExamPlanList,
+    fetchExamPlanList,
     fetchAllExamPlansBatched,
     fetchExamPlansByClassCodes,
 } from './exam-plan-parser';
@@ -287,31 +288,35 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
 
     /**
      * Fetch all exam plan data progressively and save to storage.
+     * Works both on the Exam Plan page and in background (Home/Schedule).
      */
     private async fetchAndSaveAllPlans(): Promise<void> {
-        if (!this.uiRefs) return;
-
         try {
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'loading');
-            if (this.uiRefs.statusText) {
+            if (this.uiRefs?.downloadBtn) setDownloadBtnState(this.uiRefs.downloadBtn, 'loading');
+            if (this.uiRefs?.statusText) {
                 setStatusText(this.uiRefs.statusText, 'Đang chuẩn bị dữ liệu...');
             }
 
-            const pageItems = parseExamPlanList(document);
+            const isPlanPage = window.location.pathname === '/student/schedulefees/examplant';
+            const pageItems = isPlanPage ? parseExamPlanList(document) : await fetchExamPlanList();
             const pageCodes = pageItems.map((item) => item.classCode);
             const totalExpected = pageItems.length;
 
-            // Create streaming table controller and mount immediately
-            const controller = createStreamingPlanTable(totalExpected, {
-                onDownloadSingle: (entry) => this.handleDownloadSingleCourse(entry),
-            });
-            this.mountPlanSummaryPanel(controller.panel);
+            let controller: ReturnType<typeof createStreamingPlanTable> | null = null;
+            if (isPlanPage) {
+                controller = createStreamingPlanTable(totalExpected, {
+                    onDownloadSingle: (entry) => this.handleDownloadSingleCourse(entry),
+                });
+                this.mountPlanSummaryPanel(controller.panel);
+            }
 
             const accumulated: ExamPlanEntry[] = [];
             const entries = await fetchAllExamPlansBatched(async (batch, loaded, total) => {
                 accumulated.push(...batch);
-                controller.appendEntries(batch);
-                controller.setProgress(loaded, total);
+                if (controller) {
+                    controller.appendEntries(batch);
+                    controller.setProgress(loaded, total);
+                }
                 if (this.uiRefs?.statusText) {
                     setStatusText(this.uiRefs.statusText, `Đang tải: ${loaded}/${total} môn...`);
                 }
@@ -319,7 +324,9 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 await this.storage.set('planEntries', [...accumulated]);
             });
 
-            controller.finalize(entries);
+            if (controller) {
+                controller.finalize(entries);
+            }
 
             await this.storage.set('planEntries', entries);
             await this.storage.set('fetchedClassCodes', pageCodes);
@@ -329,14 +336,14 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
 
             this.log.i(`Fetched and saved ${entries.length} plan entries`);
 
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
-            if (this.uiRefs.statusText) {
+            if (this.uiRefs?.downloadBtn) setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
+            if (this.uiRefs?.statusText) {
                 setStatusText(this.uiRefs.statusText, `${entries.length} môn · Vừa cập nhật`);
             }
         } catch (error) {
             this.log.e('Failed to fetch all plans:', error);
-            setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
-            if (this.uiRefs.statusText) {
+            if (this.uiRefs?.downloadBtn) setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
+            if (this.uiRefs?.statusText) {
                 setStatusText(this.uiRefs.statusText, 'Lỗi tải dữ liệu');
             }
         }
@@ -344,17 +351,17 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
 
     /**
      * Update active/current semester classes with progressive updates.
+     * Works both on the Exam Plan page and in background (Home/Schedule).
      */
     private async updateCurrentSemesterPlans(existingEntries: ExamPlanEntry[]): Promise<void> {
-        if (!this.uiRefs) return;
-
         try {
-            if (this.uiRefs.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'updating');
-            if (this.uiRefs.statusText) setStatusText(this.uiRefs.statusText, 'Đang cập nhật...');
+            if (this.uiRefs?.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'updating');
+            if (this.uiRefs?.statusText) setStatusText(this.uiRefs.statusText, 'Đang cập nhật...');
 
             const [fetchedClassCodes] = await Promise.all([this.storage.get('fetchedClassCodes')]);
 
-            const pageItems = parseExamPlanList(document);
+            const isPlanPage = window.location.pathname === '/student/schedulefees/examplant';
+            const pageItems = isPlanPage ? parseExamPlanList(document) : await fetchExamPlanList();
             const pageCodes = pageItems.map((item) => item.classCode);
 
             // Determine target codes to update:
@@ -370,14 +377,14 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
 
             if (targetCodes.length === 0) {
                 this.log.i('No class codes found on page to update');
-                if (this.uiRefs.updateBtn) {
+                if (this.uiRefs?.updateBtn) {
                     setUpdateBtnState(this.uiRefs.updateBtn, 'done');
                     setTimeout(() => {
                         if (this.uiRefs?.updateBtn)
                             setUpdateBtnState(this.uiRefs.updateBtn, 'ready');
                     }, 2000);
                 }
-                if (this.uiRefs.statusText) {
+                if (this.uiRefs?.statusText) {
                     setStatusText(
                         this.uiRefs.statusText,
                         `${existingEntries.length} môn · Đã cập nhật`
@@ -413,17 +420,19 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
 
             this.log.i(`Updated ${freshEntries.length} entries, total: ${merged.length}`);
 
-            if (this.uiRefs.updateBtn) {
+            if (this.uiRefs?.updateBtn) {
                 setUpdateBtnState(this.uiRefs.updateBtn, 'done');
                 setTimeout(() => {
                     if (this.uiRefs?.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'ready');
                 }, 3000);
             }
-            if (this.uiRefs.statusText) {
+            if (this.uiRefs?.statusText) {
                 setStatusText(this.uiRefs.statusText, `${merged.length} môn · Vừa cập nhật`);
             }
 
-            this.renderPlanSummaryTable(merged);
+            if (isPlanPage) {
+                this.renderPlanSummaryTable(merged);
+            }
         } catch (error) {
             this.log.e('Failed to update current semester plans:', error);
             if (this.uiRefs?.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'error');
@@ -626,6 +635,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             widgetEl: HTMLElement,
             syncBtn?: HTMLButtonElement
         ): Promise<void> => {
+            const isManualClick = Boolean(syncBtn);
             let origText = '';
             if (syncBtn) {
                 syncBtn.disabled = true;
@@ -646,7 +656,8 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                     // Initial fetch of all plans if storage is empty
                     await this.fetchAndSaveAllPlans();
                     activePlans = (await this.storage.get('planEntries')) ?? [];
-                } else if (this.shouldAutoUpdate(lastAutoUpdate)) {
+                } else if (isManualClick || this.shouldAutoUpdate(lastAutoUpdate)) {
+                    // If user manually clicked or auto-update interval elapsed, update current semester plans
                     await this.updateCurrentSemesterPlans(activePlans);
                     activePlans = (await this.storage.get('planEntries')) ?? activePlans;
                 }
