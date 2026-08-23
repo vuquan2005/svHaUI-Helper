@@ -253,7 +253,8 @@ export async function fetchAllExamPlansBatched(
     const listItems = await fetchExamPlanList();
     if (listItems.length === 0) return [];
 
-    const classCodes = listItems.map((item) => item.classCode);
+    // Reverse so the newest courses (at the bottom of the list) are fetched first
+    const classCodes = listItems.map((item) => item.classCode).reverse();
     return processBatched(classCodes, BATCH_SIZE, BATCH_DELAY_MS, fetchExamPlanDetail, onProgress);
 }
 

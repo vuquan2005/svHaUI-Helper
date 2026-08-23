@@ -34,6 +34,7 @@ import {
 import { createPlanSummaryTable, createStreamingPlanTable } from './ui/plan-table-view';
 import { enhanceScheduleTable } from './ui/schedule-enhancer';
 import { createHomeExamWidget } from './ui/home-exam-widget';
+import { getExamCountdown } from './time-utils';
 import { detectCurrentSemester } from '../export-timetable/semester-config';
 
 // ============================================
@@ -220,12 +221,16 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             });
             this.mountPlanSummaryPanel(controller.panel);
 
-            const entries = await fetchAllExamPlansBatched((batch, loaded, total) => {
+            const accumulated: ExamPlanEntry[] = [];
+            const entries = await fetchAllExamPlansBatched(async (batch, loaded, total) => {
+                accumulated.push(...batch);
                 controller.appendEntries(batch);
                 controller.setProgress(loaded, total);
                 if (this.uiRefs?.statusText) {
                     setStatusText(this.uiRefs.statusText, `Đang tải: ${loaded}/${total} môn...`);
                 }
+                // Save incrementally after each batch
+                await this.storage.set('planEntries', [...accumulated]);
             });
 
             controller.finalize(entries);
@@ -344,7 +349,20 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 return;
             }
 
-            const events = planEntriesToEvents(planEntries);
+            // Filter only upcoming (not yet passed) exams
+            const upcomingPlans = planEntries.filter(
+                (e) => getExamCountdown(e.examDate, e.examTime).direction === 1
+            );
+
+            if (upcomingPlans.length === 0) {
+                alert(
+                    'Tất cả các môn thi trong kế hoạch đều đã diễn ra. Không có môn nào sắp tới để xuất.'
+                );
+                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
+                return;
+            }
+
+            const events = planEntriesToEvents(upcomingPlans);
             const icsContent = generateExamICS(events);
 
             if (!icsContent) {
@@ -357,7 +375,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             const filename = `LichThi_${semesterId}.ics`;
             downloadExamICSFile(icsContent, filename);
 
-            this.log.i(`Downloaded exam ICS: ${filename} (${events.length} events)`);
+            this.log.i(`Downloaded upcoming exam ICS: ${filename} (${events.length} events)`);
             setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
         } catch (error) {
             this.log.e('Download from plan failed:', error);
@@ -483,6 +501,19 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             await this.storage.set('scheduleEntries', scheduleEntries);
             await this.storage.set('lastScheduleFetchTime', new Date().toISOString());
 
+            // Filter only upcoming (not yet passed) schedule entries
+            const upcomingSchedules = scheduleEntries.filter(
+                (e) => getExamCountdown(e.examDate, e.examTime).direction === 1
+            );
+
+            if (upcomingSchedules.length === 0) {
+                alert(
+                    'Tất cả các môn trong lịch thi đều đã diễn ra. Không có môn nào sắp tới để xuất.'
+                );
+                setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
+                return;
+            }
+
             let planEntries = await this.storage.get('planEntries');
 
             if (!planEntries || planEntries.length === 0) {
@@ -495,7 +526,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             }
 
             // Merge schedule + plan (with cascade matching & fallback UIDs)
-            const { events, unmatched } = mergeExamData(scheduleEntries, planEntries ?? []);
+            const { events, unmatched } = mergeExamData(upcomingSchedules, planEntries ?? []);
 
             if (unmatched.length > 0) {
                 this.log.w(
@@ -521,7 +552,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             const filename = `LichThi_${semesterId}.ics`;
             downloadExamICSFile(icsContent, filename);
 
-            this.log.i(`Downloaded exam ICS: ${filename} (${events.length} events)`);
+            this.log.i(`Downloaded upcoming exam ICS: ${filename} (${events.length} events)`);
             if (this.uiRefs.statusText) {
                 setStatusText(this.uiRefs.statusText, '');
             }
