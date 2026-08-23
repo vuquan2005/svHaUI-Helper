@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getUpcomingExamsList } from '../ui/home-exam-widget';
+import { getUpcomingExamsList, mountHomeExamWidget } from '../ui/home-exam-widget';
 import { ExamPlanEntry, ExamScheduleEntry } from '../types';
 
 describe('getUpcomingExamsList', () => {
@@ -92,5 +92,115 @@ describe('getUpcomingExamsList', () => {
         ];
 
         expect(getUpcomingExamsList([], pastPlan, fixedNow)).toEqual([]);
+    });
+});
+
+describe('mountHomeExamWidget', () => {
+    it('returns false and does not mount when on unauthenticated login page', () => {
+        const mockRoot = {
+            querySelector: (selector: string) => {
+                if (selector === 'div.splash-container') return {} as HTMLElement;
+                return null;
+            },
+        } as unknown as HTMLElement;
+
+        const widget = { isConnected: false } as HTMLElement;
+        expect(mountHomeExamWidget(widget, mockRoot)).toBe(false);
+    });
+
+    it('returns false when dashboard container lacks target section', () => {
+        const mockDashboard = {
+            querySelector: () => null,
+        } as unknown as HTMLElement;
+
+        const mockRoot = {
+            querySelector: (selector: string) => {
+                if (selector === 'div.cttsv-dashboard') return mockDashboard;
+                return null;
+            },
+        } as unknown as HTMLElement;
+
+        const widget = { isConnected: false } as HTMLElement;
+        expect(mountHomeExamWidget(widget, mockRoot)).toBe(false);
+    });
+
+    it('mounts successfully before overview section on authenticated dashboard', () => {
+        let insertedChild: unknown = null;
+        let insertedBefore: unknown = null;
+
+        const mockTarget = {} as HTMLElement;
+        const mockDashboard = {
+            querySelector: (selector: string) => {
+                if (selector === 'section.cttsv-overview-section') return mockTarget;
+                return null;
+            },
+            insertBefore: (child: unknown, before: unknown) => {
+                insertedChild = child;
+                insertedBefore = before;
+            },
+        } as unknown as HTMLElement;
+
+        const mockRoot = {
+            querySelector: (selector: string) => {
+                if (selector === 'div.cttsv-dashboard') return mockDashboard;
+                return null;
+            },
+        } as unknown as HTMLElement;
+
+        const widget = { isConnected: false } as HTMLElement;
+        const result = mountHomeExamWidget(widget, mockRoot);
+
+        expect(result).toBe(true);
+        expect(insertedChild).toBe(widget);
+        expect(insertedBefore).toBe(mockTarget);
+    });
+
+    it('mounts successfully before action grid if overview section is absent', () => {
+        let insertedChild: unknown = null;
+        let insertedBefore: unknown = null;
+
+        const mockTarget = {} as HTMLElement;
+        const mockDashboard = {
+            querySelector: (selector: string) => {
+                if (selector === 'section.cttsv-action-grid, div.cttsv-action-grid') {
+                    return mockTarget;
+                }
+                return null;
+            },
+            insertBefore: (child: unknown, before: unknown) => {
+                insertedChild = child;
+                insertedBefore = before;
+            },
+        } as unknown as HTMLElement;
+
+        const mockRoot = {
+            querySelector: (selector: string) => {
+                if (selector === 'div.cttsv-dashboard') return mockDashboard;
+                return null;
+            },
+        } as unknown as HTMLElement;
+
+        const widget = { isConnected: false } as HTMLElement;
+        const result = mountHomeExamWidget(widget, mockRoot);
+
+        expect(result).toBe(true);
+        expect(insertedChild).toBe(widget);
+        expect(insertedBefore).toBe(mockTarget);
+    });
+
+    it('avoids duplicate mounting if widget is already connected or in DOM', () => {
+        const widget = { isConnected: true } as HTMLElement;
+        const mockDashboard = {
+            querySelector: () => null,
+        } as unknown as HTMLElement;
+
+        const mockRoot = {
+            querySelector: (selector: string) => {
+                if (selector === 'div.cttsv-dashboard') return mockDashboard;
+                return null;
+            },
+        } as unknown as HTMLElement;
+
+        expect(mountHomeExamWidget(widget, mockRoot)).toBe(true);
     });
 });

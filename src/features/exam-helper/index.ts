@@ -33,11 +33,15 @@ import {
     setDownloadBtnState,
     setUpdateBtnState,
     setStatusText,
-    ExamUIRefs,
+    type ExamUIRefs,
 } from './ui';
 import { createPlanSummaryTable, createStreamingPlanTable } from './ui/plan-table-view';
 import { enhanceScheduleTable } from './ui/schedule-enhancer';
-import { createHomeExamWidget, updateHomeExamWidget } from './ui/home-exam-widget';
+import {
+    createHomeExamWidget,
+    updateHomeExamWidget,
+    mountHomeExamWidget,
+} from './ui/home-exam-widget';
 import { getExamCountdown, detectExamSemester } from './time-utils';
 
 // ============================================
@@ -689,33 +693,16 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         widget.classList.add(`${this.id}-home-widget`);
 
         observeDomUntil(
-            '.be-content, div.cttsv-dashboard, div.main-content',
+            'div.cttsv-dashboard, div.cttsv-action-grid, section.cttsv-overview-section',
             () => {
-                const dashboard =
-                    document.querySelector('div.cttsv-dashboard') ||
-                    document.querySelector('.be-content') ||
-                    document.querySelector('div.main-content');
-                if (!dashboard) return false;
-
-                // Avoid injecting twice
-                if (document.querySelector(`.${this.id}-home-widget`)) return true;
-
-                // Insert right before the overview section or action grid
-                const target =
-                    dashboard.querySelector('section.cttsv-overview-section') ||
-                    dashboard.querySelector('section.cttsv-action-grid, div.cttsv-action-grid');
-
-                if (target) {
-                    dashboard.insertBefore(widget, target);
-                } else {
-                    dashboard.prepend(widget);
+                const mounted = mountHomeExamWidget(widget);
+                if (mounted) {
+                    this.log.i('Home exam widget injected');
+                    // Real-time background sync of schedule rooms/SBD right after mount
+                    syncHomeData(widget);
+                    return true;
                 }
-
-                this.log.i('Home exam widget injected');
-
-                // Real-time background sync of schedule rooms/SBD right after mount
-                syncHomeData(widget);
-                return true;
+                return false;
             },
             {
                 signal: this.abortController?.signal,
