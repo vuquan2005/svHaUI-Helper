@@ -1,10 +1,12 @@
 $prefix: sv-grade-nav;
 
-// Biến màu
-$color-primary: #667eea;
-$color-text: #5a6fd6;
-$bg-color-hover: $color-primary;
-$text-color-hover: white;
+// Biến màu đồng bộ với tone màu chính của HaUI (#1a73e8 / #2563eb) & Beagle panel header
+$color-primary: #2563eb;
+$color-primary-light: #eff6ff;
+$color-border: #bfdbfe;
+$color-text: #1d4ed8;
+$bg-color-hover: #1d4ed8;
+$text-color-hover: #ffffff;
 
 :export {
   cssPrefix: $prefix;
@@ -26,16 +28,16 @@ $text-color-hover: white;
       align-items: center;
       gap: 6px;
       padding: 4px 12px;
-      border-radius: 4px;
+      border-radius: 6px;
 
       text-decoration: none;
       font-size: 13px;
       font-weight: 500;
       color: $color-text;
-      background: rgba($color-primary, 0.15);
-      border: 1px solid rgba($color-primary, 0.25);
+      background: $color-primary-light;
+      border: 1px solid $color-border;
 
-      transition: all 0.2s ease;
+      transition: all 0.15s ease-in-out;
 
       &-label {
         @media (max-width: 520px) {
