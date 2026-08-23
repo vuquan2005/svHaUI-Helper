@@ -107,13 +107,28 @@ export function createPlanTableRow(
 }
 
 /**
- * Sorts exam entries chronologically (closest first).
+ * Sorts exam entries:
+ * 1. Upcoming exams first (sorted ascending by closest date: Tomorrow -> Next week -> Next month)
+ * 2. Passed exams below (sorted descending: Yesterday -> Last week -> Last year)
  */
 export function sortPlanEntries(entries: ExamPlanEntry[]): ExamPlanEntry[] {
+    const now = new Date();
     return [...entries].sort((a, b) => {
-        const dateA = a.examDate.split('/').reverse().join('') + a.examTime.padStart(5, '0');
-        const dateB = b.examDate.split('/').reverse().join('') + b.examTime.padStart(5, '0');
-        return dateA.localeCompare(dateB);
+        const countA = getExamCountdown(a.examDate, a.examTime, now);
+        const countB = getExamCountdown(b.examDate, b.examTime, now);
+
+        // Upcoming exams (direction === 1) come BEFORE passed exams (direction === -1)
+        if (countA.direction !== countB.direction) {
+            return countB.direction - countA.direction; // 1 before -1
+        }
+
+        if (countA.direction === 1) {
+            // Both upcoming: sort closest date first (diffMs ascending)
+            return countA.diffMs - countB.diffMs;
+        } else {
+            // Both passed: sort most recent first (abs diff ascending)
+            return Math.abs(countA.diffMs) - Math.abs(countB.diffMs);
+        }
     });
 }
 

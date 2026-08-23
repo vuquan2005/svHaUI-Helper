@@ -15,7 +15,6 @@ import {
     parseExamPlanList,
     fetchAllExamPlansBatched,
     fetchExamPlansByClassCodes,
-    filterClassCodesBySemester,
 } from './exam-plan-parser';
 import {
     mergeExamData,
@@ -149,10 +148,23 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             this.storage.get('lastAutoUpdate'),
         ]);
 
-        // First time: no data at all -> progressive fetch
+        const pageItems = parseExamPlanList(document);
+        const pageCodes = pageItems.map((item) => item.classCode);
+
+        // First time: no data at all -> progressive fetch all page codes
         if (!planEntries || planEntries.length === 0) {
             this.log.i('No plan data found — progressive fetching all');
             await this.fetchAndSaveAllPlans();
+            return;
+        }
+
+        // Check if there are missing codes (e.g. previous fetch interrupted mid-way)
+        const savedCodeSet = new Set(planEntries.map((e) => e.classCode));
+        const missingCodes = pageCodes.filter((code) => !savedCodeSet.has(code));
+
+        if (missingCodes.length > 0) {
+            this.log.i(`Found ${missingCodes.length} missing plan codes — resuming fetch`);
+            await this.fetchMissingPlans(planEntries, missingCodes);
             return;
         }
 
@@ -197,6 +209,69 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
         if (icsContent) {
             const filename = `LichThi_${entry.classCode}.ics`;
             downloadExamICSFile(icsContent, filename);
+        }
+    }
+
+    /**
+     * Fetch missing plan entries progressively (when resuming after interruption).
+     */
+    private async fetchMissingPlans(
+        existingEntries: ExamPlanEntry[],
+        missingCodes: string[]
+    ): Promise<void> {
+        if (!this.uiRefs) return;
+
+        try {
+            setDownloadBtnState(this.uiRefs.downloadBtn, 'loading');
+            if (this.uiRefs.statusText) {
+                setStatusText(
+                    this.uiRefs.statusText,
+                    `Đang tải tiếp ${missingCodes.length} môn...`
+                );
+            }
+
+            const totalCount = existingEntries.length + missingCodes.length;
+            const controller = createStreamingPlanTable(totalCount, {
+                onDownloadSingle: (entry) => this.handleDownloadSingleCourse(entry),
+            });
+            // Pre-fill existing entries
+            controller.appendEntries(existingEntries);
+            this.mountPlanSummaryPanel(controller.panel);
+
+            const accumulated = [...existingEntries];
+            const freshEntries = await fetchExamPlansByClassCodes(
+                [...missingCodes].reverse(),
+                async (batch, loaded, _total) => {
+                    accumulated.push(...batch);
+                    controller.appendEntries(batch);
+                    controller.setProgress(existingEntries.length + loaded, totalCount);
+                    if (this.uiRefs?.statusText) {
+                        setStatusText(
+                            this.uiRefs.statusText,
+                            `Đang tải: ${existingEntries.length + loaded}/${totalCount} môn...`
+                        );
+                    }
+                    await this.storage.set('planEntries', [...accumulated]);
+                }
+            );
+
+            const merged = [...existingEntries, ...freshEntries];
+            controller.finalize(merged);
+
+            await this.storage.set('planEntries', merged);
+            const now = new Date().toISOString();
+            await this.storage.set('lastAutoUpdate', now);
+
+            setDownloadBtnState(this.uiRefs.downloadBtn, 'ready');
+            if (this.uiRefs.statusText) {
+                setStatusText(this.uiRefs.statusText, `${merged.length} môn · Vừa cập nhật`);
+            }
+        } catch (error) {
+            this.log.e('Failed to fetch missing plans:', error);
+            setDownloadBtnState(this.uiRefs.downloadBtn, 'no-data');
+            if (this.uiRefs.statusText) {
+                setStatusText(this.uiRefs.statusText, 'Lỗi tải dữ liệu');
+            }
         }
     }
 
@@ -256,7 +331,7 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
     }
 
     /**
-     * Update only classes belonging to the current semester with progressive updates.
+     * Update active/current semester classes with progressive updates.
      */
     private async updateCurrentSemesterPlans(existingEntries: ExamPlanEntry[]): Promise<void> {
         if (!this.uiRefs) return;
@@ -265,27 +340,40 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
             if (this.uiRefs.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'updating');
             if (this.uiRefs.statusText) setStatusText(this.uiRefs.statusText, 'Đang cập nhật...');
 
-            const semesterId = detectCurrentSemester();
-
-            const currentCodes = filterClassCodesBySemester(
-                existingEntries.map((e) => e.classCode),
-                semesterId
-            );
-
             const pageItems = parseExamPlanList(document);
             const pageCodes = pageItems.map((item) => item.classCode);
-            const newCurrentCodes = filterClassCodesBySemester(pageCodes, semesterId);
 
-            const allCodes = [...new Set([...currentCodes, ...newCurrentCodes])];
+            // Determine target codes to update:
+            // Find latest semester prefix (e.g., "20251") present on the page
+            const prefixes = pageCodes.map((c) => c.slice(0, 5)).filter(Boolean);
+            prefixes.sort();
+            const latestPrefix = prefixes[prefixes.length - 1];
 
-            if (allCodes.length === 0) {
-                this.log.i('No current semester codes to update');
-                if (this.uiRefs.updateBtn) setUpdateBtnState(this.uiRefs.updateBtn, 'done');
+            // If there's an active prefix, update courses from that semester, else update all page codes
+            const targetCodes = latestPrefix
+                ? pageCodes.filter((c) => c.startsWith(latestPrefix))
+                : pageCodes;
+
+            if (targetCodes.length === 0) {
+                this.log.i('No class codes found on page to update');
+                if (this.uiRefs.updateBtn) {
+                    setUpdateBtnState(this.uiRefs.updateBtn, 'done');
+                    setTimeout(() => {
+                        if (this.uiRefs?.updateBtn)
+                            setUpdateBtnState(this.uiRefs.updateBtn, 'ready');
+                    }, 2000);
+                }
+                if (this.uiRefs.statusText) {
+                    setStatusText(
+                        this.uiRefs.statusText,
+                        `${existingEntries.length} môn · Đã cập nhật`
+                    );
+                }
                 return;
             }
 
             const freshEntries = await fetchExamPlansByClassCodes(
-                allCodes,
+                [...targetCodes].reverse(),
                 (_batch, loaded, total) => {
                     if (this.uiRefs?.statusText) {
                         setStatusText(
@@ -296,18 +384,16 @@ export class ExamHelperFeature extends Feature<ExportExamStorage> {
                 }
             );
 
-            const existingOtherSemester = existingEntries.filter(
-                (e) => !e.classCode.startsWith(semesterId)
-            );
-            const merged = [...existingOtherSemester, ...freshEntries];
+            // Replace existing entries for target codes with fresh entries
+            const targetCodeSet = new Set(targetCodes);
+            const existingOther = existingEntries.filter((e) => !targetCodeSet.has(e.classCode));
+            const merged = [...existingOther, ...freshEntries];
 
             await this.storage.set('planEntries', merged);
             const now = new Date().toISOString();
             await this.storage.set('lastAutoUpdate', now);
 
-            this.log.i(
-                `Updated ${freshEntries.length} entries for semester ${semesterId}, total: ${merged.length}`
-            );
+            this.log.i(`Updated ${freshEntries.length} entries, total: ${merged.length}`);
 
             if (this.uiRefs.updateBtn) {
                 setUpdateBtnState(this.uiRefs.updateBtn, 'done');
