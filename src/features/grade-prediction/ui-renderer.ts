@@ -1,5 +1,5 @@
 import { GradeStore } from './grade-store';
-import { GRADE_COLORS, CREDITS_COLORS } from './config';
+import { GRADE_COLORS, CREDITS_COLORS, DEFAULT_NON_CREDIT_RULES_TEXT } from './config';
 import styles from './style.module.scss';
 
 const PREFIX = styles.cssPrefix;
@@ -8,6 +8,7 @@ export class UIRenderer {
     private store: GradeStore;
     private gridContainer: HTMLElement;
     private cardEl: HTMLElement | null = null;
+    private modalEl: HTMLElement | null = null;
     private unsubscribe: (() => void) | null = null;
 
     constructor(store: GradeStore, gridContainer: HTMLElement, _mainTable: HTMLTableElement) {
@@ -38,6 +39,7 @@ export class UIRenderer {
             this.unsubscribe = null;
         }
         this.cardEl?.remove();
+        this.modalEl?.remove();
     }
 
     /**
@@ -62,6 +64,10 @@ export class UIRenderer {
                     <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-primary" id="btn-toggle-edit" title="Bật/Tắt chế độ sửa điểm giả lập">
                         <span id="btn-edit-icon">✏️</span>
                         <span id="btn-edit-text">Giả lập</span>
+                    </button>
+                    <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="btn-open-rules-modal" title="Cấu hình danh sách môn không tính điểm (Non-credit)">
+                        <span>⚙️</span>
+                        <span>Môn loại trừ</span>
                     </button>
                     <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="btn-reset-edits" style="display: none;" title="Khôi phục toàn bộ điểm gốc">
                         <span>↺</span>
@@ -94,6 +100,11 @@ export class UIRenderer {
             this.store.toggleEditMode();
         });
 
+        const btnOpenRules = card.querySelector('#btn-open-rules-modal') as HTMLButtonElement;
+        btnOpenRules.addEventListener('click', () => {
+            this.openRulesModal();
+        });
+
         const btnReset = card.querySelector('#btn-reset-edits') as HTMLButtonElement;
         btnReset.addEventListener('click', () => {
             if (confirm('Bạn có chắc chắn muốn khôi phục lại toàn bộ điểm gốc?')) {
@@ -109,6 +120,118 @@ export class UIRenderer {
         this.gridContainer.appendChild(card);
         this.cardEl = card;
         this.updatePredictionCard();
+    }
+
+    /**
+     * Open or render the exclusion rules modal
+     */
+    private openRulesModal(): void {
+        if (!this.modalEl) {
+            this.renderRulesModal();
+        }
+
+        const textarea = this.modalEl?.querySelector(
+            `#${PREFIX}-textarea-rules`
+        ) as HTMLTextAreaElement | null;
+        if (textarea) {
+            textarea.value = this.store.nonCreditRules;
+        }
+
+        if (this.modalEl) {
+            this.modalEl.style.display = 'flex';
+            setTimeout(() => {
+                textarea?.focus();
+            }, 50);
+        }
+    }
+
+    /**
+     * Render the exclusion rules modal dialog
+     */
+    private renderRulesModal(): void {
+        this.modalEl?.remove();
+
+        const modalBackdrop = document.createElement('div');
+        modalBackdrop.className = `${PREFIX}-modal-backdrop`;
+        modalBackdrop.style.display = 'none';
+
+        modalBackdrop.innerHTML = `
+            <div class="${PREFIX}-modal">
+                <div class="${PREFIX}-modal-header">
+                    <div class="${PREFIX}-modal-title">
+                        <span>⚙️</span>
+                        <span>Quy tắc môn không tính GPA (Non-credit)</span>
+                    </div>
+                    <button type="button" class="${PREFIX}-modal-close" id="${PREFIX}-btn-close-rules" title="Đóng">✕</button>
+                </div>
+                <div class="${PREFIX}-modal-body">
+                    <div class="${PREFIX}-modal-guide">
+                        <div class="${PREFIX}-modal-guide-title">💡 Cú pháp thiết lập:</div>
+                        <ul class="${PREFIX}-modal-guide-list">
+                            <li>Mỗi dòng là 1 tiền tố / mã môn (VD: <code>PE</code>, <code>DC600</code>, <code>IC6005</code>).</li>
+                            <li>Dùng dấu <code>*</code> đại diện chuỗi ký tự bất kỳ (VD: <code>PE*</code>, <code>FL60*</code>, <code>FL*OT</code>).</li>
+                            <li>Dùng dấu <code>!</code> ở đầu để thêm <strong>NGOẠI LỆ</strong> tính điểm (VD: <code>!FL682</code>).</li>
+                            <li>Hỗ trợ Regex nâng cao (VD: <code>/^FL65\\d+/</code>).</li>
+                            <li>Dòng bắt đầu bằng <code>#</code> hoặc <code>//</code> là ghi chú.</li>
+                        </ul>
+                    </div>
+                    <textarea class="${PREFIX}-modal-textarea" id="${PREFIX}-textarea-rules" rows="12" spellcheck="false" placeholder="Nhập các quy tắc mã môn..."></textarea>
+                </div>
+                <div class="${PREFIX}-modal-footer">
+                    <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="${PREFIX}-btn-reset-rules" title="Khôi phục danh sách mặc định">
+                        <span>↺ Mặc định</span>
+                    </button>
+                    <div class="${PREFIX}-modal-footer-actions">
+                        <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="${PREFIX}-btn-cancel-rules">Hủy</button>
+                        <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-primary" id="${PREFIX}-btn-save-rules">
+                            <span>💾 Lưu cấu hình</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modalBackdrop);
+        this.modalEl = modalBackdrop;
+
+        const textarea = modalBackdrop.querySelector(
+            `#${PREFIX}-textarea-rules`
+        ) as HTMLTextAreaElement;
+        const btnClose = modalBackdrop.querySelector(`#${PREFIX}-btn-close-rules`) as HTMLElement;
+        const btnCancel = modalBackdrop.querySelector(`#${PREFIX}-btn-cancel-rules`) as HTMLElement;
+        const btnSave = modalBackdrop.querySelector(`#${PREFIX}-btn-save-rules`) as HTMLElement;
+        const btnReset = modalBackdrop.querySelector(`#${PREFIX}-btn-reset-rules`) as HTMLElement;
+
+        const closeModal = () => {
+            modalBackdrop.style.display = 'none';
+        };
+
+        btnClose.addEventListener('click', closeModal);
+        btnCancel.addEventListener('click', closeModal);
+
+        modalBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalBackdrop) {
+                closeModal();
+            }
+        });
+
+        modalBackdrop.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        btnReset.addEventListener('click', () => {
+            if (confirm('Bạn có chắc chắn muốn khôi phục danh sách quy tắc loại trừ mặc định?')) {
+                textarea.value = DEFAULT_NON_CREDIT_RULES_TEXT;
+            }
+        });
+
+        btnSave.addEventListener('click', () => {
+            const text = textarea.value.trim();
+            this.store.setNonCreditRules(text);
+            closeModal();
+        });
     }
 
     /**

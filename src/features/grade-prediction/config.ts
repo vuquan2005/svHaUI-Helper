@@ -26,18 +26,35 @@ export const SCORE4_TO_GRADE: Record<number, GradeLetter> = {
     0.0: 'F',
 };
 
-export const DEFAULT_NON_CREDIT_PATTERNS: (string | RegExp)[] = [
-    'PE60', // Giáo dục thể chất
-    'DC600', // Giáo dục quốc phòng
-    'IC6005', // Tin học cơ bản
-    'IC6006', // Tin học nâng cao KTXH
-    'IC6007', // Tin học nâng cao Kỹ thuật
-    /^FL60(91|92|93|94)/, // TA cơ khí cơ bản
-    'FL61',
-    'FL62',
-    /^FL65(?!82|83)\d{2}/, // Ngôn ngữ cơ bản từ K20, loại trừ FL682, FL683 tiếng Đức
-    /^FL\d+OT/, // Ôn tập ngôn ngữ
-];
+export const DEFAULT_NON_CREDIT_RULES_TEXT = `# --- QUY TẮC MÔN KHÔNG TÍNH GPA (HaUI) ---
+# Cú pháp:
+# - Nhập tiền tố/mã môn (VD: PE, DC, IC6005)
+# - Dùng * để đại diện chuỗi ký tự bất kỳ (VD: PE*, FL60*, FL*OT)
+# - Dùng ! ở đầu để thêm NGOẠI LỆ tính điểm (VD: !FL682)
+# - Hỗ trợ biểu thức chính quy Regex (VD: /^FL65\\d+/)
+# - Dòng có dấu # hoặc // ở đầu là ghi chú
+
+# Giáo dục thể chất
+PE*
+
+# Giáo dục quốc phòng
+DC*
+
+# Tin học cơ sở & nâng cao
+IC6005
+IC6006
+IC6007
+
+# Ngoại ngữ cơ bản & Ôn tập
+FL60*
+FL61*
+FL62*
+FL65*
+FL*OT
+
+# Ngoại lệ: Tiếng Đức cơ bản vẫn tính tín chỉ
+!FL682
+!FL683`;
 
 export const CREDITS_COLORS: Record<string, string> = {
     '5.0': '#d946ef', // 5 tín - Hồng fuchsia

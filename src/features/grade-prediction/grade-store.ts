@@ -3,8 +3,13 @@
  */
 
 import { CourseGradeRow, GPAPredictionResult } from './types';
-import { calculateFullPrediction, normalizeGradeInput } from './grade-calculator';
-import { DEFAULT_TOTAL_CREDITS } from './config';
+import {
+    calculateFullPrediction,
+    normalizeGradeInput,
+    isNonCreditCourse,
+    toggleCourseInRules,
+} from './grade-calculator';
+import { DEFAULT_TOTAL_CREDITS, DEFAULT_NON_CREDIT_RULES_TEXT } from './config';
 
 export type StoreListener = (store: GradeStore) => void;
 
@@ -13,6 +18,7 @@ export class GradeStore {
     private _isEditMode: boolean = false;
     private _totalTargetCredits: number = DEFAULT_TOTAL_CREDITS;
     private _customTargetGPA: number = 3.0;
+    private _nonCreditRules: string = DEFAULT_NON_CREDIT_RULES_TEXT;
     private _listeners: Set<StoreListener> = new Set();
 
     get rows(): readonly CourseGradeRow[] {
@@ -29,6 +35,10 @@ export class GradeStore {
 
     get customTargetGPA(): number {
         return this._customTargetGPA;
+    }
+
+    get nonCreditRules(): string {
+        return this._nonCreditRules;
     }
 
     get isEdited(): boolean {
@@ -64,7 +74,12 @@ export class GradeStore {
     /**
      * Initialize store with parsed rows
      */
-    setRows(rows: CourseGradeRow[], totalTargetCredits?: number, customTargetGPA?: number): void {
+    setRows(
+        rows: CourseGradeRow[],
+        totalTargetCredits?: number,
+        customTargetGPA?: number,
+        nonCreditRules?: string
+    ): void {
         this._rows = rows;
         if (totalTargetCredits && totalTargetCredits > 0) {
             this._totalTargetCredits = totalTargetCredits;
@@ -72,6 +87,24 @@ export class GradeStore {
         if (customTargetGPA && customTargetGPA > 0) {
             this._customTargetGPA = Number(customTargetGPA.toFixed(2));
         }
+        if (nonCreditRules !== undefined && nonCreditRules.trim() !== '') {
+            this._nonCreditRules = nonCreditRules;
+            // Apply rules to all rows
+            this._rows.forEach((r) => {
+                r.isNonCredit = isNonCreditCourse(r.courseCode, this._nonCreditRules);
+            });
+        }
+        this.notify();
+    }
+
+    /**
+     * Update custom non-credit rules text and re-apply to all rows
+     */
+    setNonCreditRules(rulesText: string): void {
+        this._nonCreditRules = rulesText;
+        this._rows.forEach((r) => {
+            r.isNonCredit = isNonCreditCourse(r.courseCode, this._nonCreditRules);
+        });
         this.notify();
     }
 
@@ -155,13 +188,23 @@ export class GradeStore {
     }
 
     /**
-     * Toggle a course's non-credit status
+     * Toggle a course's non-credit status and automatically remember/sync in rules
      */
     toggleCourseNonCredit(rowId: string): void {
         const row = this._rows.find((r) => r.id === rowId);
         if (!row) return;
 
-        row.isNonCredit = !row.isNonCredit;
+        this._nonCreditRules = toggleCourseInRules(
+            this._nonCreditRules,
+            row.courseCode,
+            row.isNonCredit
+        );
+
+        // Re-evaluate all rows with the updated rules
+        this._rows.forEach((r) => {
+            r.isNonCredit = isNonCreditCourse(r.courseCode, this._nonCreditRules);
+        });
+
         this.notify();
     }
 
