@@ -8,7 +8,7 @@ import { GradePredictionStorage } from './types';
 import { parseGradeTable } from './table-parser';
 import { GradeStore } from './grade-store';
 import { UIRenderer } from './ui-renderer';
-import { DEFAULT_TOTAL_CREDITS } from './config';
+import { DEFAULT_TOTAL_CREDITS, DEFAULT_NON_CREDIT_RULES_TEXT } from './config';
 
 const URL_PATTERNS = [
     { name: 'personal-exam', pattern: /^\/student\/result\/examresult/ },
@@ -69,19 +69,29 @@ export class GradePredictionFeature extends Feature<GradePredictionStorage> {
     private async initFeature(parseResult: ReturnType<typeof parseGradeTable>): Promise<void> {
         if (!parseResult.gridContainer || !parseResult.mainTable) return;
 
-        const savedCredits = await this.storage.get('defaultTotalCredits', DEFAULT_TOTAL_CREDITS);
-        const savedCustomTarget = await this.storage.get('customTargetGPA', 3.0);
+        let savedCredits = await this.storage.get('defaultTotalCredits', DEFAULT_TOTAL_CREDITS);
+        let savedCustomTarget = await this.storage.get('customTargetGPA', 3.0);
+        let savedRules = await this.storage.get(
+            'customNonCreditRules',
+            DEFAULT_NON_CREDIT_RULES_TEXT
+        );
 
         this.store = new GradeStore();
-        this.store.setRows(parseResult.rows, savedCredits, savedCustomTarget);
+        this.store.setRows(parseResult.rows, savedCredits, savedCustomTarget, savedRules);
 
-        // Persist total target credits & custom target GPA changes
+        // Persist total target credits, custom target GPA, and non-credit rules
         this.store.subscribe((store) => {
             if (store.totalTargetCredits !== savedCredits) {
+                savedCredits = store.totalTargetCredits;
                 void this.storage.set('defaultTotalCredits', store.totalTargetCredits);
             }
             if (store.customTargetGPA !== savedCustomTarget) {
+                savedCustomTarget = store.customTargetGPA;
                 void this.storage.set('customTargetGPA', store.customTargetGPA);
+            }
+            if (store.nonCreditRules !== savedRules) {
+                savedRules = store.nonCreditRules;
+                void this.storage.set('customNonCreditRules', store.nonCreditRules);
             }
         });
 

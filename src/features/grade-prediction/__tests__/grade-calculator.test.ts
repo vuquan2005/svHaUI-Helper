@@ -1,14 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import {
     isNonCreditCourse,
+    toggleCourseInRules,
     normalizeGradeInput,
     calculateGPASummary,
     calculateTargets,
 } from '../grade-calculator';
 
 describe('Grade Calculator', () => {
-    describe('isNonCreditCourse', () => {
-        it('should identify PE (Thể chất) as non-credit', () => {
+    describe('isNonCreditCourse & Rules Syntax', () => {
+        it('should identify PE (Thể chất) as non-credit with default rules', () => {
             expect(isNonCreditCourse('PE6001')).toBe(true);
             expect(isNonCreditCourse('pe6012')).toBe(true);
         });
@@ -30,7 +31,57 @@ describe('Grade Calculator', () => {
         it('should not mark credit-bearing courses as non-credit', () => {
             expect(isNonCreditCourse('IT6005')).toBe(false);
             expect(isNonCreditCourse('MA6001')).toBe(false);
-            expect(isNonCreditCourse('FL682')).toBe(false); // German exempt
+            expect(isNonCreditCourse('FL682')).toBe(false); // German exempt (!FL682)
+            expect(isNonCreditCourse('FL683')).toBe(false); // German exempt (!FL683)
+        });
+
+        it('should parse custom simple rules with comments and wildcards', () => {
+            const customRules = `
+                # My custom exclusions
+                CS*
+                MATH101
+                !CS999 # Exception
+            `;
+            expect(isNonCreditCourse('CS101', customRules)).toBe(true);
+            expect(isNonCreditCourse('CS202', customRules)).toBe(true);
+            expect(isNonCreditCourse('CS999', customRules)).toBe(false); // Overridden by !
+            expect(isNonCreditCourse('MATH101', customRules)).toBe(true);
+            expect(isNonCreditCourse('MATH102', customRules)).toBe(false);
+        });
+    });
+
+    describe('toggleCourseInRules', () => {
+        it('should add !CODE exception when enabling credits for a pattern-matched course', () => {
+            const rules = 'PE*\nDC*';
+            // PE6001 is non-credit (matches PE*). User clicks to ENABLE credits (currentlyNonCredit = true).
+            const updated = toggleCourseInRules(rules, 'PE6001', true);
+            expect(isNonCreditCourse('PE6001', updated)).toBe(false);
+            expect(isNonCreditCourse('PE6002', updated)).toBe(true); // Other PE remains non-credit
+            expect(updated).toContain('!PE6001');
+        });
+
+        it('should remove !CODE exception when disabling credits again', () => {
+            const rules = 'PE*\nDC*\n!PE6001';
+            // PE6001 is currently credit (currentlyNonCredit = false). User clicks to DISABLE credits.
+            const updated = toggleCourseInRules(rules, 'PE6001', false);
+            expect(isNonCreditCourse('PE6001', updated)).toBe(true);
+            expect(updated).not.toContain('!PE6001');
+        });
+
+        it('should add explicit CODE when making a normal course non-credit', () => {
+            const rules = 'PE*\nDC*';
+            // IT6001 is credit (currentlyNonCredit = false). User clicks to DISABLE credits.
+            const updated = toggleCourseInRules(rules, 'IT6001', false);
+            expect(isNonCreditCourse('IT6001', updated)).toBe(true);
+            expect(updated).toContain('IT6001');
+        });
+
+        it('should remove explicit CODE when making it credit again', () => {
+            const rules = 'PE*\nDC*\nIT6001';
+            // IT6001 is currently non-credit. User clicks to ENABLE credits (currentlyNonCredit = true).
+            const updated = toggleCourseInRules(rules, 'IT6001', true);
+            expect(isNonCreditCourse('IT6001', updated)).toBe(false);
+            expect(updated).not.toContain('IT6001');
         });
     });
 

@@ -53,7 +53,10 @@ export interface ParseResult {
 /**
  * Parse HaUI grade table in DOM
  */
-export function parseGradeTable(container: HTMLElement | Document = document): ParseResult {
+export function parseGradeTable(
+    container: HTMLElement | Document = document,
+    rulesText?: string
+): ParseResult {
     const gridContainer = (container.querySelector('div.kGrid') ||
         container.querySelector('#frmMain')) as HTMLElement | null;
 
@@ -131,7 +134,7 @@ export function parseGradeTable(container: HTMLElement | Document = document): P
             }
         }
 
-        const nonCredit = isNonCreditCourse(courseCode);
+        const nonCredit = isNonCreditCourse(courseCode, rulesText);
 
         const indexCell = cells[0] as HTMLTableCellElement;
 
