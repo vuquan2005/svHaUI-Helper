@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.11.0...v2.12.0) (2026-08-25)
+
+
+### Features
+
+* **grade-prediction:** add simple rule syntax  for non-credit ([#96](https://github.com/vuquan2005/svHaUI-Helper/issues/96)) ([b0b42a3](https://github.com/vuquan2005/svHaUI-Helper/commit/b0b42a3f2421b2a939882dc940c1c21ab0055d74))
+
 ## [2.11.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.10.0...v2.11.0) (2026-08-23)
 
 

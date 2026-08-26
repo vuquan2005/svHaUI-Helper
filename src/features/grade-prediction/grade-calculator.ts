@@ -11,34 +11,198 @@ import {
 } from './types';
 import {
     SCORE4_TO_GRADE,
-    DEFAULT_NON_CREDIT_PATTERNS,
+    DEFAULT_NON_CREDIT_RULES_TEXT,
     TARGET_GPA_CONFIGS,
     getAcademicClassification,
 } from './config';
 
+export interface RuleMatcher {
+    raw: string;
+    type: 'regex' | 'glob' | 'prefix';
+    regex?: RegExp;
+    prefix?: string;
+}
+
+export interface ParsedRules {
+    excludes: RuleMatcher[];
+    includes: RuleMatcher[];
+}
+
 /**
- * Check if a course code belongs to non-credit category (GDTC, GDQP, etc.)
+ * Compile a single pattern line into a RuleMatcher
+ */
+export function compileRulePattern(pattern: string): RuleMatcher | null {
+    const trimmed = pattern.trim();
+    if (!trimmed) return null;
+
+    // Check if regex: e.g. /^FL65(?!82|83)/i or /pattern/flags
+    if (trimmed.startsWith('/') && trimmed.lastIndexOf('/') > 0) {
+        const lastSlash = trimmed.lastIndexOf('/');
+        const patternStr = trimmed.slice(1, lastSlash);
+        const flags = trimmed.slice(lastSlash + 1);
+        try {
+            return {
+                raw: trimmed,
+                type: 'regex',
+                regex: new RegExp(patternStr, flags || 'i'),
+            };
+        } catch {
+            // fallback
+        }
+    }
+
+    // Check if glob (contains * or ?)
+    if (trimmed.includes('*') || trimmed.includes('?')) {
+        const escaped = trimmed.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+        const regexStr = '^' + escaped.replace(/\*/g, '.*').replace(/\?/g, '.') + '$';
+        return {
+            raw: trimmed,
+            type: 'glob',
+            regex: new RegExp(regexStr, 'i'),
+        };
+    }
+
+    // Default: prefix matching (case-insensitive)
+    return {
+        raw: trimmed,
+        type: 'prefix',
+        prefix: trimmed.toUpperCase(),
+    };
+}
+
+/**
+ * Match courseCode against a RuleMatcher
+ */
+export function matchRule(courseCode: string, matcher: RuleMatcher): boolean {
+    const code = courseCode.trim().toUpperCase();
+    if (!code) return false;
+
+    if (matcher.type === 'regex' || matcher.type === 'glob') {
+        return matcher.regex ? matcher.regex.test(code) : false;
+    }
+
+    if (matcher.type === 'prefix' && matcher.prefix) {
+        return code.startsWith(matcher.prefix);
+    }
+
+    return false;
+}
+
+/**
+ * Parse multiline rules text into structured excludes and includes matchers
+ */
+export function parseNonCreditRules(rulesText: string): ParsedRules {
+    const excludes: RuleMatcher[] = [];
+    const includes: RuleMatcher[] = [];
+
+    const lines = rulesText.split('\n');
+    for (const rawLine of lines) {
+        let cleanLine = rawLine.trim();
+        // Strip comments unless it's a regex /.../
+        if (!cleanLine.startsWith('/')) {
+            cleanLine = cleanLine
+                .replace(/#.*$/, '')
+                .replace(/\/\/.*$/, '')
+                .trim();
+        }
+        if (!cleanLine) {
+            continue;
+        }
+
+        if (cleanLine.startsWith('!')) {
+            const pat = cleanLine.slice(1).trim();
+            const matcher = compileRulePattern(pat);
+            if (matcher) includes.push(matcher);
+        } else {
+            const matcher = compileRulePattern(cleanLine);
+            if (matcher) excludes.push(matcher);
+        }
+    }
+
+    return { excludes, includes };
+}
+
+/**
+ * Check if a course code belongs to non-credit category based on rules
  */
 export function isNonCreditCourse(
     courseCode: string,
-    patterns: (string | RegExp)[] = DEFAULT_NON_CREDIT_PATTERNS
+    rules: string | ParsedRules = DEFAULT_NON_CREDIT_RULES_TEXT
 ): boolean {
     const code = courseCode.trim().toUpperCase();
     if (!code) return false;
 
-    for (const pattern of patterns) {
-        if (typeof pattern === 'string') {
-            if (code.startsWith(pattern.toUpperCase())) {
-                return true;
-            }
-        } else if (pattern instanceof RegExp) {
-            if (pattern.test(code)) {
-                return true;
-            }
+    const parsed: ParsedRules = typeof rules === 'string' ? parseNonCreditRules(rules) : rules;
+
+    // 1. Check if explicitly included / exception
+    for (const inc of parsed.includes) {
+        if (matchRule(code, inc)) {
+            return false;
+        }
+    }
+
+    // 2. Check if matches any exclusion
+    for (const exc of parsed.excludes) {
+        if (matchRule(code, exc)) {
+            return true;
         }
     }
 
     return false;
+}
+
+/**
+ * Symmetrically toggle a course code in the rules text (remember inclusion or exclusion)
+ */
+export function toggleCourseInRules(
+    rulesText: string,
+    courseCode: string,
+    currentlyNonCredit: boolean
+): string {
+    const code = courseCode.trim().toUpperCase();
+    if (!code) return rulesText;
+
+    const lines = rulesText.split('\n');
+
+    if (currentlyNonCredit) {
+        // User wants to ENABLE credits (turn off non-credit)
+        // 1. Remove exact exclusion line for this code
+        const filteredLines = lines.filter((line) => {
+            const trimmed = line.trim().toUpperCase();
+            return trimmed !== code;
+        });
+
+        // 2. Check if remaining rules still exclude this course
+        const remainingText = filteredLines.join('\n');
+        const stillNonCredit = isNonCreditCourse(code, remainingText);
+
+        if (stillNonCredit) {
+            const hasInclude = filteredLines.some((l) => l.trim().toUpperCase() === `!${code}`);
+            if (!hasInclude) {
+                filteredLines.push(`!${code}`);
+            }
+        }
+        return filteredLines.join('\n');
+    } else {
+        // User wants to DISABLE credits (turn on non-credit)
+        // 1. Remove exact exception line for this code
+        const filteredLines = lines.filter((line) => {
+            const trimmed = line.trim().toUpperCase();
+            return trimmed !== `!${code}`;
+        });
+
+        // 2. Check if remaining rules already exclude this course
+        const remainingText = filteredLines.join('\n');
+        const isNonCredit = isNonCreditCourse(code, remainingText);
+
+        if (!isNonCredit) {
+            const hasExclude = filteredLines.some((l) => l.trim().toUpperCase() === code);
+            if (!hasExclude) {
+                filteredLines.push(code);
+            }
+        }
+        return filteredLines.join('\n');
+    }
 }
 
 /**

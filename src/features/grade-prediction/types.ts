@@ -56,5 +56,5 @@ export interface GPAPredictionResult {
 export interface GradePredictionStorage extends Record<string, unknown> {
     defaultTotalCredits?: number;
     customTargetGPA?: number;
-    customNonCreditPrefixes?: string[];
+    customNonCreditRules?: string;
 }
