@@ -1,5 +1,6 @@
 import { GradeStore } from './grade-store';
 import { GRADE_COLORS, CREDITS_COLORS, DEFAULT_NON_CREDIT_RULES_TEXT } from './config';
+import { analyzeRetakenCourses } from './grade-calculator';
 import styles from './style.module.scss';
 
 const PREFIX = styles.cssPrefix;
@@ -504,12 +505,40 @@ export class UIRenderer {
     private updateTableCells(): void {
         const isEditMode = this.store.isEditMode;
 
+        const retakenMap = analyzeRetakenCourses(
+            this.store.rows.map((r) => ({
+                id: r.id,
+                courseCode: r.courseCode,
+                score4: r.currentScore4,
+                isNonCredit: r.isNonCredit,
+            }))
+        );
+
         this.store.rows.forEach((row) => {
+            const retakenStatus = retakenMap.get(row.id);
+            const isSuperseded = retakenStatus?.isSuperseded ?? false;
+            const isImproved = retakenStatus?.isImproved ?? false;
+            row.isSuperseded = isSuperseded;
+            row.isImproved = isImproved;
+
             // Selection row styling
             if (row.isSelected) {
                 row.element.classList.add(`${PREFIX}-row-selected`);
             } else {
                 row.element.classList.remove(`${PREFIX}-row-selected`);
+            }
+
+            // Retaken / Superseded row styling (dimmed text + credit & grade strike-through)
+            if (isSuperseded && !row.isNonCredit) {
+                row.element.classList.add(`${PREFIX}-row-superseded`);
+                row.creditCell.classList.add(`${PREFIX}-cell-superseded`);
+                row.score4Cell.classList.add(`${PREFIX}-cell-superseded`);
+                row.gradeCell.classList.add(`${PREFIX}-cell-superseded`);
+            } else {
+                row.element.classList.remove(`${PREFIX}-row-superseded`);
+                row.creditCell.classList.remove(`${PREFIX}-cell-superseded`);
+                row.score4Cell.classList.remove(`${PREFIX}-cell-superseded`);
+                row.gradeCell.classList.remove(`${PREFIX}-cell-superseded`);
             }
 
             // 1. Credit cell & non-credit row dimming
@@ -546,11 +575,18 @@ export class UIRenderer {
                     row.gradeCell.style.color = '';
                     row.gradeCell.style.fontWeight = '';
                 }
+
+                if (isImproved && !row.isNonCredit) {
+                    row.gradeCell.classList.add(`${PREFIX}-grade-improved`);
+                } else {
+                    row.gradeCell.classList.remove(`${PREFIX}-grade-improved`);
+                }
             } else {
                 row.gradeCell.textContent = '';
                 row.gradeCell.style.backgroundColor = '';
                 row.gradeCell.style.color = '';
                 row.gradeCell.style.fontWeight = '';
+                row.gradeCell.classList.remove(`${PREFIX}-grade-improved`);
             }
 
             // 3. Score4 cell update
@@ -560,12 +596,10 @@ export class UIRenderer {
                 row.score4Cell.textContent = '';
             }
 
-            // 4. Edited indicator
+            // 4. Edited indicator (yellow background on score4Cell, no dot on gradeCell)
             if (row.isEdited) {
-                row.gradeCell.classList.add(`${PREFIX}-cell-edited`);
                 row.score4Cell.classList.add(`${PREFIX}-score4-edited`);
             } else {
-                row.gradeCell.classList.remove(`${PREFIX}-cell-edited`);
                 row.score4Cell.classList.remove(`${PREFIX}-score4-edited`);
             }
 

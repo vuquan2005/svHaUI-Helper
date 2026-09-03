@@ -108,7 +108,7 @@ $prefix: sv-grade-pred;
     &-cell-editable {
       cursor: pointer;
       transition: filter 0.15s ease;
-      text-decoration: none !important;
+      text-decoration: none;
 
       &:hover {
         filter: brightness(0.93);
@@ -123,23 +123,44 @@ $prefix: sv-grade-pred;
       }
     }
 
-    &-cell-edited {
-      position: relative;
-
-      &::after {
-        content: '●';
-        position: absolute;
-        top: 2px;
-        right: 4px;
-        font-size: 8px;
-        color: #f59e0b;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
-      }
-    }
-
     &-score4-edited {
       background-color: #fef3c7 !important;
       color: #92400e !important;
+    }
+
+    /* Retaken / Improved course styling */
+    &-row-superseded {
+      // Keep tr opacity at 1 to prevent breaking table cell borders in border-collapse: collapse
+      color: #64748b;
+
+      td:not(.#{$prefix}-credit-badge) {
+        color: #94a3b8;
+      }
+    }
+
+    &-cell-superseded {
+      text-decoration: line-through !important;
+      text-decoration-thickness: 1.5px !important;
+
+      input {
+        text-decoration: none !important;
+      }
+    }
+
+    &-grade-improved {
+      position: relative;
+
+      &::before {
+        content: '↑';
+        position: absolute;
+        top: 1px;
+        right: 3px;
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.95);
+        pointer-events: none;
+      }
     }
 
     /* Main UI Card */

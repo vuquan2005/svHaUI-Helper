@@ -206,7 +206,8 @@ export function toggleCourseInRules(
 }
 
 /**
- * Normalize arbitrary user grade input (letter, number, diacritics) into a valid GradeLetter and score4
+ * Normalize arbitrary user grade input (letter, number, diacritics) into a valid GradeLetter and score4.
+ * Designed to be lenient and fast for quick typing in the small table cell.
  */
 export function normalizeGradeInput(
     rawInput: string
@@ -220,30 +221,39 @@ export function normalizeGradeInput(
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/Đ/g, 'D');
 
-    // Handle number inputs (e.g., "4", "4.0", "3.5", "3", "2.5", "2", "1.5", "1", "0")
-    const numericMatch = text.match(/^(\d+(?:\.\d+)?)$/);
+    // Strip leading text if user pasted or prefixed anything before the grade letter (e.g. "Điểm: B+" -> "B+")
+    text = text.replace(/.+(?=[ABCDF].*)/, '');
+    text = text.replace(/\s+/g, '');
+
+    // 1. Handle letter grades: A, B, B+, C, C+, D, D+, F (lenient matching for fast keyboard typing)
+    if (/^[ABCDF]/.test(text)) {
+        if (text.startsWith('A')) return { grade: 'A', score4: 4.0 };
+        if (text === 'B') return { grade: 'B', score4: 3.0 };
+        if (text.startsWith('B')) return { grade: 'B+', score4: 3.5 };
+        if (text === 'C') return { grade: 'C', score4: 2.0 };
+        if (text.startsWith('C')) return { grade: 'C+', score4: 2.5 };
+        if (text === 'D' || text === 'DD') return { grade: 'D', score4: 1.0 };
+        if (text.startsWith('D')) return { grade: 'D+', score4: 1.5 };
+        if (text.startsWith('F')) return { grade: 'F', score4: 0.0 };
+    }
+
+    // 2. Handle number inputs (support comma, 2-digit shortcuts e.g. "35" -> 3.5, "40" -> 4.0)
+    const normalizedNum = text.replace(',', '.');
+    const numericMatch = normalizedNum.match(/^(\d+(?:\.\d+)?)$/);
     if (numericMatch) {
-        const num = parseFloat(numericMatch[1]);
+        let num = parseFloat(numericMatch[1]);
+
+        // Shorthand for 2-digit typing without decimal point: 35 -> 3.5, 25 -> 2.5, 15 -> 1.5, 40 -> 4.0, 30 -> 3.0, 20 -> 2.0
+        if (num >= 15 && num <= 40 && num % 5 === 0) {
+            num = num / 10;
+        }
+
         const rounded = Math.round(num * 2) / 2;
         if (rounded in SCORE4_TO_GRADE) {
             const letter = SCORE4_TO_GRADE[rounded];
             return { grade: letter, score4: rounded };
         }
     }
-
-    // Handle letter inputs (e.g., "A", "B+", "B", "C+", "C", "D+", "D", "F")
-    text = text.replace(/\s+/g, '');
-    if (text.startsWith('A')) return { grade: 'A', score4: 4.0 };
-    if (text.startsWith('B+') || text.startsWith('BPLUS') || text === 'B+')
-        return { grade: 'B+', score4: 3.5 };
-    if (text === 'B') return { grade: 'B', score4: 3.0 };
-    if (text.startsWith('C+') || text.startsWith('CPLUS') || text === 'C+')
-        return { grade: 'C+', score4: 2.5 };
-    if (text === 'C') return { grade: 'C', score4: 2.0 };
-    if (text.startsWith('D+') || text.startsWith('DPLUS') || text === 'D+')
-        return { grade: 'D+', score4: 1.5 };
-    if (text === 'D') return { grade: 'D', score4: 1.0 };
-    if (text.startsWith('F')) return { grade: 'F', score4: 0.0 };
 
     return null;
 }
@@ -470,4 +480,81 @@ export function calculateFullPrediction(
         remainingCredits,
         targets,
     };
+}
+
+export interface RetakenCourseStatus {
+    isSuperseded: boolean;
+    isImproved: boolean;
+}
+
+export interface RetakenAnalysisItem {
+    id: string;
+    courseCode: string;
+    score4: number | null;
+    isNonCredit: boolean;
+}
+
+/**
+ * Analyze courses to identify retaken/improved attempts:
+ * - isSuperseded: An older or lower-scoring attempt whose credits/grade are replaced by another attempt.
+ * - isImproved: A winning attempt that improved upon an earlier lower score for the same course.
+ */
+export function analyzeRetakenCourses(
+    courses: RetakenAnalysisItem[]
+): Map<string, RetakenCourseStatus> {
+    const result = new Map<string, RetakenCourseStatus>();
+
+    // Default all to false
+    courses.forEach((c) => {
+        result.set(c.id, { isSuperseded: false, isImproved: false });
+    });
+
+    // Group eligible credit-bearing courses with courseCode
+    const groups = new Map<string, RetakenAnalysisItem[]>();
+    for (const c of courses) {
+        if (c.isNonCredit) continue;
+        const code = c.courseCode.trim().toUpperCase();
+        if (!code) continue;
+
+        const group = groups.get(code) || [];
+        group.push(c);
+        groups.set(code, group);
+    }
+
+    for (const group of groups.values()) {
+        if (group.length <= 1) continue;
+
+        // Find attempts that have valid score4
+        const scoredAttempts = group.filter((item) => item.score4 !== null && !isNaN(item.score4));
+        if (scoredAttempts.length <= 1) continue;
+
+        // Find the maximum score among attempts
+        let maxScore = -1;
+        for (const item of scoredAttempts) {
+            if (item.score4! > maxScore) {
+                maxScore = item.score4!;
+            }
+        }
+
+        // Determine winning attempt (consistent with calculateGPASummary: first with maxScore)
+        const winningIndex = scoredAttempts.findIndex((item) => item.score4 === maxScore);
+
+        // An attempt is improved if it is the winning attempt AND there was an earlier scored attempt with a lower score
+        const hasEarlierLowerScore = scoredAttempts
+            .slice(0, winningIndex)
+            .some((item) => item.score4! < maxScore);
+
+        for (let i = 0; i < scoredAttempts.length; i++) {
+            const item = scoredAttempts[i];
+            if (i === winningIndex) {
+                if (hasEarlierLowerScore) {
+                    result.set(item.id, { isSuperseded: false, isImproved: true });
+                }
+            } else {
+                result.set(item.id, { isSuperseded: true, isImproved: false });
+            }
+        }
+    }
+
+    return result;
 }
