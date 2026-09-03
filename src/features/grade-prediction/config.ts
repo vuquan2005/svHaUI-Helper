@@ -57,14 +57,18 @@ FL*OT
 !FL683`;
 
 export const CREDITS_COLORS: Record<string, string> = {
-    '5.0': '#d946ef', // 5 tín - Hồng fuchsia
-    '5': '#d946ef',
-    '4.0': '#ef4444', // 4 tín - Đỏ tươi
-    '4': '#ef4444',
-    '3.0': '#f59e0b', // 3 tín - Cam hổ phách
-    '3': '#f59e0b',
-    '2.0': '#06b6d4', // 2 tín - Xanh cyan
-    '2': '#06b6d4',
+    '9.0': '#fb923c', // 9 tín - Đồ án tốt nghiệp (Cam sáng dịu)
+    '9': '#fb923c',
+    '6.0': '#f472b6', // 6 tín - Thực tập tốt nghiệp (Hồng sáng dịu)
+    '6': '#f472b6',
+    '5.0': '#c084fc', // 5 tín - Tím sáng dịu
+    '5': '#c084fc',
+    '4.0': '#818cf8', // 4 tín - Tím chàm sáng dịu
+    '4': '#818cf8',
+    '3.0': '#60a5fa', // 3 tín - Xanh dương sáng dịu
+    '3': '#60a5fa',
+    '2.0': '#14b8a6', // 2 tín - Xanh ngọc lam sáng dịu
+    '2': '#14b8a6',
     '1.0': '#10b981', // 1 tín - Xanh lục ngọc
     '1': '#10b981',
 };

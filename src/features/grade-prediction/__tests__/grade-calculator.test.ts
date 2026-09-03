@@ -5,6 +5,7 @@ import {
     normalizeGradeInput,
     calculateGPASummary,
     calculateTargets,
+    analyzeRetakenCourses,
 } from '../grade-calculator';
 
 describe('Grade Calculator', () => {
@@ -118,6 +119,35 @@ describe('Grade Calculator', () => {
             expect(normalizeGradeInput('-1')).toBeNull();
             expect(normalizeGradeInput('')).toBeNull();
         });
+
+        it('should support lenient letter inputs and shortcuts', () => {
+            expect(normalizeGradeInput('a+')).toEqual({ grade: 'A', score4: 4.0 });
+            expect(normalizeGradeInput('b.')).toEqual({ grade: 'B+', score4: 3.5 });
+            expect(normalizeGradeInput('b,')).toEqual({ grade: 'B+', score4: 3.5 });
+            expect(normalizeGradeInput('b1')).toEqual({ grade: 'B+', score4: 3.5 });
+            expect(normalizeGradeInput('c.')).toEqual({ grade: 'C+', score4: 2.5 });
+            expect(normalizeGradeInput('c1')).toEqual({ grade: 'C+', score4: 2.5 });
+            expect(normalizeGradeInput('d.')).toEqual({ grade: 'D+', score4: 1.5 });
+            expect(normalizeGradeInput('dd')).toEqual({ grade: 'D', score4: 1.0 });
+            expect(normalizeGradeInput('đ')).toEqual({ grade: 'D', score4: 1.0 });
+            expect(normalizeGradeInput('đ+')).toEqual({ grade: 'D+', score4: 1.5 });
+            expect(normalizeGradeInput('Điểm A')).toEqual({ grade: 'A', score4: 4.0 });
+            expect(normalizeGradeInput('Môn B+')).toEqual({ grade: 'B+', score4: 3.5 });
+        });
+
+        it('should support comma and 2-digit shorthand numbers', () => {
+            expect(normalizeGradeInput('3,5')).toEqual({ grade: 'B+', score4: 3.5 });
+            expect(normalizeGradeInput('2,5')).toEqual({ grade: 'C+', score4: 2.5 });
+            expect(normalizeGradeInput('1,5')).toEqual({ grade: 'D+', score4: 1.5 });
+            expect(normalizeGradeInput('4,0')).toEqual({ grade: 'A', score4: 4.0 });
+            expect(normalizeGradeInput('0,0')).toEqual({ grade: 'F', score4: 0.0 });
+            expect(normalizeGradeInput('35')).toEqual({ grade: 'B+', score4: 3.5 });
+            expect(normalizeGradeInput('25')).toEqual({ grade: 'C+', score4: 2.5 });
+            expect(normalizeGradeInput('15')).toEqual({ grade: 'D+', score4: 1.5 });
+            expect(normalizeGradeInput('40')).toEqual({ grade: 'A', score4: 4.0 });
+            expect(normalizeGradeInput('30')).toEqual({ grade: 'B', score4: 3.0 });
+            expect(normalizeGradeInput('20')).toEqual({ grade: 'C', score4: 2.0 });
+        });
     });
 
     describe('calculateGPASummary', () => {
@@ -218,6 +248,66 @@ describe('Grade Calculator', () => {
             expect(updated.gpa).toBe(3.6); // (12 + 6) / 5 = 3.6
             expect(updated.totalAccumulatedCredits).toBe(5);
             expect(updated.courseCount).toBe(2);
+        });
+    });
+
+    describe('analyzeRetakenCourses', () => {
+        it('should not mark single courses as superseded or improved', () => {
+            const courses = [
+                { id: '1', courseCode: 'IT6001', score4: 3.5, isNonCredit: false },
+                { id: '2', courseCode: 'IT6002', score4: 4.0, isNonCredit: false },
+            ];
+            const result = analyzeRetakenCourses(courses);
+            expect(result.get('1')).toEqual({ isSuperseded: false, isImproved: false });
+            expect(result.get('2')).toEqual({ isSuperseded: false, isImproved: false });
+        });
+
+        it('should correctly mark retaken courses with improved grade', () => {
+            const courses = [
+                { id: 'old-1', courseCode: 'IT6001', score4: 1.0, isNonCredit: false }, // D
+                { id: 'new-1', courseCode: 'IT6001', score4: 3.5, isNonCredit: false }, // B+
+                { id: 'other', courseCode: 'IT6002', score4: 3.0, isNonCredit: false },
+            ];
+            const result = analyzeRetakenCourses(courses);
+            expect(result.get('old-1')).toEqual({ isSuperseded: true, isImproved: false });
+            expect(result.get('new-1')).toEqual({ isSuperseded: false, isImproved: true });
+            expect(result.get('other')).toEqual({ isSuperseded: false, isImproved: false });
+        });
+
+        it('should handle retakes with lower or equal grade', () => {
+            const courses = [
+                { id: 'attempt-1', courseCode: 'IT6001', score4: 3.0, isNonCredit: false }, // B
+                { id: 'attempt-2', courseCode: 'IT6001', score4: 2.0, isNonCredit: false }, // C (lower)
+            ];
+            const result = analyzeRetakenCourses(courses);
+            expect(result.get('attempt-1')).toEqual({ isSuperseded: false, isImproved: false });
+            expect(result.get('attempt-2')).toEqual({ isSuperseded: true, isImproved: false });
+        });
+
+        it('should handle multiple retakes across 3 attempts', () => {
+            const courses = [
+                { id: 'attempt-1', courseCode: 'IT6001', score4: 0.0, isNonCredit: false }, // F
+                { id: 'attempt-2', courseCode: 'IT6001', score4: 1.0, isNonCredit: false }, // D
+                { id: 'attempt-3', courseCode: 'IT6001', score4: 4.0, isNonCredit: false }, // A
+            ];
+            const result = analyzeRetakenCourses(courses);
+            expect(result.get('attempt-1')).toEqual({ isSuperseded: true, isImproved: false });
+            expect(result.get('attempt-2')).toEqual({ isSuperseded: true, isImproved: false });
+            expect(result.get('attempt-3')).toEqual({ isSuperseded: false, isImproved: true });
+        });
+
+        it('should ignore non-credit courses and ungraded courses', () => {
+            const courses = [
+                { id: 'pe-1', courseCode: 'PE6001', score4: 3.0, isNonCredit: true },
+                { id: 'pe-2', courseCode: 'PE6001', score4: 4.0, isNonCredit: true },
+                { id: 'it-1', courseCode: 'IT6001', score4: 2.0, isNonCredit: false },
+                { id: 'it-2', courseCode: 'IT6001', score4: null, isNonCredit: false }, // In progress
+            ];
+            const result = analyzeRetakenCourses(courses);
+            expect(result.get('pe-1')).toEqual({ isSuperseded: false, isImproved: false });
+            expect(result.get('pe-2')).toEqual({ isSuperseded: false, isImproved: false });
+            expect(result.get('it-1')).toEqual({ isSuperseded: false, isImproved: false });
+            expect(result.get('it-2')).toEqual({ isSuperseded: false, isImproved: false });
         });
     });
 });

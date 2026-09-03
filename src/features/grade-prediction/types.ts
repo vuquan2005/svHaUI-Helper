@@ -19,6 +19,8 @@ export interface CourseGradeRow {
     isNonCredit: boolean;
     isEdited: boolean;
     isSelected: boolean;
+    isSuperseded?: boolean;
+    isImproved?: boolean;
     element: HTMLTableRowElement;
     indexCell: HTMLTableCellElement;
     creditCell: HTMLTableCellElement;
