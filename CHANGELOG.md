@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.12.0...v2.13.0) (2026-09-03)
+
+
+### Features
+
+* **grade-prediction:** highlight retaken courses and improve input ([#99](https://github.com/vuquan2005/svHaUI-Helper/issues/99)) ([6679f48](https://github.com/vuquan2005/svHaUI-Helper/commit/6679f48a3907543c5e5abaacce1e11144d896275))
+
 ## [2.12.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.11.0...v2.12.0) (2026-08-25)
 
 
