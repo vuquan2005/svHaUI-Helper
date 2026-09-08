@@ -46,7 +46,7 @@ describe('getUpcomingExamsList', () => {
         expect(list.length).toBe(2);
         expect(list[0].exam.course).toBe('Đồ án môn học Cơ điện tử');
         expect(list[1].exam.course).toBe('Quản lý chất lượng sản phẩm');
-        expect(list[0].countdown.days).toBe(11);
+        expect(list[0].countdown.days).toBe(12);
     });
 
     it('overlays schedule details (room, SBD) on matching plan courses', () => {

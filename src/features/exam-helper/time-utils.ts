@@ -109,15 +109,22 @@ export function getExamCountdown(
     const absDiff = Math.abs(diffMs);
     const direction: 1 | -1 = diffMs >= 0 ? 1 : -1;
 
-    const days = Math.floor(absDiff / (24 * 60 * 60 * 1000));
+    // Calculate calendar days difference (normalizing to local midnight)
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startOfExamDay = new Date(
+        examDateTime.getFullYear(),
+        examDateTime.getMonth(),
+        examDateTime.getDate()
+    ).getTime();
+    const calendarDaysDiff = Math.round((startOfExamDay - startOfToday) / (24 * 60 * 60 * 1000));
+    const days = Math.abs(calendarDaysDiff);
+
     const hours = Math.floor((absDiff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
     const minutes = Math.floor((absDiff % (60 * 60 * 1000)) / (60 * 1000));
 
     let urgency: ExamUrgency = 'normal';
     if (direction === -1) {
         urgency = 'passed';
-    } else if (days === 0 && hours < 24) {
-        urgency = 'urgent';
     } else if (days <= 3) {
         urgency = 'urgent';
     } else if (days <= 7) {
@@ -132,20 +139,31 @@ export function getExamCountdown(
 
     if (direction === 1) {
         if (days === 0) {
-            if (hours > 0) {
-                label = `Còn ${hours} giờ ${minutes} phút (Hôm nay)`;
-                shortLabel = `Hôm nay (${hours}h)`;
+            const todayHours = Math.floor(absDiff / (60 * 60 * 1000));
+            if (todayHours > 0) {
+                label = `Còn ${todayHours} giờ ${minutes} phút (Hôm nay)`;
+                shortLabel = `Hôm nay (${todayHours}h)`;
             } else {
                 label = `Còn ${minutes} phút (Sắp thi)`;
                 shortLabel = `Sắp thi (${minutes}p)`;
             }
+        } else if (days === 1) {
+            const totalHours = Math.floor(absDiff / (60 * 60 * 1000));
+            label =
+                totalHours < 24
+                    ? `Còn ${totalHours} giờ ${minutes} phút (Ngày mai)`
+                    : `Còn 1 ngày (Ngày mai)`;
+            shortLabel = `Còn 1 ngày`;
         } else {
-            label = `Còn ${days} ngày ${hours} giờ`;
+            label = `Còn ${days} ngày`;
             shortLabel = `Còn ${days} ngày`;
         }
     } else {
         if (days === 0) {
             label = `Đã thi hôm nay`;
+            shortLabel = `Đã thi`;
+        } else if (days === 1) {
+            label = `Đã thi hôm qua`;
             shortLabel = `Đã thi`;
         } else {
             label = `Đã thi (${days} ngày trước)`;
