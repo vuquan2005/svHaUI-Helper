@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.13.0...v2.13.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **exam-helper:** fix 1-day offset in countdown badges using calendar ([#103](https://github.com/vuquan2005/svHaUI-Helper/issues/103)) ([476f4b7](https://github.com/vuquan2005/svHaUI-Helper/commit/476f4b71856a48d43c03ec79907b8abefdcbc9c8))
+
 ## [2.13.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.12.0...v2.13.0) (2026-09-03)
 
 
