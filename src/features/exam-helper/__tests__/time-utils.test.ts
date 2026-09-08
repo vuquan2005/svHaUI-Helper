@@ -22,34 +22,56 @@ describe('getExamCountdown', () => {
     // Reference date: 20/06/2026 at 08:00
     const now = new Date(2026, 5, 20, 8, 0, 0);
 
-    it('calculates urgent status for exam within 3 days', () => {
+    it('calculates urgent status for exam in 2 days', () => {
         const countdown = getExamCountdown('22/06/2026', '7h00', now);
+        expect(countdown.direction).toBe(1);
+        expect(countdown.urgency).toBe('urgent');
+        expect(countdown.days).toBe(2);
+        expect(countdown.shortLabel).toBe('Còn 2 ngày');
+    });
+
+    it('calculates urgent status and 1 day remaining for exam tomorrow even if within 24 hours', () => {
+        const eveningNow = new Date(2026, 5, 20, 20, 0, 0); // 20:00 tonight
+        const countdown = getExamCountdown('21/06/2026', '7h00', eveningNow); // 07:00 tomorrow (11h away)
         expect(countdown.direction).toBe(1);
         expect(countdown.urgency).toBe('urgent');
         expect(countdown.days).toBe(1);
         expect(countdown.shortLabel).toBe('Còn 1 ngày');
+        expect(countdown.label).toBe('Còn 11 giờ 0 phút (Ngày mai)');
     });
 
     it('calculates warning status for exam within 7 days', () => {
         const countdown = getExamCountdown('26/06/2026', '7h00', now);
         expect(countdown.direction).toBe(1);
         expect(countdown.urgency).toBe('warning');
-        expect(countdown.days).toBe(5);
-        expect(countdown.shortLabel).toBe('Còn 5 ngày');
+        expect(countdown.days).toBe(6);
+        expect(countdown.shortLabel).toBe('Còn 6 ngày');
     });
 
     it('calculates notice status for exam within 14 days', () => {
         const countdown = getExamCountdown('02/07/2026', '7h00', now);
         expect(countdown.direction).toBe(1);
         expect(countdown.urgency).toBe('notice');
-        expect(countdown.days).toBe(11);
+        expect(countdown.days).toBe(12);
+        expect(countdown.shortLabel).toBe('Còn 12 ngày');
     });
 
     it('calculates passed status for past exams', () => {
         const countdown = getExamCountdown('15/06/2026', '7h00', now);
         expect(countdown.direction).toBe(-1);
         expect(countdown.urgency).toBe('passed');
+        expect(countdown.days).toBe(5);
         expect(countdown.shortLabel).toBe('Đã thi');
+        expect(countdown.label).toBe('Đã thi (5 ngày trước)');
+    });
+
+    it('calculates passed status for exam yesterday', () => {
+        const countdown = getExamCountdown('19/06/2026', '15h00', now);
+        expect(countdown.direction).toBe(-1);
+        expect(countdown.urgency).toBe('passed');
+        expect(countdown.days).toBe(1);
+        expect(countdown.shortLabel).toBe('Đã thi');
+        expect(countdown.label).toBe('Đã thi hôm qua');
     });
 
     it('calculates today status for exam occurring today', () => {
@@ -57,7 +79,18 @@ describe('getExamCountdown', () => {
         expect(countdown.direction).toBe(1);
         expect(countdown.urgency).toBe('urgent');
         expect(countdown.days).toBe(0);
-        expect(countdown.shortLabel).toContain('Hôm nay');
+        expect(countdown.shortLabel).toBe('Hôm nay (5h)');
+        expect(countdown.label).toBe('Còn 5 giờ 30 phút (Hôm nay)');
+    });
+
+    it('calculates passed status for exam that finished earlier today', () => {
+        const afternoonNow = new Date(2026, 5, 20, 15, 0, 0);
+        const countdown = getExamCountdown('20/06/2026', '7h00', afternoonNow);
+        expect(countdown.direction).toBe(-1);
+        expect(countdown.urgency).toBe('passed');
+        expect(countdown.days).toBe(0);
+        expect(countdown.shortLabel).toBe('Đã thi');
+        expect(countdown.label).toBe('Đã thi hôm nay');
     });
 });
 
