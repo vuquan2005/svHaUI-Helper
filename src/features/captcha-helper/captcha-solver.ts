@@ -43,5 +43,10 @@ export async function solveCaptchaFromDataUrl(dataUrl: string): Promise<string> 
     ctx.drawImage(img, 0, 0);
 
     const recognizer = getSharedOcrRecognizer();
-    return await recognizer.recognize(canvas);
+    try {
+        return await recognizer.recognize(canvas);
+    } finally {
+        canvas.width = 0;
+        canvas.height = 0;
+    }
 }

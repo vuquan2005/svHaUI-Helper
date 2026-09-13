@@ -6,7 +6,7 @@
 import * as ort from 'onnxruntime-web/wasm';
 import { browser } from 'wxt/browser';
 import { fetchArrayBuffer } from '@/utils';
-import { DEFAULT_MODEL_URL, ORT_WASM_CDN_BASE, CHARACTER_DICT } from './config';
+import { DEFAULT_MODEL_PATH, CHARACTER_DICT } from './config';
 import { prepareInputTensor, ctcDecode } from './ocr-utils';
 
 export interface OcrRecognizerOptions {
@@ -31,7 +31,7 @@ export class OcrRecognizer {
 
     constructor(options: OcrRecognizerOptions) {
         this.log = options.log;
-        this.modelUrl = options.modelUrl || DEFAULT_MODEL_URL;
+        this.modelUrl = options.modelUrl || DEFAULT_MODEL_PATH;
     }
 
     /**
@@ -49,39 +49,28 @@ export class OcrRecognizer {
         this.initializing = (async () => {
             this.log.d('Initializing ONNX Runtime session...');
 
-            // Disable multi-threading in WASM to avoid COOP/COEP headers issues in browser/userscript
+            // Disable multi-threading in WASM to avoid COOP/COEP headers issues
             ort.env.wasm.numThreads = 1;
 
-            let wasmPaths: string | Record<string, string> = ORT_WASM_CDN_BASE;
-            let targetModelUrl = this.modelUrl;
+            const wasmSimdUrl = browser.runtime.getURL('/wasm/ort-wasm-simd-threaded.wasm');
+            const wasmMjsUrl = browser.runtime.getURL('/wasm/ort-wasm-simd-threaded.mjs');
 
-            try {
-                if (typeof browser !== 'undefined' && browser.runtime?.getURL) {
-                    const wasmSimdUrl = browser.runtime.getURL('/wasm/ort-wasm-simd-threaded.wasm');
-                    const wasmMjsUrl = browser.runtime.getURL('/wasm/ort-wasm-simd-threaded.mjs');
-                    const resourceModelUrl = browser.runtime.getURL('/models/model_quant.onnx');
-
-                    wasmPaths = {
-                        'ort-wasm-simd-threaded.wasm': wasmSimdUrl,
-                        'ort-wasm-simd-threaded.mjs': wasmMjsUrl,
-                        wasm: wasmSimdUrl,
-                        mjs: wasmMjsUrl,
-                    };
-                    if (this.modelUrl === DEFAULT_MODEL_URL) {
-                        targetModelUrl = resourceModelUrl;
-                    }
-                }
-            } catch (err) {
-                this.log.d('browser.runtime.getURL fallback triggered:', err);
-            }
-
-            // In local dev mode, load model directly from Vite dev server with CORS enabled
-            if (import.meta.env.DEV && targetModelUrl === DEFAULT_MODEL_URL) {
-                targetModelUrl = 'http://127.0.0.1:5173/model_quant.onnx';
-            }
+            const wasmPaths = {
+                'ort-wasm-simd-threaded.wasm': wasmSimdUrl,
+                'ort-wasm-simd-threaded.mjs': wasmMjsUrl,
+                wasm: wasmSimdUrl,
+                mjs: wasmMjsUrl,
+            };
 
             ort.env.wasm.wasmPaths = wasmPaths;
-            this.log.d('Configured WASM paths:', wasmPaths);
+            this.log.d('Configured local WASM paths:', wasmPaths);
+
+            const targetModelUrl =
+                this.modelUrl.startsWith('http://') || this.modelUrl.startsWith('https://')
+                    ? this.modelUrl
+                    : browser.runtime.getURL(
+                          this.modelUrl as Parameters<typeof browser.runtime.getURL>[0]
+                      );
 
             this.log.d('Fetching ONNX model binary from:', targetModelUrl);
             const modelBuffer = await fetchArrayBuffer(targetModelUrl);

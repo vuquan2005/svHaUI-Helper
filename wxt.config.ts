@@ -1,8 +1,7 @@
 import { defineConfig } from 'wxt';
 import packageJson from './package.json' with { type: 'json' };
 
-const { version, devDependencies } = packageJson;
-const ortVersion = (devDependencies['onnxruntime-web'] || '').replace(/[\^~]/g, '');
+const { version } = packageJson;
 
 const buildTime: string = new Date()
     .toLocaleString('sv-SE', { hour12: false })
@@ -36,12 +35,6 @@ export default defineConfig({
             content_security_policy: {
                 extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'",
             },
-            web_accessible_resources: [
-                {
-                    resources: ['models/*', 'wasm/*'],
-                    matches: ['https://sv.haui.edu.vn/*'],
-                },
-            ],
             browser_specific_settings: {
                 gecko: {
                     id: 'svhaui-helper@vuquan.dev',
@@ -60,7 +53,6 @@ export default defineConfig({
         define: {
             __APP_VERSION__: JSON.stringify(version),
             __BUILD_TIME__: JSON.stringify(buildTime),
-            __ORT_VERSION__: JSON.stringify(ortVersion),
         },
     }),
 });

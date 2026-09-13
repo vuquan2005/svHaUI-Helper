@@ -17,12 +17,19 @@ export default defineBackground(() => {
         if (message?.action === 'SOLVE_CAPTCHA') {
             (async () => {
                 try {
-                    await ensureOffscreenDocument();
-                    const response = await browser.runtime.sendMessage({
-                        action: 'OFFSCREEN_SOLVE_CAPTCHA',
-                        dataUrl: message.dataUrl,
-                    });
-                    sendResponse(response);
+                    if (import.meta.env.BROWSER === 'firefox') {
+                        const { solveCaptchaFromDataUrl } =
+                            await import('@/features/captcha-helper/captcha-solver');
+                        const text = await solveCaptchaFromDataUrl(message.dataUrl);
+                        sendResponse({ success: true, text });
+                    } else {
+                        await ensureOffscreenDocument();
+                        const response = await browser.runtime.sendMessage({
+                            action: 'OFFSCREEN_SOLVE_CAPTCHA',
+                            dataUrl: message.dataUrl,
+                        });
+                        sendResponse(response);
+                    }
                 } catch (err) {
                     sendResponse({ success: false, error: String(err) });
                 }

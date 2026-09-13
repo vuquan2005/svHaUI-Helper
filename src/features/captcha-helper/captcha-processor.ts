@@ -118,27 +118,18 @@ export class CaptchaProcessor {
 
             // Step 2: Perform OCR
             if (this.onTextRecognized) {
-                let text = '';
-                if (import.meta.env.BROWSER === 'firefox') {
-                    this.log.d(
-                        'Recognizing captcha with local ONNX model (Firefox direct mode)...'
-                    );
-                    const { getSharedOcrRecognizer } = await import('./captcha-solver');
-                    const recognizer = getSharedOcrRecognizer();
-                    text = await recognizer.recognize(this.canvasEl);
-                } else {
-                    const dataUrl = this.canvasEl.toDataURL('image/png');
-                    this.log.d('Sending captcha to background/offscreen for OCR recognition...');
-                    const response = await browser.runtime.sendMessage({
-                        action: 'SOLVE_CAPTCHA',
-                        dataUrl,
-                    });
+                const dataUrl = this.canvasEl.toDataURL('image/png');
+                this.log.d('Sending captcha to background for OCR recognition...');
+                const response = await browser.runtime.sendMessage({
+                    action: 'SOLVE_CAPTCHA',
+                    dataUrl,
+                });
 
-                    if (response?.success && response.text) {
-                        text = response.text;
-                    } else {
-                        this.log.e('Captcha recognition failed:', response?.error);
-                    }
+                let text = '';
+                if (response?.success && response.text) {
+                    text = response.text;
+                } else {
+                    this.log.e('Captcha recognition failed:', response?.error);
                 }
 
                 if (text) {
