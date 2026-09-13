@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.0.1...v3.1.0) (2026-09-13)
+
+
+### Features
+
+* **brand:** redesign extension logo with 3D origami concept ([#112](https://github.com/vuquan2005/svHaUI-Helper/issues/112)) ([1d0b4d6](https://github.com/vuquan2005/svHaUI-Helper/commit/1d0b4d6ecaeed938f16c6d57b83378afaecb5e08))
+* logo flight trail ([#114](https://github.com/vuquan2005/svHaUI-Helper/issues/114)) ([03fb282](https://github.com/vuquan2005/svHaUI-Helper/commit/03fb282ae306a57879205e634cba74390342b6ff))
+
 ## [3.0.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.0.0...v3.0.1) (2026-09-13)
 
 
