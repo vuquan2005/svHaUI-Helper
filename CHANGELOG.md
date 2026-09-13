@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.0.0...v3.0.1) (2026-09-13)
+
+
+### Bug Fixes
+
+* **firefox:** declare data_collection_permissions in gecko manifest ([#109](https://github.com/vuquan2005/svHaUI-Helper/issues/109)) ([901acb3](https://github.com/vuquan2005/svHaUI-Helper/commit/901acb33359d3cd461ffbe00c9edc3e61fd3dea1))
+
 ## [3.0.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.14.0...v3.0.0) (2026-09-13)
 
 
