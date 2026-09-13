@@ -39,12 +39,12 @@ export default defineConfig({
                 gecko: {
                     id: 'svhaui-helper@vuquan.dev',
                     strict_min_version: '109.0',
+                    data_collection_permissions: {
+                        required: ['none'],
+                    },
                 },
             },
         };
-    },
-    suppressWarnings: {
-        firefoxDataCollection: true,
     },
     vite: () => ({
         resolve: {
