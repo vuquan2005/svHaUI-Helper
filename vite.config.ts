@@ -1,14 +1,11 @@
 import { defineConfig } from 'vite';
 import monkey, { cdn } from 'vite-plugin-monkey';
 import path from 'path';
-import { version, devDependencies } from './package.json';
+import packageJson from './package.json' with { type: 'json' };
 
+const { version, devDependencies } = packageJson;
 const isMinify = process.env.MINIFY === 'true';
 const ortVersion = (devDependencies['onnxruntime-web'] || '').replace(/[\^~]/g, '');
-
-// GitHub release URLs for auto-update (only for minified version)
-const GITHUB_RELEASE_BASE = 'https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download';
-const MINIFIED_SCRIPT_NAME = 'svhaui-helper.min.user.js';
 
 const buildTime: string = new Date()
     .toLocaleString('sv-SE', { hour12: false })
@@ -17,36 +14,29 @@ const buildTime: string = new Date()
 
 // Determine output file name
 const getFileName = () => {
-    if (isMinify) return MINIFIED_SCRIPT_NAME;
+    if (isMinify) return 'svhaui-helper.min.user.js';
     return 'svhaui-helper.user.js';
 };
 
-// Determine update URLs based on build type
-const getUpdateUrls = () => {
-    if (isMinify) {
-        return {
-            downloadURL: `${GITHUB_RELEASE_BASE}/${MINIFIED_SCRIPT_NAME}`,
-            updateURL: `${GITHUB_RELEASE_BASE}/${MINIFIED_SCRIPT_NAME}`,
-        };
-    }
-    return {};
-};
+// Deprecated: Do not set updateURL so Tampermonkey stops checking once migrated
+const getUpdateUrls = () => ({});
 
 export default defineConfig({
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './src'),
+            '@': path.resolve(import.meta.dirname, './src'),
         },
     },
     plugins: [
         monkey({
             entry: 'src/main.ts',
             userscript: {
-                name: 'SV HaUI Helper',
+                name: '[NGỪNG HỖ TRỢ] SV HaUI Helper',
                 version,
                 namespace: 'https://github.com/vuquan2005/svHaUI-Helper',
                 author: 'VuQuan',
-                description: 'Nâng cao trải nghiệm cho sinh viên HaUI',
+                description:
+                    '[DEPRECATED] Đã chuyển sang Browser Extension độc lập. Tải tại: https://github.com/vuquan2005/svHaUI-Helper/releases',
                 license: 'GPL-3.0-only',
                 homepageURL: 'https://github.com/vuquan2005/svHaUI-Helper',
                 supportURL: 'https://github.com/vuquan2005/svHaUI-Helper/issues',
