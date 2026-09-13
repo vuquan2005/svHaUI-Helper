@@ -124,3 +124,11 @@ Nếu bạn thấy dự án hữu ích, hãy cân nhắc ủng hộ tác giả.
 <p align="center">
   <img src="assets/donation-qr.png" alt="Donation QR" width="300">
 </p>
+
+## 🔒 Quyền riêng tư
+
+Tiện ích hoạt động **cục bộ 100%**, cam kết hoàn toàn không thu thập, lưu trữ hay chia sẻ bất kỳ dữ liệu cá nhân nào của sinh viên. Xem chi tiết tại [Chính sách quyền riêng tư (PRIVACY.md)](PRIVACY.md).
+
+## 📄 Giấy phép
+
+Dự án được phát hành theo giấy phép [GNU General Public License v3.0 (GPL-3.0)](LICENSE).

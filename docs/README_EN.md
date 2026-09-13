@@ -116,3 +116,11 @@ pnpm build:firefox
 # Package zip for all platforms
 pnpm zip:all
 ```
+
+## 🔒 Privacy Policy
+
+The extension operates **100% offline** on your device and does NOT collect, store, track, or transmit any personal data. For more details, see the [Privacy Policy (PRIVACY.md)](../PRIVACY.md).
+
+## 📄 License
+
+This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](../LICENSE).

@@ -99,8 +99,90 @@ Thank you very much for your time and assistance!
 ## 2. Microsoft Edge Add-ons (Partner Center)
 
 - **Gói tải lên**: File `.output/svhaui-helper-*-chrome.zip`
-- **Mô tả ngắn & Chi tiết**: Dùng chung nội dung như trên.
+- **Mô tả ngắn & Chi tiết**: Dùng chung nội dung như mục 1 (Firefox AMO).
+- **Hình ảnh quảng bá (Store Assets)**:
+  - **Logo cửa hàng (Store Logo)**: `assets/store-icon-300.png` _(300 x 300 px, bắt buộc)_
+  - **Khung quảng cáo nhỏ (Small Promo Tile)**: `assets/promo-small-440x280.png` _(440 x 280 px, bắt buộc)_
+  - **Khung quảng cáo lớn (Large Promo Tile)**: `assets/promo-marquee-1400x560.png` _(1400 x 560 px, tùy chọn)_
 - **Giải trình quyền (Permission justifications)** khi Edge hỏi:
   - `storage`: _"Used to store user preferences and feature toggle states locally on the device."_
   - `offscreen`: _"Used to run Canvas 2D operations and ONNX Runtime WebAssembly model locally for offline Captcha OCR recognition."_
-- **URL chính sách riêng tư**: `https://github.com/vuquan2005/svHaUI-Helper#readme`
+- **URL chính sách riêng tư**: `https://github.com/vuquan2005/svHaUI-Helper/blob/main/PRIVACY.md`
+- **URL trang web hỗ trợ**: `https://github.com/vuquan2005/svHaUI-Helper/issues`
+
+---
+
+## 3. Google Chrome Web Store (CWS - Developer Dashboard)
+
+### 📌 Thông tin cơ bản (Store Listing)
+
+- **Tên tiện ích (Item name)**: `SV HaUI Helper`
+- **Tóm tắt ngắn (Short description)** _(tối đa 132 ký tự)_:
+
+```text
+Tiện ích hỗ trợ sinh viên HaUI: tự giải Captcha bằng AI offline, đếm ngược lịch thi, xuất thời khóa biểu .ics và dự đoán GPA.
+```
+
+- **Mô tả chi tiết (Detailed description)**: Dùng chung nội dung Markdown ở mục 1.
+- **Danh mục (Category)**: `Năng suất` _(Productivity)_ hoặc `Giáo dục` _(Education)_.
+- **Ngôn ngữ chính (Primary language)**: `Tiếng Việt` _(Vietnamese)_.
+
+---
+
+### 🎨 Tài nguyên đồ họa (Store Assets)
+
+- **Biểu tượng cửa hàng (Store Icon)**: `public/icon/128.png` _(128 x 128 px)_.
+- **Khung quảng cáo nhỏ (Small Promo Tile)**: `assets/promo-small-440x280.png` _(440 x 280 px, bắt buộc)_.
+- **Biểu ngữ nổi bật (Marquee Tile)**: `assets/promo-marquee-1400x560.png` _(1400 x 560 px, tùy chọn)_.
+- **Ảnh chụp màn hình (Screenshots)**: Tối thiểu 1 ảnh, tỉ lệ chuẩn 1280 x 800 px (hoặc 640 x 400 px).
+
+---
+
+### 🔒 Thực hành quyền riêng tư (Privacy Practices)
+
+#### 1. Mục đích duy nhất (Single Purpose)
+
+Điền câu trả lời tiếng Anh vào ô Single Purpose:
+
+```text
+Enhance student productivity on the Hanoi University of Industry (HaUI) portal by providing offline AI Captcha auto-fill, exam countdown and calendar sync (.ics), and semester GPA simulation.
+```
+
+#### 2. Giải trình quyền sử dụng (Permission Justifications)
+
+- **`storage`**:
+  ```text
+  Used to store user feature preferences (such as enabling/disabling exam countdown or auto-fill) locally on the user's browser.
+  ```
+- **`offscreen`**:
+  ```text
+  Used to execute Canvas 2D image processing and run the bundled ONNX Runtime WebAssembly model for Captcha recognition off-screen without freezing the UI.
+  ```
+- **`host_permissions (https://sv.haui.edu.vn/*)`**:
+  ```text
+  Required to read and modify DOM elements on the university portal: displaying exam countdown widgets, injecting calendar export buttons, and calculating GPA on local grade tables.
+  ```
+
+#### 3. Chứng nhận dữ liệu người dùng (User Data Certifications)
+
+- **Thu thập dữ liệu (Data collection)**: `CHỌN KHÔNG (NO)` — Tiện ích không thu thập bất kỳ dữ liệu cá nhân nào.
+- **Chứng nhận tuân thủ**: Tick chọn đầy đủ các cam kết:
+  - Tiện ích không bán dữ liệu cho bên thứ ba.
+  - Tiện ích không sử dụng dữ liệu cho mục đích không liên quan đến chức năng cốt lõi.
+  - Tiện ích không sử dụng dữ liệu để xác định khả năng tín dụng hoặc cho mục đích cho vay.
+- **URL Chính sách riêng tư**: `https://github.com/vuquan2005/svHaUI-Helper/blob/main/PRIVACY.md`
+
+---
+
+## 4. Bảng tổng hợp quy cách tài nguyên đồ họa (Store Assets Matrix)
+
+| Tệp tài nguyên                                                              | Kích thước     | Định dạng  | Mục đích sử dụng                                 |
+| :-------------------------------------------------------------------------- | :------------- | :--------- | :----------------------------------------------- |
+| [`public/icon/16.png`](../public/icon/16.png)                               | 16 x 16 px     | PNG (RGBA) | Favicon tab, toolbar nhỏ                         |
+| [`public/icon/32.png`](../public/icon/32.png)                               | 32 x 32 px     | PNG (RGBA) | Thanh công cụ extension, Windows Retina          |
+| [`public/icon/48.png`](../public/icon/48.png)                               | 48 x 48 px     | PNG (RGBA) | Trang quản lý extension (chrome://extensions)    |
+| [`public/icon/128.png`](../public/icon/128.png)                             | 128 x 128 px   | PNG (RGBA) | Biểu tượng Store cài đặt CWS & AMO               |
+| [`assets/store-icon-300.png`](../assets/store-icon-300.png)                 | 300 x 300 px   | PNG (RGBA) | Biểu tượng Store bắt buộc trên Microsoft Edge    |
+| [`assets/promo-small-440x280.png`](../assets/promo-small-440x280.png)       | 440 x 280 px   | PNG (RGB)  | Thẻ quảng cáo nhỏ trên Chrome Web Store & Edge   |
+| [`assets/promo-marquee-1400x560.png`](../assets/promo-marquee-1400x560.png) | 1400 x 560 px  | PNG (RGB)  | Biểu ngữ lớn (Marquee) trang chủ Store           |
+| [`assets/logo.png`](../assets/logo.png)                                     | 1024 x 1024 px | PNG (RGBA) | Master Logo gốc chất lượng cao cho README & Docs |
