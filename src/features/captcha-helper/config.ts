@@ -16,12 +16,9 @@ export const DEBOUNCE_DELAY_MS = 30;
 /** Required captcha length */
 export const CAPTCHA_LENGTH = 5;
 
-/** Default PP-OCRv4 ONNX model URL (hosted on GitHub Releases) */
-export const DEFAULT_MODEL_URL =
-    'https://github.com/vuquan2005/svHaUI-Helper/releases/download/model-v0.0.2/model_quant.onnx';
-
-/** CDN base URL for ONNX Runtime Web WebAssembly binaries */
-export const ORT_WASM_CDN_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${__ORT_VERSION__}/dist/`;
+/** Default PP-OCRv4 ONNX model path within extension bundle */
+export const DEFAULT_MODEL_PATH = '/models/model_quant.onnx';
+export const DEFAULT_MODEL_URL = DEFAULT_MODEL_PATH;
 
 /**
  * Character dictionary used during PaddleOCR training (34 characters)

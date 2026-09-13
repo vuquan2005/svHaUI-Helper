@@ -7,3 +7,4 @@ export * from './text-utils';
 export * from './date';
 export * from './download';
 export * from './network';
+export * from './window-location';

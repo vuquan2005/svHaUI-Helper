@@ -1,15 +1,6 @@
-import {
-    GM,
-    GM_getValue,
-    GM_setValue,
-    GM_deleteValue,
-    GM_listValues,
-    GM_addValueChangeListener,
-    GmValueListenerId,
-    GM_removeValueChangeListener,
-} from '$';
+import { browser } from 'wxt/browser';
 
-export type StorageListenerId = GmValueListenerId;
+export type StorageListenerId = number;
 
 export type ValueChangeHandler<T> = (
     name: string,
@@ -18,19 +9,66 @@ export type ValueChangeHandler<T> = (
     remote?: boolean
 ) => void;
 
-const fallbackListeners = new Map<
-    number,
-    {
-        key: string;
-        callback: ValueChangeHandler<unknown>;
-        domHandler?: (e: StorageEvent) => void;
+interface ListenerRecord {
+    key: string;
+    callback: ValueChangeHandler<unknown>;
+}
+
+const listeners = new Map<StorageListenerId, ListenerRecord>();
+let listenerIdSeq = 1;
+let extensionListenerAttached = false;
+
+function ensureExtensionListener() {
+    if (extensionListenerAttached) return;
+    try {
+        if (typeof browser !== 'undefined' && browser.storage?.onChanged) {
+            browser.storage.onChanged.addListener((changes, areaName) => {
+                if (areaName && areaName !== 'local') return;
+                for (const [changedKey, change] of Object.entries(changes)) {
+                    listeners.forEach(({ key, callback }) => {
+                        if (key === changedKey) {
+                            try {
+                                callback(changedKey, change.oldValue, change.newValue, true);
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                    });
+                }
+            });
+            extensionListenerAttached = true;
+        }
+    } catch {
+        // Non-extension environments (e.g. unit tests)
     }
->();
-let fallbackListenerIdSeq = 1;
+}
+
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('storage', (e: StorageEvent) => {
+        if (!e.key) return;
+        listeners.forEach(({ key, callback }) => {
+            if (key === e.key) {
+                let oldVal: unknown = undefined;
+                let newVal: unknown = undefined;
+                try {
+                    if (e.oldValue !== null) oldVal = JSON.parse(e.oldValue);
+                } catch {
+                    oldVal = e.oldValue;
+                }
+                try {
+                    if (e.newValue !== null) newVal = JSON.parse(e.newValue);
+                } catch {
+                    newVal = e.newValue;
+                }
+                callback(e.key, oldVal, newVal, true);
+            }
+        });
+    });
+}
 
 /**
- * Low-level Storage API wrapper that provides a unified interface for GM4/GM3 APIs.
- * Prioritizes GM4 (GM.*) API, falls back to GM3 (GM_*) when needed.
+ * Low-level Storage API wrapper that provides a unified interface for WebExtension storage.
+ * Prioritizes browser.storage.local, falls back to localStorage when needed.
  */
 const StorageAPI = {
     /**
@@ -39,12 +77,18 @@ const StorageAPI = {
      * @param defaultValue - Optional default value if key doesn't exist
      */
     async getValue<T>(key: string, defaultValue?: T): Promise<T> {
-        if (GM?.getValue) {
-            return GM.getValue(key, defaultValue);
+        try {
+            if (typeof browser !== 'undefined' && browser.storage?.local) {
+                const res = await browser.storage.local.get(key);
+                if (res && res[key] !== undefined) {
+                    return res[key] as T;
+                }
+                return defaultValue as T;
+            }
+        } catch {
+            // Fall through to localStorage
         }
-        if (typeof GM_getValue === 'function') {
-            return GM_getValue(key, defaultValue);
-        }
+
         if (typeof window !== 'undefined' && window.localStorage) {
             const raw = window.localStorage.getItem(key);
             if (raw !== null) {
@@ -56,7 +100,8 @@ const StorageAPI = {
             }
             return defaultValue as T;
         }
-        throw new Error('GM.getValue/GM_getValue is not available!');
+
+        return defaultValue as T;
     },
 
     /**
@@ -65,13 +110,15 @@ const StorageAPI = {
      * @param value - The value to store
      */
     async setValue<T>(key: string, value: T): Promise<void> {
-        if (GM?.setValue) {
-            return GM.setValue(key, value);
+        try {
+            if (typeof browser !== 'undefined' && browser.storage?.local) {
+                await browser.storage.local.set({ [key]: value });
+                return;
+            }
+        } catch {
+            // Fall through to localStorage
         }
-        if (typeof GM_setValue === 'function') {
-            GM_setValue(key, value);
-            return;
-        }
+
         if (typeof window !== 'undefined' && window.localStorage) {
             const oldValueRaw = window.localStorage.getItem(key);
             let oldValue: unknown = undefined;
@@ -83,7 +130,7 @@ const StorageAPI = {
                 }
             }
             window.localStorage.setItem(key, JSON.stringify(value));
-            fallbackListeners.forEach(({ key: watchedKey, callback }) => {
+            listeners.forEach(({ key: watchedKey, callback }) => {
                 if (watchedKey === key) {
                     try {
                         callback(key, oldValue, value, false);
@@ -94,7 +141,6 @@ const StorageAPI = {
             });
             return;
         }
-        throw new Error('GM.setValue/GM_setValue is not available!');
     },
 
     /**
@@ -102,13 +148,15 @@ const StorageAPI = {
      * @param key - The key to delete
      */
     async deleteValue(key: string): Promise<void> {
-        if (GM?.deleteValue) {
-            return GM.deleteValue(key);
+        try {
+            if (typeof browser !== 'undefined' && browser.storage?.local) {
+                await browser.storage.local.remove(key);
+                return;
+            }
+        } catch {
+            // Fall through to localStorage
         }
-        if (typeof GM_deleteValue === 'function') {
-            GM_deleteValue(key);
-            return;
-        }
+
         if (typeof window !== 'undefined' && window.localStorage) {
             const oldValueRaw = window.localStorage.getItem(key);
             let oldValue: unknown = undefined;
@@ -120,7 +168,7 @@ const StorageAPI = {
                 }
             }
             window.localStorage.removeItem(key);
-            fallbackListeners.forEach(({ key: watchedKey, callback }) => {
+            listeners.forEach(({ key: watchedKey, callback }) => {
                 if (watchedKey === key) {
                     try {
                         callback(key, oldValue, undefined, false);
@@ -131,41 +179,43 @@ const StorageAPI = {
             });
             return;
         }
-        throw new Error('GM.deleteValue/GM_deleteValue is not available!');
     },
 
     /**
      * Lists all keys in storage.
      */
     async listValues(): Promise<string[]> {
-        if (GM?.listValues) {
-            return GM.listValues();
+        try {
+            if (typeof browser !== 'undefined' && browser.storage?.local) {
+                const all = await browser.storage.local.get(null);
+                return Object.keys(all);
+            }
+        } catch {
+            // Fall through to localStorage
         }
-        if (typeof GM_listValues === 'function') {
-            return GM_listValues();
-        }
+
         if (typeof window !== 'undefined' && window.localStorage) {
             return Object.keys(window.localStorage);
         }
-        throw new Error('GM.listValues/GM_listValues is not available!');
+
+        return [];
     },
 
     /**
      * Gets multiple values from storage.
-     * Falls back to Promise.all with individual getValue calls if batch API unavailable.
      * @param keysOrDefaults - Array of keys or object with key-default pairs
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async getValues<T extends Record<string, any>>(
+    async getValues<T extends Record<string, unknown>>(
         keysOrDefaults: string[] | T
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ): Promise<Record<string, any>> {
-        // Try GM4 batch API
-        if (GM?.getValues) {
-            return GM.getValues(keysOrDefaults);
+    ): Promise<Record<string, unknown>> {
+        try {
+            if (typeof browser !== 'undefined' && browser.storage?.local) {
+                return await browser.storage.local.get(keysOrDefaults);
+            }
+        } catch {
+            // Fall through to fallback
         }
 
-        // Fallback to Promise.all with individual calls
         if (Array.isArray(keysOrDefaults)) {
             const results = await Promise.all(
                 keysOrDefaults.map(async (key) => ({
@@ -178,7 +228,7 @@ const StorageAPI = {
                     acc[key] = value;
                     return acc;
                 },
-                {} as Record<string, any>
+                {} as Record<string, unknown>
             );
         } else {
             const entries = Object.entries(keysOrDefaults);
@@ -193,23 +243,25 @@ const StorageAPI = {
                     acc[key] = value;
                     return acc;
                 },
-                {} as Record<string, any>
+                {} as Record<string, unknown>
             );
         }
     },
 
     /**
      * Sets multiple values in storage.
-     * Falls back to Promise.all with individual setValue calls if batch API unavailable.
      * @param values - Object containing key-value pairs to set
      */
-    async setValues(values: Record<string, any>): Promise<void> {
-        // Try GM4 batch API
-        if (GM?.setValues) {
-            return GM.setValues(values);
+    async setValues(values: Record<string, unknown>): Promise<void> {
+        try {
+            if (typeof browser !== 'undefined' && browser.storage?.local) {
+                await browser.storage.local.set(values);
+                return;
+            }
+        } catch {
+            // Fall through to fallback
         }
 
-        // Fallback to Promise.all with individual calls
         await Promise.all(
             Object.entries(values).map(([key, value]) => StorageAPI.setValue(key, value))
         );
@@ -217,16 +269,18 @@ const StorageAPI = {
 
     /**
      * Deletes multiple values from storage.
-     * Falls back to Promise.all with individual deleteValue calls if batch API unavailable.
      * @param keys - Array of keys to delete
      */
     async deleteValues(keys: string[]): Promise<void> {
-        // Try GM4 batch API
-        if (GM?.deleteValues) {
-            return GM.deleteValues(keys);
+        try {
+            if (typeof browser !== 'undefined' && browser.storage?.local) {
+                await browser.storage.local.remove(keys);
+                return;
+            }
+        } catch {
+            // Fall through to fallback
         }
 
-        // Fallback to Promise.all with individual calls
         await Promise.all(keys.map((key) => StorageAPI.deleteValue(key)));
     },
 
@@ -238,69 +292,22 @@ const StorageAPI = {
     async addValueChangeListener<T>(
         key: string,
         callback: ValueChangeHandler<T>
-    ): Promise<GmValueListenerId> {
-        if (GM?.addValueChangeListener) {
-            return GM.addValueChangeListener(key, callback);
-        }
-
-        if (typeof GM_addValueChangeListener === 'function') {
-            return GM_addValueChangeListener(key, callback);
-        }
-
-        if (typeof window !== 'undefined' && window.localStorage) {
-            const id = fallbackListenerIdSeq++;
-            const domHandler = (e: StorageEvent) => {
-                if (e.key === key) {
-                    let oldVal: T | undefined = undefined;
-                    let newVal: T | undefined = undefined;
-                    try {
-                        if (e.oldValue !== null) oldVal = JSON.parse(e.oldValue);
-                    } catch {
-                        oldVal = e.oldValue as unknown as T;
-                    }
-                    try {
-                        if (e.newValue !== null) newVal = JSON.parse(e.newValue);
-                    } catch {
-                        newVal = e.newValue as unknown as T;
-                    }
-                    callback(key, oldVal, newVal, true);
-                }
-            };
-            window.addEventListener('storage', domHandler);
-            fallbackListeners.set(id, {
-                key,
-                callback: callback as ValueChangeHandler<unknown>,
-                domHandler,
-            });
-            return id as unknown as GmValueListenerId;
-        }
-
-        throw new Error('GM.addValueChangeListener/GM_addValueChangeListener is not available!');
+    ): Promise<StorageListenerId> {
+        ensureExtensionListener();
+        const id = listenerIdSeq++;
+        listeners.set(id, {
+            key,
+            callback: callback as ValueChangeHandler<unknown>,
+        });
+        return id;
     },
 
     /**
      * Removes a value change listener.
      * @param listenerId - The listener ID to remove
      */
-    async removeValueChangeListener(listenerId: GmValueListenerId): Promise<void> {
-        if (typeof listenerId === 'number' && fallbackListeners.has(listenerId)) {
-            const entry = fallbackListeners.get(listenerId);
-            if (entry?.domHandler && typeof window !== 'undefined') {
-                window.removeEventListener('storage', entry.domHandler);
-            }
-            fallbackListeners.delete(listenerId);
-            return;
-        }
-
-        if (GM?.removeValueChangeListener) {
-            GM.removeValueChangeListener(listenerId);
-            return;
-        }
-
-        if (typeof GM_removeValueChangeListener === 'function') {
-            GM_removeValueChangeListener(listenerId);
-            return;
-        }
+    async removeValueChangeListener(listenerId: StorageListenerId): Promise<void> {
+        listeners.delete(listenerId);
     },
 };
 
@@ -352,7 +359,7 @@ export class StorageEntry<T> {
      * @param callback - Function to call when the value changes
      * @returns A promise that resolves to the listener ID
      */
-    public onchange(callback: ValueChangeHandler<T>): Promise<GmValueListenerId> {
+    public onchange(callback: ValueChangeHandler<T>): Promise<StorageListenerId> {
         return StorageAPI.addValueChangeListener(this.key, callback);
     }
 
@@ -361,7 +368,7 @@ export class StorageEntry<T> {
      * @param listenerId - The ID of the listener to remove
      * @returns A promise that resolves when the listener is removed
      */
-    public removeValueChangeListener(listenerId: GmValueListenerId): Promise<void> {
+    public removeValueChangeListener(listenerId: StorageListenerId): Promise<void> {
         return StorageAPI.removeValueChangeListener(listenerId);
     }
 }
@@ -370,46 +377,9 @@ export class StorageEntry<T> {
  * A scoped storage utility that namespaces all keys with a prefix.
  * Provides type-safe access to storage values within a defined scope.
  *
- * ### Available APIs:
- * - `get(key, defaultValue)` - Get a single value
- * - `set(key, value)` - Set a single value
- * - `delete(key)` - Delete a single value
- * - `has(key)` - Check if a key exists
- * - `getMultiple(keys)` - Get multiple values
- * - `setMultiple(values)` - Set multiple values
- * - `deleteMultiple(keys)` - Delete multiple values
- * - `keys()` - List all local keys in scope
- * - `entries()` - Get all key-value pairs in scope
- * - `clear()` - Delete all keys in scope
- * - `onValueChange(key, callback)` - Watch for value changes
- * - `removeValueChangeListener(id)` - Stop watching changes
- *
  * @template T - Record type defining the shape of stored values
- *
- * @example
- * ```typescript
- * interface FeatureConfig {
- *   enabled: boolean;
- *   threshold: number;
- * }
- *
- * const storage = new ScopedStorage<FeatureConfig>('my-feature');
- *
- * // Single operations
- * await storage.set('enabled', true);
- * const isEnabled = await storage.get('enabled', false);
- *
- * // Batch operations
- * await storage.setMultiple({ enabled: true, threshold: 50 });
- * const data = await storage.getMultiple(['enabled', 'threshold']);
- *
- * // React to changes
- * storage.onValueChange('enabled', (oldVal, newVal) => {
- *   console.log(`Status changed from ${oldVal} to ${newVal}`);
- * });
- * ```
  */
-export class ScopedStorage<T extends Record<string, any>> {
+export class ScopedStorage<T extends Record<string, unknown>> {
     private readonly prefix: string;
 
     /** Separator used between scope name and key */
@@ -451,7 +421,7 @@ export class ScopedStorage<T extends Record<string, any>> {
      * @param input - Array of keys or object with key-default pairs
      */
     async getMultiple(input: (keyof T & string)[] | Partial<T>): Promise<Partial<T>> {
-        let payload: string[] | Record<string, any>;
+        let payload: string[] | Record<string, unknown>;
 
         if (Array.isArray(input)) {
             payload = input.map((k) => this.getFullKey(k));
@@ -468,7 +438,7 @@ export class ScopedStorage<T extends Record<string, any>> {
         for (const [fullKey, value] of Object.entries(rawResult)) {
             if (fullKey.startsWith(this.prefix)) {
                 const localKey = this.getLocalKey(fullKey);
-                (result as any)[localKey] = value;
+                (result as Record<string, unknown>)[localKey] = value;
             }
         }
 
@@ -489,7 +459,7 @@ export class ScopedStorage<T extends Record<string, any>> {
      * @param values - Object containing key-value pairs to set
      */
     async setMultiple(values: Partial<T>): Promise<void> {
-        const prefixedValues: Record<string, any> = {};
+        const prefixedValues: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(values)) {
             prefixedValues[this.getFullKey(key)] = value;
         }
@@ -561,7 +531,7 @@ export class ScopedStorage<T extends Record<string, any>> {
     async onValueChange<K extends keyof T>(
         key: K & string,
         callback: (key: K, oldValue?: T[K], newValue?: T[K], remote?: boolean) => void
-    ): Promise<GmValueListenerId> {
+    ): Promise<StorageListenerId> {
         const requestedKey = key;
         return StorageAPI.addValueChangeListener<T[K]>(
             this.getFullKey(key),
@@ -575,7 +545,7 @@ export class ScopedStorage<T extends Record<string, any>> {
      * Removes a value change listener.
      * @param listenerId - The listener ID to remove
      */
-    async removeValueChangeListener(listenerId: GmValueListenerId): Promise<void> {
+    async removeValueChangeListener(listenerId: StorageListenerId): Promise<void> {
         await StorageAPI.removeValueChangeListener(listenerId);
     }
 }

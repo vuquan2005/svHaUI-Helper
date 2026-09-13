@@ -6,6 +6,7 @@
  */
 
 import { ExamScheduleEntry } from './types';
+import { toAbsoluteUrl } from '@/utils';
 
 // ============================================
 // Column Indices (1-indexed from td:nth-child as per docs)
@@ -130,7 +131,7 @@ export function parseExamScheduleFromDOM(tableEl: HTMLTableElement): ExamSchedul
  */
 export async function fetchExamScheduleFromWeb(): Promise<ExamScheduleEntry[]> {
     try {
-        const response = await fetch('/student/schedulefees/transactionmodules', {
+        const response = await fetch(toAbsoluteUrl('/student/schedulefees/transactionmodules'), {
             headers: {
                 Accept: 'text/html,application/xhtml+xml',
             },

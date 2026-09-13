@@ -1,17 +1,17 @@
 /**
  * Captcha Image Processor
- * Manages captcha image preprocessing and PP-OCRv4 ONNX recognition.
+ * Manages captcha image preprocessing in DOM and delegates PP-OCRv4 ONNX recognition to background/offscreen.
  *
  * NOTE:
  * - Chạy trong môi trường MPA (ASP.NET Web Forms postback).
  * - Pipeline xử lý gồm:
  *   1. Chờ ảnh captcha tải xong (hoặc lấy ảnh có sẵn nếu complete).
  *   2. Tiền xử lý ảnh (bóc kênh Saturation, Otsu, Connected Components, Telea inpainting) -> vẽ ra canvas.
- *   3. Nhận diện chữ qua mô hình PP-OCRv4 ONNX Runtime (WASM).
+ *   3. Gửi DataURL của canvas sang Background/Offscreen để chạy mô hình PP-OCRv4 ONNX Runtime (WASM).
  */
 
+import { browser } from 'wxt/browser';
 import { CaptchaPreprocessor } from './captcha-pre-processor';
-import { OcrRecognizer } from './ocr-recognizer';
 
 export interface CaptchaProcessorOptions {
     /** The captcha image element */
@@ -33,7 +33,6 @@ export class CaptchaProcessor {
     private canvasEl: HTMLCanvasElement | null = null;
     private log: CaptchaProcessorOptions['log'];
     private onTextRecognized?: CaptchaProcessorOptions['onTextRecognized'];
-    private ocrRecognizer: OcrRecognizer;
 
     // Bound handler for proper cleanup
     private handleImgLoad = this.onImgLoad.bind(this);
@@ -42,7 +41,6 @@ export class CaptchaProcessor {
         this.imgEl = options.imgEl;
         this.log = options.log;
         this.onTextRecognized = options.onTextRecognized;
-        this.ocrRecognizer = new OcrRecognizer({ log: this.log });
     }
 
     /**
@@ -77,8 +75,6 @@ export class CaptchaProcessor {
             this.canvasEl.remove();
             this.canvasEl = null;
         }
-
-        await this.ocrRecognizer.terminate();
     }
 
     /**
@@ -118,13 +114,29 @@ export class CaptchaProcessor {
                 ctx.putImageData(imgData, 0, 0);
             }
 
-            this.log.d('Captcha image processed');
+            this.log.d('Captcha image processed on canvas');
 
-            // Step 2: Perform OCR on the processed image
+            // Step 2: Perform OCR
             if (this.onTextRecognized) {
-                const text = await this.ocrRecognizer.recognize(this.canvasEl);
+                const dataUrl = this.canvasEl.toDataURL('image/png');
+                this.log.d('Sending captcha to background for OCR recognition...');
+                const response = await browser.runtime.sendMessage({
+                    action: 'SOLVE_CAPTCHA',
+                    dataUrl,
+                });
+
+                let text = '';
+                if (response?.success && response.text) {
+                    text = response.text;
+                } else {
+                    this.log.e('Captcha recognition failed:', response?.error);
+                }
+
                 if (text) {
+                    this.log.d(`Captcha recognized: "${text}"`);
                     this.onTextRecognized(text);
+                } else {
+                    this.log.e('Captcha recognition returned empty result');
                 }
             }
         } catch (error) {

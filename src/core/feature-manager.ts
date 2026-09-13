@@ -4,6 +4,8 @@
 
 import { Feature } from './feature';
 import { createLogger } from './logger';
+import { storage } from './storage';
+import type { AppSettings } from '@/types';
 
 const log = createLogger('FeatureManager');
 
@@ -16,6 +18,7 @@ export class FeatureManager {
     private running: Set<string> = new Set();
     private isApplying = false;
     private pendingApply = false;
+    private storageListenerAttached = false;
 
     /**
      * Register a new feature
@@ -82,6 +85,17 @@ export class FeatureManager {
         log.d('Applying features...');
 
         try {
+            // Ensure storage change listener is attached once
+            if (!this.storageListenerAttached) {
+                this.storageListenerAttached = true;
+                storage.addValueChangeListener<AppSettings>('app_settings', () => {
+                    log.d('App settings changed, re-applying features...');
+                    this.applyFeatures();
+                });
+            }
+
+            const settings = await storage.get<AppSettings>('app_settings');
+
             // Sort by priority descending
             const sortedFeatures = [...this.features.entries()].sort(
                 ([, a], [, b]) => b.priority - a.priority
@@ -91,15 +105,11 @@ export class FeatureManager {
             for (const [id, feature] of sortedFeatures) {
                 if (!this.running.has(id)) continue;
 
-                // const isEnabled = settings.isFeatureEnabled(
-                //     feature.id,
-                //     feature.name,
-                //     feature.description
-                // );
+                const isEnabled = settings?.features?.[feature.id] ?? true;
                 const shouldRun = feature.shouldRun();
 
-                if (/*!isEnabled ||*/ !shouldRun) {
-                    const reason = !shouldRun ? 'URL mismatch' : 'Disabled';
+                if (!isEnabled || !shouldRun) {
+                    const reason = !isEnabled ? 'Disabled' : 'URL mismatch';
                     log.d(`Stopping ${feature.name} (Reason: ${reason})`);
                     this._executeStop(feature);
                 }
@@ -109,9 +119,10 @@ export class FeatureManager {
             for (const [id, feature] of sortedFeatures) {
                 if (this.running.has(id)) continue;
 
-                // if (!settings.isFeatureEnabled(feature.id, feature.name, feature.description)) {
-                //     continue;
-                // }
+                const isEnabled = settings?.features?.[feature.id] ?? true;
+                if (!isEnabled) {
+                    continue;
+                }
 
                 if (!feature.shouldRun()) {
                     continue;

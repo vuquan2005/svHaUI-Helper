@@ -33,9 +33,9 @@
 
 ## 📖 Giới thiệu
 
-**SV HaUI Helper** là một userscript được thiết kế để cải thiện trải nghiệm sử dụng cổng thông tin sinh viên [sv.haui.edu.vn](https://sv.haui.edu.vn) của Đại học Công nghiệp Hà Nội (HaUI).
+**SV HaUI Helper** là một tiện ích mở rộng trình duyệt (Web Extension) được thiết kế để cải thiện trải nghiệm sử dụng cổng thông tin sinh viên [sv.haui.edu.vn](https://sv.haui.edu.vn) của Đại học Công nghiệp Hà Nội (HaUI).
 
-Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở rộng và bảo trì.
+Dự án hoạt động **offline 100%**, tích hợp mô hình AI ONNX nhận diện captcha ngay trên máy bạn và giao diện popup trực quan, bảo mật và tốc độ cao.
 
 ## ✨ Tính năng
 
@@ -49,52 +49,37 @@ Dự án được xây dựng với kiến trúc module hóa, dễ dàng mở r�
 | 📅 Calendar Export | Xuất thời khóa biểu sang file ICS, theo dõi cập nhật                       |         ✅ |
 | 📋 Exam Helper     | Đếm ngược, tổng hợp kế hoạch thi và xuất lịch thi sang file ICS            |         ✅ |
 | ❄️ Remove Snowfall | Ẩn hiệu ứng tuyết rơi trên trang                                           |         ✅ |
+| 🎛️ Popup Menu      | Menu điều khiển nhanh, bật/tắt tính năng theo nhu cầu, đếm ngược thi       |         ✅ |
 
 ## 🚀 Cài đặt
 
-### Yêu cầu
+### Cài đặt từ GitHub Releases (Khuyến nghị)
 
-- Trình duyệt: Chrome, Firefox, Edge, hoặc Safari
-- Extension quản lý userscript:
-  - [Tampermonkey](https://www.tampermonkey.net/)
-  - [Violentmonkey](https://violentmonkey.github.io/)
+#### 🌐 Cho Microsoft Edge / Google Chrome / Cốc Cốc / Brave
 
-### Cài đặt nhanh
+1. Tải bản mới nhất `svhaui-helper-<version>-chrome.zip` tại [GitHub Releases](https://github.com/vuquan2005/svHaUI-Helper/releases/latest).
+2. Giải nén file `.zip` vào một thư mục trên máy tính của bạn (lưu ý không xóa thư mục này sau khi cài).
+3. Mở trình duyệt và truy cập:
+   - Edge: `edge://extensions`
+   - Chrome / Brave / Cốc Cốc: `chrome://extensions`
+4. Bật công tắc **Developer mode** (Chế độ cho nhà phát triển) ở góc trên bên phải hoặc menu bên trái.
+5. Nhấp nút **Load unpacked** (Tải tiện ích đã giải nén) và chọn thư mục vừa giải nén.
+6. Truy cập [sv.haui.edu.vn](https://sv.haui.edu.vn) và tận hưởng!
 
-1. Cài đặt **Tampermonkey**[[Chrome]](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)[[FireFox]](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/) hoặc **Violentmonkey**[[Chrome]](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)[[FireFox]](https://addons.mozilla.org/vi/firefox/addon/violentmonkey/) từ cửa hàng extension của trình duyệt.
-2. Chọn **một trong các nguồn** dưới đây để cài đặt script:
+#### 🦊 Cho Mozilla Firefox
 
-| Nguồn               | Link                                                                                                                        | Ghi chú                                                                                                                 |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Greasy Fork**     | [Cài đặt](https://greasyfork.org/vi/scripts/562762-sv-haui-helper)                                                          | ⭐ Khuyến nghị. Tự động cập nhật. Thích hợp cho đa số người dùng.                                                       |
-| GitHub (minified)   | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Nhẹ hơn, nhận bản cập nhật trực tiếp từ kho lưu trữ.                                                                    |
-| GitHub (unminified) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)         | Bản build dễ đọc hơn. Dành để kiểm tra mã (chưa nén). Cài đặt bản mới nhất tại thời điểm tải và không tự động cập nhật. |
+1. Tải file `svhaui-helper-<version>-firefox.zip` tại [GitHub Releases](https://github.com/vuquan2005/svHaUI-Helper/releases/latest).
+2. Trên thanh địa chỉ Firefox, gõ `about:debugging#/runtime/this-firefox` và nhấn Enter.
+3. Bấm **Load Temporary Add-on...** (Tải tiện ích tạm thời...) và chọn file zip vừa tải.
 
-3. Xác nhận cài đặt trong popup của Tampermonkey/Violentmonkey.
-4. Truy cập [sv.haui.edu.vn](https://sv.haui.edu.vn) và tận hưởng!
-
-### ⚠️ Lưu ý cho Chrome / Edge (Manifest V3)
-
-Do chính sách bảo mật mới của Google, bạn **bắt buộc** phải cấp quyền thủ công thì Script mới chạy được:
-
-1. Mở trang Quản lý tiện ích: gõ `chrome://extensions` vào thanh địa chỉ.
-2. Bật **Developer mode** (Chế độ nhà phát triển) ở góc trên bên phải.
-
-![Bật Chế độ nhà phát triển](./assets/enable_extension_dev_mode.png)
-
-3. Tìm **Tampermonkey/Violentmonkey** → Click nút **Details** (Chi tiết).
-4. Kéo xuống tìm và bật công tắc tại dòng:
-
-   > **Cho phép tập lệnh của người dùng** (Allow user scripts)
-
-![Cho phép chèn script](./assets/allow_user_script.png)
+---
 
 ## 🛠️ Phát triển
 
 ### Yêu cầu
 
 - [Node.js](https://nodejs.org/) >= 24
-- [pnpm](https://pnpm.io/) (khuyến nghị) hoặc npm
+- [pnpm](https://pnpm.io/) >= 9
 
 ### Thiết lập môi trường
 
@@ -106,8 +91,30 @@ cd svHaUI-Helper
 # Cài đặt dependencies
 pnpm install
 
-# Chạy development server
+# Khởi chạy extension ở chế độ Development (Chromium / Edge)
 pnpm dev
+
+# Hoặc khởi chạy trên Firefox
+pnpm dev:firefox
+```
+
+### Đóng gói & Kiểm thử
+
+```bash
+# Chạy toàn bộ test suites
+pnpm test
+
+# Kiểm tra kiểu dữ liệu
+pnpm compile
+
+# Build extension cho Chrome / Edge
+pnpm build
+
+# Build extension cho Firefox
+pnpm build:firefox
+
+# Đóng gói zip tất cả các nền tảng
+pnpm zip:all
 ```
 
 ## ☕ Ủng hộ
