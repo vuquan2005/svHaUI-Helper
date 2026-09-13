@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.13.1...v2.14.0) (2026-09-13)
+
+
+### Features
+
+* **migration-notice:** display extension migration banner and deprecate userscript ([#106](https://github.com/vuquan2005/svHaUI-Helper/issues/106)) ([38a5665](https://github.com/vuquan2005/svHaUI-Helper/commit/38a5665ed6d619e1662f0d65a45fb284bf814406))
+
 ## [2.13.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.13.0...v2.13.1) (2026-09-08)
 
 
