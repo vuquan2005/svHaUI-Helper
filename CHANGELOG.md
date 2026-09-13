@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.14.0...v3.0.0) (2026-09-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate from userscript to browser extension with WXT ([#105](https://github.com/vuquan2005/svHaUI-Helper/issues/105))
+
+### Features
+
+* migrate from userscript to browser extension with WXT ([#105](https://github.com/vuquan2005/svHaUI-Helper/issues/105)) ([4480689](https://github.com/vuquan2005/svHaUI-Helper/commit/4480689055b23c111dddf7d3ea48409c318e7229))
+
 ## [2.14.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v2.13.1...v2.14.0) (2026-09-13)
 
 
