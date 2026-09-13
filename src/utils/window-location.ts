@@ -51,6 +51,21 @@ export class WindowLocationWrapper {
     get pathAndQuery(): string {
         return this.path + this.search;
     }
+    /**
+     * Convert a relative or absolute path to a fully qualified URL
+     */
+    toAbsolute(path: string): string {
+        return toAbsoluteUrl(path);
+    }
+}
+
+export function toAbsoluteUrl(path: string): string {
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const origin =
+        typeof window !== 'undefined' && window.location?.origin
+            ? window.location.origin
+            : 'https://sv.haui.edu.vn';
+    return new URL(path, origin).href;
 }
 
 export const browserLocation = new WindowLocationWrapper();

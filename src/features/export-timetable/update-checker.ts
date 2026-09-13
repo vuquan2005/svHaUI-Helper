@@ -7,6 +7,7 @@ import { TimetableEntry, TimetableDiff } from './types';
 import { getSemesterDateRange } from './semester-config';
 import { parseTimetableFromHTML } from './timetable-parser';
 import { formatDateVN } from '../../utils/date';
+import { toAbsoluteUrl } from '@/utils';
 
 // ============================================
 // Constants
@@ -135,7 +136,7 @@ export async function fetchSemesterTimetable(semesterId: string): Promise<Timeta
     if (!dateRange) throw new Error(`Invalid semester ID: ${semesterId}`);
 
     // Step 1: GET the page to extract ASP.NET form tokens
-    const pageResp = await fetch(TIMETABLE_URL, { credentials: 'same-origin' });
+    const pageResp = await fetch(toAbsoluteUrl(TIMETABLE_URL), { credentials: 'same-origin' });
     if (!pageResp.ok) throw new Error(`Failed to load timetable page: ${pageResp.status}`);
 
     const pageHtml = await pageResp.text();
@@ -164,7 +165,7 @@ export async function fetchSemesterTimetable(semesterId: string): Promise<Timeta
     // Submit button
     formData.set('ctl03$butGet', 'Xem');
 
-    const postResp = await fetch(TIMETABLE_URL, {
+    const postResp = await fetch(toAbsoluteUrl(TIMETABLE_URL), {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

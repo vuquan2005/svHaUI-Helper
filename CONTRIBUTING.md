@@ -15,8 +15,7 @@ Cảm ơn bạn đã quan tâm đến việc đóng góp cho **SV HaUI Helper**!
 ### Yêu cầu
 
 - Node.js >= 24
-- pnpm >= 8 (hoặc npm/yarn)
-- Tampermonkey/Violentmonkey extension
+- pnpm >= 9 (hoặc npm/yarn)
 
 ### Cài đặt
 
@@ -28,15 +27,12 @@ cd svHaUI-Helper
 # Cài dependencies
 pnpm install
 
-# Chạy dev server
+# Chạy development server (sẽ tự động mở trình duyệt với extension nạp sẵn)
 pnpm dev
+
+# Hoặc chạy trên Firefox
+pnpm dev:firefox
 ```
-
-### Cài đặt userscript dev
-
-1. Mở `http://localhost:5173/`
-2. Click vào link `.user.js` để cài vào Tampermonkey
-3. Mỗi khi save code, script sẽ tự động reload
 
 ## 📝 Quy ước code
 
@@ -148,9 +144,9 @@ Dự án áp dụng quy trình GitHub Flow và **bảo vệ branch `main`** (kh�
    ```bash
    pnpm lint:fix          # Chạy eslint và tự động sửa lỗi
    pnpm format            # Định dạng code với Prettier
-   pnpm exec tsc --noEmit # Kiểm tra TypeScript types
+   pnpm compile           # Kiểm tra TypeScript types với WXT
    pnpm test              # Chạy toàn bộ test suites
-   pnpm build:all         # Kiểm tra build userscript
+   pnpm zip:all           # Kiểm tra build & zip extension cho các trình duyệt
    ```
 
 3. **Commit theo chuẩn Conventional Commits**:
@@ -176,12 +172,12 @@ Dự án áp dụng quy trình GitHub Flow và **bảo vệ branch `main`** (kh�
 - **CI Kiểm tra PR**: Khi tạo hoặc cập nhật Pull Request, workflow `.github/workflows/pull-request.yml` sẽ tự động chạy:
   1. Kiểm tra tiêu đề PR với Commitlint (`npx commitlint`).
   2. Chạy Linter (`pnpm lint`) & Format check (`pnpm format:check`).
-  3. Type check (`tsc --noEmit`).
+  3. Type check (`pnpm compile`).
   4. Chạy Unit Tests (`pnpm test`).
-  5. Build Userscript artifact (`pnpm build:all`).
+  5. Đóng gói Extension artifact (`pnpm zip:all`).
 - **Release tự động với Release Please**:
   - Khi PR được merge vào `main`, workflow `.github/workflows/release.yml` sử dụng [Release Please](https://github.com/googleapis/release-please) để phân tích các commit Conventional Commits.
-  - Tự động tạo Release PR, tính toán Semantic Versioning (SemVer: `fix` → patch, `feat` → minor, `BREAKING CHANGE` → major), cập nhật `CHANGELOG.md` và phát hành GitHub Release với file userscript `.user.js` đã build.
+  - Tự động tạo Release PR, tính toán Semantic Versioning (SemVer: `fix` → patch, `feat` → minor, `BREAKING CHANGE` → major), cập nhật `CHANGELOG.md` và phát hành GitHub Release đính kèm các file zip extension (`.output/*.zip`) đã build sẵn.
 
 ---
 

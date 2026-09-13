@@ -33,9 +33,9 @@
 
 ## 📖 Introduction
 
-**SV HaUI Helper** is a userscript designed to improve the user experience on the student portal [sv.haui.edu.vn](https://sv.haui.edu.vn) of Hanoi University of Industry (HaUI).
+**SV HaUI Helper** is a browser Web Extension designed to improve the user experience on the student portal [sv.haui.edu.vn](https://sv.haui.edu.vn) of Hanoi University of Industry (HaUI).
 
-The project is built with a modular architecture, making it easy to extend and maintain.
+It operates **100% offline**, bundling a localized ONNX AI model for captcha recognition and a responsive popup dashboard for per-feature configuration.
 
 ## ✨ Features
 
@@ -49,48 +49,37 @@ The project is built with a modular architecture, making it easy to extend and m
 | 📅 Calendar Export | Export timetable to ICS format, auto-check for updates     |     ✅ |
 | 📋 Exam Helper     | Exam countdown, consolidated exam plan & export to ICS     |     ✅ |
 | ❄️ Remove Snowfall | Hide snowfall animation on the website                     |     ✅ |
+| 🎛️ Popup Menu      | Quick control panel, toggle features live, exam countdown  |     ✅ |
 
 ## 🚀 Installation
 
-### Requirements
+### Install via GitHub Releases (Recommended)
 
-- Browser: Chrome, Firefox, Edge, or Safari
-- Userscript manager extension:
-  - [Tampermonkey](https://www.tampermonkey.net/) (Recommended)
-  - [Violentmonkey](https://violentmonkey.github.io/)
+#### 🌐 Microsoft Edge / Google Chrome / Brave
 
-### Quick Install
+1. Download the latest `svhaui-helper-<version>-chrome.zip` from [GitHub Releases](https://github.com/vuquan2005/svHaUI-Helper/releases/latest).
+2. Unpack the `.zip` archive into a local folder.
+3. Open your browser and navigate to:
+   - Edge: `edge://extensions`
+   - Chrome / Brave: `chrome://extensions`
+4. Enable **Developer mode** in the top right corner or side menu.
+5. Click **Load unpacked** and select the extracted folder.
+6. Visit [sv.haui.edu.vn](https://sv.haui.edu.vn) and enjoy!
 
-1. Install **Tampermonkey** or **Violentmonkey** from your browser's extension store.
-2. Choose **one of the sources** below to install the script:
+#### 🦊 Mozilla Firefox
 
-| Source              | Link                                                                                                                        | Notes                                                                                                                 |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Greasy Fork**     | [Install](https://greasyfork.org/en/scripts/562762-sv-haui-helper)                                                          | ⭐ Recommended. Automatically updates. Suitable for most users.                                                       |
-| GitHub (minified)   | [svhaui-helper.min.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.min.user.js) | Lighter, receives updates directly from the repository.                                                               |
-| GitHub (unminified) | [svhaui-helper.user.js](https://github.com/vuquan2005/svHaUI-Helper/releases/latest/download/svhaui-helper.user.js)         | More readable build. Meant for code inspection (unminified). Installs the latest version at download, no auto-update. |
+1. Download `svhaui-helper-<version>-firefox.zip` from [GitHub Releases](https://github.com/vuquan2005/svHaUI-Helper/releases/latest).
+2. Navigate to `about:debugging#/runtime/this-firefox` in Firefox.
+3. Click **Load Temporary Add-on...** and pick the downloaded zip file.
 
-3. Confirm the installation in the Tampermonkey/Violentmonkey popup.
-4. Visit [sv.haui.edu.vn](https://sv.haui.edu.vn) and enjoy!
-
-### ⚠️ Note for Chrome / Edge (Manifest V3)
-
-Due to Google's new security policies, you **must manually grant permission** for the script to work:
-
-1. Go to the Extensions Management page: type `chrome://extensions` in the address bar.
-2. Toggle **Developer mode** on in the top right corner.
-3. Find **Tampermonkey/Violentmonkey** → Click **Details**.
-4. Scroll down and enable the toggle for:
-   > **Allow user scripts**
-   > _(This setting allows the extension to run code not reviewed by Google)_
-5. If a "Disable developer mode extensions" warning appears when restarting the browser, simply choose **Keep**.
+---
 
 ## 🛠️ Development
 
 ### Requirements
 
 - [Node.js](https://nodejs.org/) >= 24
-- [pnpm](https://pnpm.io/) (recommended) or npm
+- [pnpm](https://pnpm.io/) >= 9
 
 ### Environment Setup
 
@@ -102,6 +91,28 @@ cd svHaUI-Helper
 # Install dependencies
 pnpm install
 
-# Run development server
+# Start extension in development mode (Chromium / Edge)
 pnpm dev
+
+# Or start in Firefox
+pnpm dev:firefox
+```
+
+### Build & Package
+
+```bash
+# Run tests
+pnpm test
+
+# Type check
+pnpm compile
+
+# Build for Chromium / Edge
+pnpm build
+
+# Build for Firefox
+pnpm build:firefox
+
+# Package zip for all platforms
+pnpm zip:all
 ```

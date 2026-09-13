@@ -41,16 +41,16 @@ jobs:
         run: pnpm format:check
 
       - name: Type check
-        run: pnpm exec tsc --noEmit
+        run: pnpm compile
 
       - name: Test
         run: pnpm test
 
       - name: Build
-        run: pnpm build:all
+        run: pnpm zip:all
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: userscript
-          path: dist/*.user.js
+          name: web-extension
+          path: .output/*.zip

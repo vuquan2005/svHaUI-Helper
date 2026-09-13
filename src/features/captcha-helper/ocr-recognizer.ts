@@ -3,8 +3,8 @@
  * Wrapper for PP-OCRv4 Mobile ONNX engine using ONNX Runtime Web
  */
 
-import * as ort from 'onnxruntime-web';
-import { GM_getResourceURL } from '$';
+import * as ort from 'onnxruntime-web/wasm';
+import { browser } from 'wxt/browser';
 import { fetchArrayBuffer } from '@/utils';
 import { DEFAULT_MODEL_URL, ORT_WASM_CDN_BASE, CHARACTER_DICT } from './config';
 import { prepareInputTensor, ctcDecode } from './ocr-utils';
@@ -56,23 +56,23 @@ export class OcrRecognizer {
             let targetModelUrl = this.modelUrl;
 
             try {
-                if (typeof GM_getResourceURL === 'function') {
-                    const wasmSimdUrl = GM_getResourceURL('ORT_WASM_SIMD');
-                    const wasmUrl = GM_getResourceURL('ORT_WASM');
-                    const resourceModelUrl = GM_getResourceURL('OCR_MODEL');
+                if (typeof browser !== 'undefined' && browser.runtime?.getURL) {
+                    const wasmSimdUrl = browser.runtime.getURL('/wasm/ort-wasm-simd-threaded.wasm');
+                    const wasmMjsUrl = browser.runtime.getURL('/wasm/ort-wasm-simd-threaded.mjs');
+                    const resourceModelUrl = browser.runtime.getURL('/models/model_quant.onnx');
 
-                    if (wasmSimdUrl && wasmUrl) {
-                        wasmPaths = {
-                            'ort-wasm-simd.wasm': wasmSimdUrl,
-                            'ort-wasm.wasm': wasmUrl,
-                        };
-                    }
-                    if (resourceModelUrl && this.modelUrl === DEFAULT_MODEL_URL) {
+                    wasmPaths = {
+                        'ort-wasm-simd-threaded.wasm': wasmSimdUrl,
+                        'ort-wasm-simd-threaded.mjs': wasmMjsUrl,
+                        wasm: wasmSimdUrl,
+                        mjs: wasmMjsUrl,
+                    };
+                    if (this.modelUrl === DEFAULT_MODEL_URL) {
                         targetModelUrl = resourceModelUrl;
                     }
                 }
             } catch (err) {
-                this.log.d('GM_getResourceURL fallback triggered:', err);
+                this.log.d('browser.runtime.getURL fallback triggered:', err);
             }
 
             // In local dev mode, load model directly from Vite dev server with CORS enabled
@@ -81,6 +81,7 @@ export class OcrRecognizer {
             }
 
             ort.env.wasm.wasmPaths = wasmPaths;
+            this.log.d('Configured WASM paths:', wasmPaths);
 
             this.log.d('Fetching ONNX model binary from:', targetModelUrl);
             const modelBuffer = await fetchArrayBuffer(targetModelUrl);

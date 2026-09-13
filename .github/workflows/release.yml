@@ -40,15 +40,15 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Type check
-        run: pnpm exec tsc --noEmit
+        run: pnpm compile
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Test
         run: pnpm test
         if: ${{ steps.release.outputs.release_created }}
 
-      - name: Build all
-        run: pnpm build:all
+      - name: Build and Zip
+        run: pnpm zip:all
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Upload Release Assets
@@ -56,4 +56,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ steps.release.outputs.tag_name }} ./dist/svhaui-helper.user.js ./dist/svhaui-helper.min.user.js
+          gh release upload ${{ steps.release.outputs.tag_name }} .output/*.zip

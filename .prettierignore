@@ -17,6 +17,9 @@ node_modules
 dist
 dist-ssr
 coverage
+.output
+.wxt
+public/wasm
 
 # Local & Env
 *.local
@@ -38,9 +41,6 @@ coverage
 .agent
 .git
 .husky
-
-# Documentation (generated)
-docs/api-reference
 
 # Package Managers (Auto-generated)
 pnpm-lock.yaml

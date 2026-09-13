@@ -10,6 +10,7 @@
  */
 
 import { ExamPlanEntry } from './types';
+import { toAbsoluteUrl } from '@/utils';
 
 // ============================================
 // Constants
@@ -156,7 +157,7 @@ export function parseExamPlanDetail(html: string): ExamPlanEntry[] {
  * @returns Array of { classCode, course } items
  */
 export async function fetchExamPlanList(): Promise<ExamPlanListItem[]> {
-    const resp = await fetch(EXAM_PLAN_URL, { credentials: 'same-origin' });
+    const resp = await fetch(toAbsoluteUrl(EXAM_PLAN_URL), { credentials: 'same-origin' });
     if (!resp.ok) throw new Error(`Failed to load exam plan page: ${resp.status}`);
 
     const html = await resp.text();
@@ -173,7 +174,7 @@ export async function fetchExamPlanList(): Promise<ExamPlanListItem[]> {
  * @returns Array of ExamPlanEntry for this code
  */
 async function fetchExamPlanDetail(classCode: string): Promise<ExamPlanEntry[]> {
-    const url = `${EXAM_PLAN_URL}?code=${encodeURIComponent(classCode)}`;
+    const url = toAbsoluteUrl(`${EXAM_PLAN_URL}?code=${encodeURIComponent(classCode)}`);
     const resp = await fetch(url, { credentials: 'same-origin' });
     if (!resp.ok)
         throw new Error(`Failed to fetch exam plan detail for ${classCode}: ${resp.status}`);
