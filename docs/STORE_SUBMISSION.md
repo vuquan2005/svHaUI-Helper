@@ -76,20 +76,27 @@ Dear Reviewer,
 
 This extension is an open-source student helper designed for Hanoi University of Industry (HaUI) on the portal https://sv.haui.edu.vn.
 
-Testing without student credentials:
-- Reviewers do not need an active student account to test the extension.
-- Please visit the public login page: https://sv.haui.edu.vn/sso
-- You can observe the extension popup UI (by clicking the toolbar icon) and test the offline Captcha auto-fill feature on the login page (uses bundled ONNX Runtime WebAssembly).
+Testing instructions:
+
+    Public testing (No credentials required): Reviewers can test the popup UI and the offline Captcha auto-fill feature directly on the public login page: https://sv.haui.edu.vn/sso (powered by bundled ONNX Runtime WebAssembly).
+
+    Post-login features demonstration: Because live student credentials cannot be created or maintained publicly, we have provided a detailed video demonstration showing the post-login features in action (exam badges, GPA prediction table): [Chèn link Google Drive / YouTube Unlisted tại đây].
 
 Security & Policy notes:
-- Data Collection: The extension operates 100% client-side and does NOT collect or transmit any user data.
-- innerHTML warnings: Used strictly for rendering static UI components (exam badges, GPA prediction table, and popup toggles) derived from the university portal's local DOM. No unsanitized remote strings are evaluated.
-- Dynamic imports: Originate from the official Microsoft 'onnxruntime-web' library to load bundled local WebAssembly modules.
+
+    Data Collection: The extension operates 100% client-side and does NOT collect or transmit any user data.
+
+    innerHTML usage: Used strictly for rendering static UI components derived from the university portal's local DOM. No unsanitized remote data is evaluated.
+
+    Dynamic imports / WASM: Originate from the official Microsoft onnxruntime-web library to load bundled local WebAssembly modules.
 
 Source code:
-- The source code archive has been provided. Build instructions:
-  1. pnpm install
-  2. pnpm build:firefox
+
+    Source archive provided. Build steps:
+
+        pnpm install
+
+        pnpm build:firefox
 
 Thank you very much for your time and assistance!
 ```
@@ -104,6 +111,7 @@ Thank you very much for your time and assistance!
   - **Logo cửa hàng (Store Logo)**: `assets/store-icon-300.png` _(300 x 300 px, bắt buộc)_
   - **Khung quảng cáo nhỏ (Small Promo Tile)**: `assets/promo-small-440x280.png` _(440 x 280 px, bắt buộc)_
   - **Khung quảng cáo lớn (Large Promo Tile)**: `assets/promo-marquee-1400x560.png` _(1400 x 560 px, tùy chọn)_
+  - **Ảnh chụp màn hình (Screenshots)**: `assets/screenshot-1-exam.png`, `assets/screenshot-2-gpa.png`, `assets/screenshot-3-schedule.png`, `assets/screenshot-4-exam-plan.png` _(1280 x 800 px, tối thiểu 1 ảnh)_
 - **Giải trình quyền (Permission justifications)** khi Edge hỏi:
   - `storage`: _"Used to store user preferences and feature toggle states locally on the device."_
   - `offscreen`: _"Used to run Canvas 2D operations and ONNX Runtime WebAssembly model locally for offline Captcha OCR recognition."_
@@ -134,7 +142,12 @@ Tiện ích hỗ trợ sinh viên HaUI: tự giải Captcha bằng AI offline, �
 - **Biểu tượng cửa hàng (Store Icon)**: `public/icon/128.png` _(128 x 128 px)_.
 - **Khung quảng cáo nhỏ (Small Promo Tile)**: `assets/promo-small-440x280.png` _(440 x 280 px, bắt buộc)_.
 - **Biểu ngữ nổi bật (Marquee Tile)**: `assets/promo-marquee-1400x560.png` _(1400 x 560 px, tùy chọn)_.
-- **Ảnh chụp màn hình (Screenshots)**: Tối thiểu 1 ảnh, tỉ lệ chuẩn 1280 x 800 px (hoặc 640 x 400 px).
+- **Ảnh chụp màn hình (Screenshots)**: Tối thiểu 1 ảnh (tối đa 5 ảnh), tỉ lệ chuẩn 1280 x 800 px (hoặc 640 x 400 px):
+  - `assets/screenshot-1-exam.png`: Đếm ngược Lịch thi & Kế hoạch thi trên Trang chủ.
+  - `assets/screenshot-2-gpa.png`: Bảng điểm học kỳ, Giả lập điểm thi & Dự đoán mục tiêu GPA.
+  - `assets/screenshot-3-schedule.png`: Thời khóa biểu học kỳ & Xuất file lịch học (.ics).
+  - `assets/screenshot-4-exam-plan.png`: Kế hoạch thi chi tiết, bảng tổng hợp môn thi & Xuất file lịch thi (.ics).
+  - `assets/screenshot-5-popup.png`: Giao diện Popup Menu điều khiển nhanh và bật/tắt tính năng theo nhu cầu.
 
 ---
 
@@ -171,18 +184,3 @@ Enhance student productivity on the Hanoi University of Industry (HaUI) portal b
   - Tiện ích không sử dụng dữ liệu cho mục đích không liên quan đến chức năng cốt lõi.
   - Tiện ích không sử dụng dữ liệu để xác định khả năng tín dụng hoặc cho mục đích cho vay.
 - **URL Chính sách riêng tư**: `https://github.com/vuquan2005/svHaUI-Helper/blob/main/PRIVACY.md`
-
----
-
-## 4. Bảng tổng hợp quy cách tài nguyên đồ họa (Store Assets Matrix)
-
-| Tệp tài nguyên                                                              | Kích thước     | Định dạng  | Mục đích sử dụng                                 |
-| :-------------------------------------------------------------------------- | :------------- | :--------- | :----------------------------------------------- |
-| [`public/icon/16.png`](../public/icon/16.png)                               | 16 x 16 px     | PNG (RGBA) | Favicon tab, toolbar nhỏ                         |
-| [`public/icon/32.png`](../public/icon/32.png)                               | 32 x 32 px     | PNG (RGBA) | Thanh công cụ extension, Windows Retina          |
-| [`public/icon/48.png`](../public/icon/48.png)                               | 48 x 48 px     | PNG (RGBA) | Trang quản lý extension (chrome://extensions)    |
-| [`public/icon/128.png`](../public/icon/128.png)                             | 128 x 128 px   | PNG (RGBA) | Biểu tượng Store cài đặt CWS & AMO               |
-| [`assets/store-icon-300.png`](../assets/store-icon-300.png)                 | 300 x 300 px   | PNG (RGBA) | Biểu tượng Store bắt buộc trên Microsoft Edge    |
-| [`assets/promo-small-440x280.png`](../assets/promo-small-440x280.png)       | 440 x 280 px   | PNG (RGB)  | Thẻ quảng cáo nhỏ trên Chrome Web Store & Edge   |
-| [`assets/promo-marquee-1400x560.png`](../assets/promo-marquee-1400x560.png) | 1400 x 560 px  | PNG (RGB)  | Biểu ngữ lớn (Marquee) trang chủ Store           |
-| [`assets/logo.png`](../assets/logo.png)                                     | 1024 x 1024 px | PNG (RGBA) | Master Logo gốc chất lượng cao cho README & Docs |
