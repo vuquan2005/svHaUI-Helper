@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.1.0...v3.2.0) (2026-09-16)
+
+
+### Features
+
+* **i18n:** add locale messages and manifest localization ([#121](https://github.com/vuquan2005/svHaUI-Helper/issues/121)) ([ba3de4f](https://github.com/vuquan2005/svHaUI-Helper/commit/ba3de4f670deab8cc8778590897e1140652f502b))
+
 ## [3.1.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.0.1...v3.1.0) (2026-09-13)
 
 
