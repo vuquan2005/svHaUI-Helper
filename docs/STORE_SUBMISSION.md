@@ -111,7 +111,7 @@ Thank you very much for your time and assistance!
   - **Logo cửa hàng (Store Logo)**: `assets/store-icon-300.png` _(300 x 300 px, bắt buộc)_
   - **Khung quảng cáo nhỏ (Small Promo Tile)**: `assets/promo-small-440x280.png` _(440 x 280 px, bắt buộc)_
   - **Khung quảng cáo lớn (Large Promo Tile)**: `assets/promo-marquee-1400x560.png` _(1400 x 560 px, tùy chọn)_
-  - **Ảnh chụp màn hình (Screenshots)**: `assets/screenshot-1-exam.png`, `assets/screenshot-2-gpa.png`, `assets/screenshot-3-schedule.png`, `assets/screenshot-4-exam-plan.png` _(1280 x 800 px, tối thiểu 1 ảnh)_
+  - **Ảnh chụp màn hình (Screenshots)**: `assets/screenshot-1-home-page.png`, `assets/screenshot-2-studyresults.png`, `assets/screenshot-3-timetable.png`, `assets/screenshot-4-exam-plan.png` _(1280 x 800 px, tối thiểu 1 ảnh)_
 - **Giải trình quyền (Permission justifications)** khi Edge hỏi:
   - `storage`: _"Used to store user preferences and feature toggle states locally on the device."_
   - `offscreen`: _"Used to run Canvas 2D operations and ONNX Runtime WebAssembly model locally for offline Captcha OCR recognition."_
@@ -143,9 +143,9 @@ Tiện ích hỗ trợ sinh viên HaUI: tự giải Captcha bằng AI offline, �
 - **Khung quảng cáo nhỏ (Small Promo Tile)**: `assets/promo-small-440x280.png` _(440 x 280 px, bắt buộc)_.
 - **Biểu ngữ nổi bật (Marquee Tile)**: `assets/promo-marquee-1400x560.png` _(1400 x 560 px, tùy chọn)_.
 - **Ảnh chụp màn hình (Screenshots)**: Tối thiểu 1 ảnh (tối đa 5 ảnh), tỉ lệ chuẩn 1280 x 800 px (hoặc 640 x 400 px):
-  - `assets/screenshot-1-exam.png`: Đếm ngược Lịch thi & Kế hoạch thi trên Trang chủ.
-  - `assets/screenshot-2-gpa.png`: Bảng điểm học kỳ, Giả lập điểm thi & Dự đoán mục tiêu GPA.
-  - `assets/screenshot-3-schedule.png`: Thời khóa biểu học kỳ & Xuất file lịch học (.ics).
+  - `assets/screenshot-1-home-page.png`: Đếm ngược Lịch thi & Kế hoạch thi trên Trang chủ.
+  - `assets/screenshot-2-studyresults.png`: Bảng điểm học kỳ, Giả lập điểm thi & Dự đoán mục tiêu GPA.
+  - `assets/screenshot-3-timetable.png`: Thời khóa biểu học kỳ & Xuất file lịch học (.ics).
   - `assets/screenshot-4-exam-plan.png`: Kế hoạch thi chi tiết, bảng tổng hợp môn thi & Xuất file lịch thi (.ics).
   - `assets/screenshot-5-popup.png`: Giao diện Popup Menu điều khiển nhanh và bật/tắt tính năng theo nhu cầu.
 
