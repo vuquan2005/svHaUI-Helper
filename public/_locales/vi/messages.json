@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "SV HaUI Helper",
+    "description": "Tên tiện ích"
+  },
+  "extensionDescription": {
+    "message": "Nâng cao trải nghiệm cho sinh viên HaUI",
+    "description": "Mô tả ngắn của tiện ích"
+  }
+}

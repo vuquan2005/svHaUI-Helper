@@ -18,8 +18,9 @@ export default defineConfig({
         }
 
         return {
-            name: 'SV HaUI Helper',
-            description: 'Nâng cao trải nghiệm cho sinh viên HaUI',
+            name: '__MSG_extensionName__',
+            description: '__MSG_extensionDescription__',
+            default_locale: 'vi',
             version,
             permissions,
             host_permissions: ['https://sv.haui.edu.vn/*'],

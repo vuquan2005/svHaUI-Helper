@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "SV HaUI Helper",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Enhance the experience for HaUI students",
+    "description": "Short extension description"
+  }
+}
