@@ -1,6 +1,37 @@
 import { browser } from 'wxt/browser';
 
+// Polyfill browser.commands for Firefox Android (where browser.commands is undefined)
+// to prevent WXT dev reload shortcut listener from crashing background initialization.
+try {
+    interface BrowserWithCommands {
+        commands?: {
+            onCommand?: {
+                addListener: (cb: unknown) => void;
+                removeListener: (cb: unknown) => void;
+                hasListener: (cb: unknown) => boolean;
+            };
+        };
+    }
+    const globals = globalThis as unknown as {
+        browser?: BrowserWithCommands;
+        chrome?: BrowserWithCommands;
+    };
+    const globalBrowser = globals.browser || globals.chrome;
+    if (globalBrowser && !globalBrowser.commands) {
+        globalBrowser.commands = {
+            onCommand: {
+                addListener: () => {},
+                removeListener: () => {},
+                hasListener: () => false,
+            },
+        };
+    }
+} catch {
+    // Ignore if global browser object is not extensible
+}
+
 export default defineBackground(() => {
+    console.log('ℹ️ [HaUI:Background] Background script initialized successfully');
     async function ensureOffscreenDocument(): Promise<void> {
         if (typeof chrome === 'undefined' || !chrome.offscreen) return;
         const hasDoc = await chrome.offscreen.hasDocument();
