@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.2.0...v3.3.0) (2026-09-19)
+
+
+### Features
+
+* **firefox:** add Firefox Android support and dev runner ([#123](https://github.com/vuquan2005/svHaUI-Helper/issues/123)) ([a527e67](https://github.com/vuquan2005/svHaUI-Helper/commit/a527e67dcc7ab507e935ee359d0652b1d5ed6f3f))
+
 ## [3.2.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.1.0...v3.2.0) (2026-09-16)
 
 
