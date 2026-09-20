@@ -6,6 +6,8 @@ Tài liệu này lưu trữ sẵn toàn bộ nội dung cần điền khi nộp 
 
 ## 1. Firefox Add-ons (AMO - addons.mozilla.org)
 
+- **Liên kết Store chính thức**: https://addons.mozilla.org/vi/firefox/addon/sv-haui-helper/
+
 ### 📌 Thông tin cơ bản
 
 - **Tên tiện ích**: `SV HaUI Helper`
@@ -105,6 +107,7 @@ Thank you very much for your time and assistance!
 
 ## 2. Microsoft Edge Add-ons (Partner Center)
 
+- **Liên kết Store chính thức**: https://microsoftedge.microsoft.com/addons/detail/nfhfnkngbclhmcanckbnpdgghpogadmj
 - **Gói tải lên**: File `.output/svhaui-helper-*-chrome.zip`
 - **Mô tả ngắn & Chi tiết**: Dùng chung nội dung như mục 1 (Firefox AMO).
 - **Hình ảnh quảng bá (Store Assets)**:

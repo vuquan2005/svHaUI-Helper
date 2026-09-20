@@ -15,6 +15,12 @@
 </p>
 
 <p align="center">
+  <a href="https://microsoftedge.microsoft.com/addons/detail/nfhfnkngbclhmcanckbnpdgghpogadmj">
+    <img src="https://img.shields.io/badge/Microsoft%20Edge-Add--ons-0078D7?style=flat-square&logo=microsoftedge" alt="Microsoft Edge Add-ons">
+  </a>
+  <a href="https://addons.mozilla.org/vi/firefox/addon/sv-haui-helper/">
+    <img src="https://img.shields.io/amo/v/sv-haui-helper?style=flat-square&logo=firefox-browser&label=Firefox%20Add-ons" alt="Firefox Add-ons">
+  </a>
   <a href="https://github.com/vuquan2005/svHaUI-Helper/releases">
     <img src="https://img.shields.io/github/v/release/vuquan2005/svHaUI-Helper?style=flat-square" alt="Release">
   </a>
@@ -53,24 +59,30 @@ Dự án hoạt động **offline 100%**, tích hợp mô hình AI ONNX nhận d
 
 ## 🚀 Cài đặt
 
-### Cài đặt từ GitHub Releases (Khuyến nghị)
+### 🏪 Cài đặt trực tiếp từ Cửa hàng tiện ích (Khuyến nghị)
 
-#### 🌐 Cho Microsoft Edge / Google Chrome / Cốc Cốc / Brave
+Cài đặt nhanh chóng chỉ với 1 click, tự động đồng bộ và cập nhật phiên bản mới:
+
+| Trình duyệt                                | Nguồn cài đặt                                                                                                                                                                                                              | Trạng thái                      |
+| :----------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ |
+| **Microsoft Edge**                         | [![Microsoft Edge Add-ons](https://img.shields.io/badge/Edge%20Add--ons-Cài%20đặt%20ngay-0078D7?style=flat-square&logo=microsoftedge)](https://microsoftedge.microsoft.com/addons/detail/nfhfnkngbclhmcanckbnpdgghpogadmj) | ✅ Đã phát hành chính thức      |
+| **Mozilla Firefox**                        | [![Firefox Add-ons](https://img.shields.io/badge/Firefox%20Add--ons-Cài%20đặt%20ngay-FF7139?style=flat-square&logo=firefox-browser)](https://addons.mozilla.org/vi/firefox/addon/sv-haui-helper/)                          | ✅ Đã phát hành chính thức      |
+| **Userscript (Tampermonkey/Greasemonkey)** | [![Greasy Fork](https://img.shields.io/badge/Greasy%20Fork-Cài%20Userscript-black?style=flat-square&logo=greasyfork)](https://greasyfork.org/vi/scripts/562762-sv-haui-helper)                                             | Đã ngừng phát triển             |
+| **Google Chrome**                          | Chrome Web Store                                                                                                                                                                                                           | Cài từ GitHub Releases bên dưới |
+
+---
+
+### 📦 Cài đặt thủ công từ GitHub Releases
+
+#### 🌐 Cho Chrome / Brave / Chromium
 
 1. Tải bản mới nhất `svhaui-helper-<version>-chrome.zip` tại [GitHub Releases](https://github.com/vuquan2005/svHaUI-Helper/releases/latest).
 2. Giải nén file `.zip` vào một thư mục trên máy tính của bạn (lưu ý không xóa thư mục này sau khi cài).
 3. Mở trình duyệt và truy cập:
-   - Edge: `edge://extensions`
-   - Chrome / Brave / Cốc Cốc: `chrome://extensions`
-4. Bật công tắc **Developer mode** (Chế độ cho nhà phát triển) ở góc trên bên phải hoặc menu bên trái.
+   - Chrome / Brave: `chrome://extensions`
+4. Bật công tắc **Developer mode** (Chế độ cho nhà phát triển) ở góc trên bên phải.
 5. Nhấp nút **Load unpacked** (Tải tiện ích đã giải nén) và chọn thư mục vừa giải nén.
 6. Truy cập [sv.haui.edu.vn](https://sv.haui.edu.vn) và tận hưởng!
-
-#### 🦊 Cho Mozilla Firefox
-
-1. Tải file `svhaui-helper-<version>-firefox.zip` tại [GitHub Releases](https://github.com/vuquan2005/svHaUI-Helper/releases/latest).
-2. Trên thanh địa chỉ Firefox, gõ `about:debugging#/runtime/this-firefox` và nhấn Enter.
-3. Bấm **Load Temporary Add-on...** (Tải tiện ích tạm thời...) và chọn file zip vừa tải.
 
 ---
 
