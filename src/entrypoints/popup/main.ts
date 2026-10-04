@@ -8,9 +8,22 @@ interface FeatureDef {
     name: string;
     description: string;
     isSubSetting?: boolean;
+    parentFeatureId?: string;
 }
 
 const FEATURES: FeatureDef[] = [
+    {
+        id: 'dark-mode',
+        name: 'Giao diện tối (Dark Mode)',
+        description: 'Chế độ nền tối bảo vệ mắt cho toàn bộ website và tiện ích',
+    },
+    {
+        id: 'dark_mode_system',
+        name: 'Tự động theo hệ thống',
+        description: 'Chỉ bật khi máy tính/điện thoại ở chế độ tối',
+        isSubSetting: true,
+        parentFeatureId: 'dark-mode',
+    },
     {
         id: 'captcha-helper',
         name: 'Tự động giải Captcha',
@@ -21,6 +34,7 @@ const FEATURES: FeatureDef[] = [
         name: 'Sửa lỗi gõ Telex ô Captcha',
         description: 'Tự chuyển chữ có dấu thành phím gõ gốc khi nhập mã',
         isSubSetting: true,
+        parentFeatureId: 'captcha-helper',
     },
     {
         id: 'exam-helper',
@@ -64,7 +78,31 @@ const FEATURES: FeatureDef[] = [
     },
 ];
 
+async function syncPopupTheme(): Promise<void> {
+    const stored = await browser.storage.local.get(['app_settings', 'dark_mode_system']);
+    const appSettings = stored.app_settings as { features?: Record<string, boolean> } | undefined;
+    const isEnabled = appSettings?.features?.['dark-mode'] ?? false;
+    const isSystem = Boolean(stored.dark_mode_system);
+
+    const isDark =
+        isEnabled && (!isSystem || window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('sv-dark', isDark);
+}
+
 async function initPopup(): Promise<void> {
+    // 0. Theme synchronization
+    await syncPopupTheme();
+
+    window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', () => void syncPopupTheme());
+
+    browser.storage.onChanged.addListener((changes, areaName) => {
+        if (areaName === 'local' && (changes.app_settings || changes.dark_mode_system)) {
+            void syncPopupTheme();
+        }
+    });
+
     // 1. Version display
     const versionEl = document.getElementById('app-version');
     if (versionEl && typeof __APP_VERSION__ !== 'undefined') {
@@ -184,18 +222,46 @@ async function renderFeatureToggles(): Promise<void> {
 
     listEl.innerHTML = '';
 
-    const stored = await browser.storage.local.get(['app_settings', 'captcha_undo_telex']);
+    const stored = await browser.storage.local.get([
+        'app_settings',
+        'captcha_undo_telex',
+        'dark_mode_system',
+    ]);
     const appSettings = (stored.app_settings || {
         logLevel: 'warn',
         features: {},
     }) as AppSettings;
-    const undoTelex = stored.captcha_undo_telex ?? true;
+    const undoTelex =
+        stored.captcha_undo_telex !== undefined ? Boolean(stored.captcha_undo_telex) : true;
+    const darkModeSystem = Boolean(stored.dark_mode_system);
 
     for (const feat of FEATURES) {
         const item = document.createElement('div');
-        item.className = 'toggle-item';
+        item.className = feat.isSubSetting ? 'toggle-item toggle-item-sub' : 'toggle-item';
 
-        const isChecked = feat.isSubSetting ? undoTelex : (appSettings.features?.[feat.id] ?? true);
+        const isParentEnabled = feat.parentFeatureId
+            ? feat.parentFeatureId === 'dark-mode'
+                ? (appSettings.features?.['dark-mode'] ?? false)
+                : (appSettings.features?.[feat.parentFeatureId] ?? true)
+            : true;
+
+        if (feat.parentFeatureId) {
+            item.setAttribute('data-parent', feat.parentFeatureId);
+            if (!isParentEnabled) {
+                item.classList.add('is-disabled');
+            }
+        }
+
+        let isChecked: boolean;
+        if (feat.id === 'captcha_undo_telex') {
+            isChecked = undoTelex;
+        } else if (feat.id === 'dark_mode_system') {
+            isChecked = darkModeSystem;
+        } else if (feat.id === 'dark-mode') {
+            isChecked = appSettings.features?.[feat.id] ?? false;
+        } else {
+            isChecked = appSettings.features?.[feat.id] ?? true;
+        }
 
         item.innerHTML = `
             <div class="toggle-info">
@@ -203,7 +269,7 @@ async function renderFeatureToggles(): Promise<void> {
                 <span class="toggle-desc">${feat.description}</span>
             </div>
             <label class="switch">
-                <input type="checkbox" data-id="${feat.id}" ${isChecked ? 'checked' : ''}>
+                <input type="checkbox" data-id="${feat.id}" ${isChecked ? 'checked' : ''} ${!isParentEnabled ? 'disabled' : ''}>
                 <span class="slider"></span>
             </label>
         `;
@@ -212,16 +278,36 @@ async function renderFeatureToggles(): Promise<void> {
         checkbox?.addEventListener('change', async (e) => {
             const checked = (e.target as HTMLInputElement).checked;
 
-            if (feat.isSubSetting) {
+            if (feat.id === 'captcha_undo_telex') {
                 await browser.storage.local.set({
                     captcha_undo_telex: checked,
                     'feat:captcha-helper.undoTelex': checked,
                 });
+            } else if (feat.id === 'dark_mode_system') {
+                await browser.storage.local.set({
+                    dark_mode_system: checked,
+                });
+                await syncPopupTheme();
             } else {
                 if (!appSettings.features) appSettings.features = {};
                 appSettings.features[feat.id] = checked;
                 await browser.storage.local.set({
                     app_settings: appSettings,
+                });
+                if (feat.id === 'dark-mode') {
+                    await syncPopupTheme();
+                }
+
+                // Update sub-settings if this feature is a parent
+                const childItems = listEl.querySelectorAll<HTMLElement>(
+                    `[data-parent="${feat.id}"]`
+                );
+                childItems.forEach((childItem) => {
+                    childItem.classList.toggle('is-disabled', !checked);
+                    const childInput = childItem.querySelector<HTMLInputElement>('input');
+                    if (childInput) {
+                        childInput.disabled = !checked;
+                    }
                 });
             }
         });

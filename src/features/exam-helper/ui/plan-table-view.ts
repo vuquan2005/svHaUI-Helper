@@ -6,7 +6,6 @@
 
 import { ExamPlanEntry } from '../types';
 import { getExamCountdown, ExamUrgency } from '../time-utils';
-import styles from '../style.module.scss';
 
 export interface PlanTableViewCallbacks {
     onDownloadSingle?: (entry: ExamPlanEntry) => void;
@@ -29,16 +28,16 @@ export interface PlanTableController {
 export function getBadgeClass(urgency: ExamUrgency): string {
     switch (urgency) {
         case 'urgent':
-            return styles.badgeUrgent;
+            return 'sv-exam-badge--urgent';
         case 'warning':
-            return styles.badgeWarning;
+            return 'sv-exam-badge--warning';
         case 'notice':
-            return styles.badgeNotice;
+            return 'sv-exam-badge--notice';
         case 'passed':
-            return styles.badgePassed;
+            return 'sv-exam-badge--passed';
         case 'normal':
         default:
-            return styles.badgeNormal;
+            return 'sv-exam-badge--normal';
     }
 }
 
@@ -48,11 +47,11 @@ export function getBadgeClass(urgency: ExamUrgency): string {
 export function getRowClass(urgency: ExamUrgency): string {
     switch (urgency) {
         case 'urgent':
-            return styles.rowUrgent;
+            return 'sv-exam-row--urgent';
         case 'warning':
-            return styles.rowWarning;
+            return 'sv-exam-row--warning';
         case 'passed':
-            return styles.rowPassed;
+            return 'sv-exam-row--passed';
         default:
             return '';
     }
@@ -83,7 +82,7 @@ export function createPlanTableRow(
         <td style="text-align: center; font-weight: 500;">${entry.examTime}</td>
         <td style="text-align: center;">Lần ${entry.attempt}</td>
         <td style="text-align: center;">
-            <span class="${styles.badge} ${badgeCls}" title="${countdown.label}">${countdown.shortLabel}</span>
+            <span class="sv-exam-badge ${badgeCls}" title="${countdown.label}">${countdown.shortLabel}</span>
         </td>
         <td style="text-align: center; font-size: 12px; color: #64748b;">${entry.department || '--'}</td>
         ${
@@ -141,11 +140,11 @@ export function createStreamingPlanTable(
     callbacks: PlanTableViewCallbacks = {}
 ): PlanTableController {
     const panel = document.createElement('div');
-    panel.className = styles.planSummaryPanel;
+    panel.className = 'sv-exam-plan-panel';
 
     // Header
     const header = document.createElement('div');
-    header.className = styles.panelHead;
+    header.className = 'sv-exam-panel-head';
 
     const title = document.createElement('h3');
     const badgeSpan = document.createElement('span');
@@ -160,7 +159,7 @@ export function createStreamingPlanTable(
 
     // Responsive table wrapper
     const tableWrap = document.createElement('div');
-    tableWrap.className = `${styles.tableResponsive} table-responsive`;
+    tableWrap.className = 'sv-exam-table-responsive table-responsive';
 
     const table = document.createElement('table');
     table.className = 'table table-bordered table-striped table-hover';

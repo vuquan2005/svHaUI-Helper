@@ -4,7 +4,7 @@
  * Uses Bootstrap 3 classes already available on HaUI portal.
  */
 
-import styles from './style.module.scss';
+import './style.scss';
 
 // ============================================
 // Types
@@ -42,7 +42,7 @@ export type UpdateBtnState = 'ready' | 'updating' | 'done' | 'error';
  */
 export function createExamPlanUI(callbacks: ExamUICallbacks): ExamUIRefs {
     const container = document.createElement('div');
-    container.className = styles.container;
+    container.className = 'sv-exam-container';
 
     const downloadBtn = createDownloadButton(callbacks.onDownloadExam);
     container.appendChild(downloadBtn);
@@ -67,7 +67,7 @@ export function createExamPlanUI(callbacks: ExamUICallbacks): ExamUIRefs {
  */
 export function createExamScheduleUI(callbacks: ExamUICallbacks): ExamUIRefs {
     const container = document.createElement('div');
-    container.className = styles.scheduleContainer;
+    container.className = 'sv-exam-schedule-container';
 
     const downloadBtn = createDownloadButton(callbacks.onDownloadExam);
     container.appendChild(downloadBtn);

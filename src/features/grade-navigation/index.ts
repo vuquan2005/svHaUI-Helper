@@ -4,7 +4,7 @@
  */
 
 import { Feature } from '@/core';
-import styles from './style.module.scss';
+import './style.scss';
 
 // ============================================
 // Types
@@ -22,7 +22,7 @@ interface NavLink {
 // Constants
 // ============================================
 
-const CSS_PREFIX = styles.cssPrefix;
+const CSS_PREFIX = 'sv-grade-nav';
 
 // ============================================
 // URL Matching Patterns

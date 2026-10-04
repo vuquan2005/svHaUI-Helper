@@ -1,0 +1,15 @@
+/**
+ * SV HaUI Helper - Dark Theme Stylesheet
+ * Native dark theme for HaUI Portal (sv.haui.edu.vn)
+ * Activates whenever html has the 'sv-dark' class.
+ */
+
+// 1. Global Design System Tokens
+@use '@/styles/theme';
+
+// 2. Dark Mode Partials
+@use './styles/variables';
+@use './styles/layout';
+@use './styles/dashboard';
+@use './styles/components';
+@use './styles/pages';

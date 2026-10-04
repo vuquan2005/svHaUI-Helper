@@ -1,0 +1,202 @@
+@use './variables' as *;
+
+@media screen {
+  html.sv-dark {
+    /* -------------------------------------------------------------
+     * LOGIN VIEW (Unauthenticated State - div.splash-container)
+     * ----------------------------------------------------------- */
+    .splash-container {
+      background-color: transparent !important;
+
+      .panel.panel-default,
+      .panel {
+        background-color: $sv-dark-bg-surface !important;
+        border: 1px solid $sv-dark-border !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+      }
+
+      .panel-heading {
+        background-color: $sv-dark-bg-base !important;
+        border-bottom: 1px solid $sv-dark-border !important;
+      }
+
+      .splash-description {
+        h4 {
+          color: $sv-dark-text-head !important;
+          font-weight: 700 !important;
+        }
+
+        h5 {
+          color: $sv-dark-text-muted !important;
+        }
+      }
+
+      .panel-body {
+        background-color: $sv-dark-bg-surface !important;
+
+        a[href*='loginapi/sv'] {
+          background-color: $sv-dark-bg-base !important;
+          border: 1px solid $sv-dark-border !important;
+          color: $sv-dark-text-head !important;
+          border-radius: 8px !important;
+          display: inline-block !important;
+          padding: 8px 16px !important;
+          text-decoration: none !important;
+          transition: all 0.15s ease !important;
+
+          &:hover {
+            background-color: $sv-dark-bg-hover !important;
+            border-color: $sv-dark-primary !important;
+            color: $sv-dark-primary !important;
+          }
+        }
+      }
+
+      #ctl00_inpUserName,
+      #ctl00_inpPassword {
+        background-color: $sv-dark-bg-base !important;
+        border-color: $sv-dark-border !important;
+        color: $sv-dark-text-head !important;
+      }
+
+      #ctl00_butLogin {
+        background-color: $sv-dark-primary-hover !important;
+        border-color: $sv-dark-primary-active !important;
+        color: #ffffff !important;
+
+        &:hover {
+          background-color: $sv-dark-primary-active !important;
+        }
+      }
+
+      .splash-footer {
+        background-color: $sv-dark-bg-base !important;
+        border-top: 1px solid $sv-dark-border !important;
+        color: $sv-dark-text-muted !important;
+
+        a {
+          color: $sv-dark-primary !important;
+
+          &:hover {
+            color: $sv-dark-link !important;
+            text-decoration: underline !important;
+          }
+        }
+      }
+    }
+
+    /* Survey Page & Modals */
+    #kbox.modal-content,
+    #kSurvey_All {
+      background-color: $sv-dark-bg-surface !important;
+      color: $sv-dark-text-main !important;
+    }
+
+    .panel-full-primary {
+      background-color: $sv-dark-bg-base !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-main !important;
+    }
+
+    /* Kendo Window / kPortal Dialogs */
+    .k-window {
+      background-color: $sv-dark-bg-surface !important;
+      border: 1px solid $sv-dark-border !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+      color: $sv-dark-text-head !important;
+
+      .k-window-titlebar {
+        background-color: $sv-dark-bg-base !important;
+        border-bottom: 1px solid $sv-dark-border !important;
+        color: $sv-dark-text-head !important;
+
+        .k-window-title {
+          color: $sv-dark-text-head !important;
+          font-weight: 600 !important;
+        }
+
+        .k-window-actions .k-icon {
+          color: $sv-dark-text-muted !important;
+
+          &:hover {
+            color: #ffffff !important;
+          }
+        }
+      }
+
+      .k-window-content {
+        background-color: $sv-dark-bg-surface !important;
+        color: $sv-dark-text-main !important;
+
+        iframe {
+          background-color: $sv-dark-bg-surface !important;
+        }
+      }
+    }
+
+    .k-overlay {
+      background-color: $sv-dark-bg-base !important;
+      opacity: 0.7 !important;
+    }
+
+    /* Select2 */
+    .select2-container--default {
+      .select2-selection--single {
+        background-color: $sv-dark-bg-base !important;
+        border-color: $sv-dark-border !important;
+
+        .select2-selection__rendered {
+          color: $sv-dark-text-head !important;
+        }
+      }
+
+      .select2-dropdown {
+        background-color: $sv-dark-bg-surface !important;
+        border-color: $sv-dark-border !important;
+      }
+
+      .select2-search--dropdown .select2-search__field {
+        background-color: $sv-dark-bg-base !important;
+        border-color: $sv-dark-border !important;
+        color: $sv-dark-text-head !important;
+      }
+
+      .select2-results__option {
+        color: $sv-dark-text-main !important;
+      }
+
+      .select2-results__option--highlighted[aria-selected] {
+        background-color: $sv-dark-primary-hover !important;
+        color: #ffffff !important;
+      }
+    }
+
+    scrollbar-color: var(--sv-border, #334155) var(--sv-bg-base, #0f172a);
+
+    /* -------------------------------------------------------------
+     * 4. SCROLLBARS IN DARK MODE
+     * ----------------------------------------------------------- */
+    &::-webkit-scrollbar,
+    & *::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track,
+    & *::-webkit-scrollbar-track {
+      background: $sv-dark-bg-base;
+    }
+
+    &::-webkit-scrollbar-thumb,
+    & *::-webkit-scrollbar-thumb {
+      background: $sv-dark-border;
+      border-radius: 4px;
+
+      &:hover {
+        background: $sv-dark-border-hover;
+      }
+    }
+  }
+}

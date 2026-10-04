@@ -7,7 +7,7 @@
 import { Feature } from '@/core';
 import { observeDomUntil } from '@/utils/dom';
 import { ADDITIONAL_SHORTCUTS, SHORTCUT_SORT_ORDER, ShortcutItem } from './shortcuts';
-import './style.module.scss';
+import './style.scss';
 
 export const SHORTCUT_CLASS = 'sv-helper-shortcut';
 

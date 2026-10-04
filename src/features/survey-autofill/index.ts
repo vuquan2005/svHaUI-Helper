@@ -4,7 +4,7 @@
  */
 
 import { Feature } from '@/core';
-import styles from './style.module.scss';
+import './style.scss';
 
 export class SurveyAutofillFeature extends Feature {
     constructor() {
@@ -49,7 +49,7 @@ export class SurveyAutofillFeature extends Feature {
             return;
         }
 
-        headerRow.classList.add(styles.cssPrefix);
+        headerRow.classList.add('sv-survey-autofill');
 
         cells.forEach((cell, index) => {
             const score = index + 1;

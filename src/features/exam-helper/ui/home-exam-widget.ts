@@ -6,7 +6,6 @@
 import { ExamScheduleEntry, ExamPlanEntry } from '../types';
 import { getExamCountdown } from '../time-utils';
 import { getBadgeClass } from './plan-table-view';
-import styles from '../style.module.scss';
 
 export interface UnifiedUpcomingExam {
     course: string;
@@ -87,14 +86,14 @@ export function createHomeExamWidget(
     callbacks: HomeExamWidgetCallbacks = {}
 ): HTMLDivElement {
     const widget = document.createElement('div');
-    widget.className = styles.homeExamWidget;
+    widget.className = 'sv-exam-home-widget';
 
     // Header
     const header = document.createElement('div');
-    header.className = styles.widgetHeader;
+    header.className = 'sv-exam-widget-header';
 
     const title = document.createElement('h4');
-    title.className = styles.widgetTitle;
+    title.className = 'sv-exam-widget-title';
 
     const actions = document.createElement('div');
     actions.className = 'widget-actions';
@@ -127,7 +126,7 @@ export function createHomeExamWidget(
     }
 
     const viewAll = document.createElement('a');
-    viewAll.className = styles.viewAllLink;
+    viewAll.className = 'sv-exam-view-all';
     viewAll.href = '/student/schedulefees/transactionmodules';
     viewAll.innerHTML = 'Chi tiết &rarr;';
     actions.appendChild(viewAll);
@@ -138,7 +137,7 @@ export function createHomeExamWidget(
 
     // Body (List / Empty State)
     const listContainer = document.createElement('div');
-    listContainer.className = styles.examList;
+    listContainer.className = 'sv-exam-list';
     widget.appendChild(listContainer);
 
     // Initial render of content
@@ -156,8 +155,8 @@ export function updateHomeExamWidget(
     planEntries?: ExamPlanEntry[]
 ): void {
     const upcomingList = getUpcomingExamsList(scheduleEntries, planEntries);
-    const listContainer = widget.querySelector(`.${styles.examList}`);
-    const title = widget.querySelector(`.${styles.widgetTitle}`);
+    const listContainer = widget.querySelector('.sv-exam-list');
+    const title = widget.querySelector('.sv-exam-widget-title');
     const downloadBtn = widget.querySelector<HTMLButtonElement>('.home-download-btn');
 
     if (upcomingList.length > 0) {
@@ -172,19 +171,19 @@ export function updateHomeExamWidget(
             listContainer.innerHTML = '';
             for (const { exam, countdown } of upcomingList) {
                 const card = document.createElement('div');
-                card.className = styles.examCard;
+                card.className = 'sv-exam-card';
                 const badgeClass = getBadgeClass(countdown.urgency);
 
                 let locationHtml = '';
                 if (exam.room && exam.building) {
-                    locationHtml = `<div class="${styles.examLocation}">📍 Phòng: <strong>${exam.room} - ${exam.building}</strong> ${exam.sbd ? `(SBD: ${exam.sbd})` : ''}</div>`;
+                    locationHtml = `<div class="sv-exam-location">📍 Phòng: <strong>${exam.room} - ${exam.building}</strong> ${exam.sbd ? `(SBD: ${exam.sbd})` : ''}</div>`;
                 }
 
                 card.innerHTML = `
-                    <div class="${styles.courseName}">${exam.course}</div>
-                    <div class="${styles.examMeta}">
+                    <div class="sv-exam-course-name">${exam.course}</div>
+                    <div class="sv-exam-meta">
                         <span>🗓️ ${exam.examTime} ngày ${exam.examDate}</span>
-                        <span class="${styles.badge} ${badgeClass}">${countdown.shortLabel}</span>
+                        <span class="sv-exam-badge ${badgeClass}">${countdown.shortLabel}</span>
                     </div>
                     ${locationHtml}
                 `;
@@ -207,7 +206,7 @@ export function updateHomeExamWidget(
                     : '📭 Chưa có dữ liệu lịch thi. Hãy bấm "Đồng bộ" để tải tự động.';
 
             listContainer.innerHTML = `
-                <div class="${styles.emptyState}">
+                <div class="sv-exam-empty-state">
                     <span>${message}</span>
                 </div>
             `;
@@ -245,7 +244,7 @@ export function mountHomeExamWidget(
     if (!dashboard) return false;
 
     // 3. Avoid injecting duplicate widgets
-    if (widget.isConnected || dashboard.querySelector(`.${styles.homeExamWidget}`)) {
+    if (widget.isConnected || dashboard.querySelector('.sv-exam-home-widget')) {
         return true;
     }
 

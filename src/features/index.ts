@@ -13,10 +13,12 @@ import { ExportTimetableFeature } from './export-timetable';
 import { GradePredictionFeature } from './grade-prediction';
 import { HomeShortcutsFeature } from './home-shortcuts';
 import { ExamHelperFeature } from './exam-helper';
+import { DarkModeFeature } from './dark-mode';
 
 // Add new features here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const allFeatures: Feature<any>[] = [
+    new DarkModeFeature(),
     new DynamicTitleFeature(),
     new CaptchaHelperFeature(),
     new GradeNavigationFeature(),

@@ -1,0 +1,11 @@
+.sv-survey-autofill {
+  > td {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+
+    &:hover {
+      background-color: var(--sv-bg-surface-hover, rgba(0, 0, 0, 0.05));
+    }
+  }
+}

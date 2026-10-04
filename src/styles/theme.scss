@@ -1,0 +1,144 @@
+/**
+ * SV HaUI Helper - Global Design System Tokens
+ * CSS Custom Properties for light, dark, and print modes.
+ * Applied across Extension pages (Popup) and injected Portal UI components.
+ */
+
+:root {
+  /* Brand & Accent Colors */
+  --sv-primary: #0054a6;
+  --sv-primary-hover: #003e7d;
+  --sv-primary-active: #002d5b;
+  --sv-accent: #f37021;
+  --sv-accent-hover: #d95d13;
+  --sv-accent-light: #fff3ec;
+
+  /* Surfaces & Backgrounds */
+  --sv-bg-base: #f8fafc;
+  --sv-bg-surface: #ffffff;
+  --sv-bg-surface-hover: #f1f5f9;
+  --sv-bg-surface-active: #e2e8f0;
+  --sv-bg-nested: #f8fafc;
+  --sv-bg-alt: #f1f5f9;
+  --sv-bg-hover-subtle: #f1f5f9;
+  --sv-card-bg: #ffffff;
+  --sv-header-bg: #ffffff;
+  --sv-footer-bg: #ffffff;
+  --sv-sub-item-bg: #f8fafc;
+  --sv-nav-hover-bg: #f0f7ff;
+
+  /* Typography / Text Colors */
+  --sv-text-main: #1e293b;
+  --sv-text-head: #0f172a;
+  --sv-text-muted: #64748b;
+  --sv-text-dim: #94a3b8;
+  --sv-text-white: #ffffff;
+  --sv-link: #0054a6;
+  --sv-link-hover: #003e7d;
+
+  /* Borders & Dividers */
+  --sv-border: #e2e8f0;
+  --sv-border-subtle: #f1f5f9;
+  --sv-border-hover: #cbd5e1;
+
+  /* Component Tokens */
+  --sv-slider-bg: #cbd5e1;
+  --sv-badge-bg: #f1f5f9;
+
+  /* Border Radii */
+  --sv-radius-sm: 6px;
+  --sv-radius-md: 10px;
+  --sv-radius-lg: 14px;
+  --sv-radius-full: 9999px;
+
+  /* Shadows */
+  --sv-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --sv-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --sv-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+
+  /* Backward-compatible aliases */
+  --primary-color: var(--sv-primary);
+  --primary-hover: var(--sv-primary-hover);
+  --accent-color: var(--sv-accent);
+  --accent-light: var(--sv-accent-light);
+  --bg-color: var(--sv-bg-base);
+  --card-bg: var(--sv-card-bg);
+  --header-bg: var(--sv-header-bg);
+  --footer-bg: var(--sv-footer-bg);
+  --text-main: var(--sv-text-main);
+  --text-muted: var(--sv-text-muted);
+  --border-color: var(--sv-border);
+  --border-subtle: var(--sv-border-subtle);
+  --sub-item-bg: var(--sv-sub-item-bg);
+  --nav-hover-bg: var(--sv-nav-hover-bg);
+  --slider-bg: var(--sv-slider-bg);
+  --badge-bg: var(--sv-badge-bg);
+  --radius-sm: var(--sv-radius-sm);
+  --radius-md: var(--sv-radius-md);
+  --radius-lg: var(--sv-radius-lg);
+}
+
+@media screen {
+  :root.sv-dark,
+  html.sv-dark {
+    /* Brand & Accent Colors */
+    --sv-primary: #3b82f6;
+    --sv-primary-hover: #2563eb;
+    --sv-primary-active: #1d4ed8;
+    --sv-accent: #f97316;
+    --sv-accent-hover: #fb923c;
+    --sv-accent-light: rgba(249, 115, 22, 0.2);
+
+    /* Surfaces & Backgrounds */
+    --sv-bg-base: #0f172a;
+    --sv-bg-surface: #1e293b;
+    --sv-bg-surface-hover: #243044;
+    --sv-bg-surface-active: #182234;
+    --sv-bg-nested: #151d2c;
+    --sv-bg-alt: #172233;
+    --sv-bg-hover-subtle: #2e3d54;
+    --sv-card-bg: #1e293b;
+    --sv-header-bg: #1e293b;
+    --sv-footer-bg: #1e293b;
+    --sv-sub-item-bg: #162032;
+    --sv-nav-hover-bg: #243044;
+
+    /* Typography / Text Colors */
+    --sv-text-main: #cbd5e1;
+    --sv-text-head: #f1f5f9;
+    --sv-text-muted: #94a3b8;
+    --sv-text-dim: #64748b;
+    --sv-text-white: #ffffff;
+    --sv-link: #60a5fa;
+    --sv-link-hover: #93c5fd;
+
+    /* Borders & Dividers */
+    --sv-border: #334155;
+    --sv-border-subtle: #243044;
+    --sv-border-hover: #475569;
+
+    /* Component Tokens */
+    --sv-slider-bg: #475569;
+    --sv-badge-bg: #334155;
+
+    /* Shadows */
+    --sv-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --sv-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --sv-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* -------------------------------------------------------------
+ * Global Patches: Fix HaUI legacy sidebar artifacts
+ * ----------------------------------------------------------- */
+.sb__list > li.parent:not(.open) > ul.sub-menu,
+.sb__list > li.parent:not(.open) > ul {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  overflow: hidden !important;
+}

@@ -1,17 +1,4 @@
-:root {
-  --primary-color: #0054a6;
-  --primary-hover: #003e7d;
-  --accent-color: #f37021;
-  --accent-light: #fff3ec;
-  --bg-color: #f8fafc;
-  --card-bg: #ffffff;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-}
+@use '@/styles/theme';
 
 * {
   box-sizing: border-box;
@@ -22,8 +9,8 @@
 body {
   width: 350px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-main);
+  background-color: var(--sv-bg-base);
+  color: var(--sv-text-main);
   font-size: 13px;
   line-height: 1.4;
   user-select: none;
@@ -35,8 +22,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #ffffff;
-  border-bottom: 1px solid var(--border-color);
+  background: var(--sv-header-bg);
+  border-bottom: 1px solid var(--sv-border);
 
   .logo-title {
     display: flex;
@@ -53,15 +40,15 @@ body {
     h1 {
       font-size: 14px;
       font-weight: 700;
-      color: var(--primary-color);
+      color: var(--sv-primary);
       line-height: 1.2;
     }
 
     .badge {
       font-size: 10px;
       font-weight: 600;
-      color: var(--text-muted);
-      background: #f1f5f9;
+      color: var(--sv-text-muted);
+      background: var(--sv-badge-bg);
       padding: 2px 6px;
       border-radius: 999px;
       display: inline-block;
@@ -70,13 +57,13 @@ body {
   }
 
   .github-link {
-    color: var(--text-muted);
+    color: var(--sv-text-muted);
     transition: color 0.2s;
     display: flex;
     align-items: center;
 
     &:hover {
-      color: var(--text-main);
+      color: var(--sv-text-main);
     }
   }
 }
@@ -91,15 +78,15 @@ body {
 
 /* Card */
 .card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: var(--sv-card-bg);
+  border: 1px solid var(--sv-border);
+  border-radius: var(--sv-radius-md);
   padding: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .exam-card {
-  border-left: 4px solid var(--accent-color);
+  border-left: 4px solid var(--sv-accent);
 
   .card-header {
     display: flex;
@@ -110,7 +97,7 @@ body {
     .card-title {
       font-weight: 600;
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--sv-text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -118,8 +105,8 @@ body {
     .badge-accent {
       font-size: 11px;
       font-weight: 600;
-      color: var(--accent-color);
-      background: var(--accent-light);
+      color: var(--sv-accent);
+      background: var(--sv-accent-light);
       padding: 2px 8px;
       border-radius: 999px;
     }
@@ -129,13 +116,13 @@ body {
     .exam-name {
       font-size: 14px;
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--sv-text-main);
       margin-bottom: 4px;
     }
 
     .exam-meta {
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--sv-text-muted);
       display: flex;
       gap: 8px;
     }
@@ -148,7 +135,7 @@ body {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--sv-text-muted);
     letter-spacing: 0.5px;
     margin-bottom: 8px;
   }
@@ -165,10 +152,10 @@ body {
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    color: var(--text-main);
+    background: var(--sv-card-bg);
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius-sm);
+    color: var(--sv-text-main);
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -180,9 +167,9 @@ body {
     }
 
     &:hover {
-      border-color: var(--primary-color);
-      background: #f0f7ff;
-      color: var(--primary-color);
+      border-color: var(--sv-primary);
+      background: var(--sv-nav-hover-bg);
+      color: var(--sv-primary);
       transform: translateY(-1px);
     }
 
@@ -194,9 +181,9 @@ body {
 
 /* Toggles List */
 .toggles-list {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: var(--sv-card-bg);
+  border: 1px solid var(--sv-border);
+  border-radius: var(--sv-radius-md);
   overflow: hidden;
 
   .toggle-item {
@@ -204,10 +191,25 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 10px 12px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--sv-border-subtle);
 
     &:last-child {
       border-bottom: none;
+    }
+
+    &.toggle-item-sub {
+      padding-left: 22px;
+      background-color: var(--sv-sub-item-bg);
+      border-left: 3px solid #3b82f6;
+    }
+
+    &.is-disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+
+      .switch {
+        pointer-events: none;
+      }
     }
 
     .toggle-info {
@@ -219,12 +221,12 @@ body {
       .toggle-title {
         font-size: 12px;
         font-weight: 500;
-        color: var(--text-main);
+        color: var(--sv-text-main);
       }
 
       .toggle-desc {
         font-size: 11px;
-        color: var(--text-muted);
+        color: var(--sv-text-muted);
       }
     }
   }
@@ -247,11 +249,8 @@ body {
   .slider {
     position: absolute;
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #cbd5e1;
+    inset: 0;
+    background-color: var(--sv-slider-bg);
     transition: 0.2s;
     border-radius: 20px;
 
@@ -270,7 +269,7 @@ body {
   }
 
   input:checked + .slider {
-    background-color: var(--primary-color);
+    background-color: var(--sv-primary);
   }
 
   input:checked + .slider:before {
@@ -284,22 +283,22 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: #ffffff;
-  border-top: 1px solid var(--border-color);
+  background: var(--sv-footer-bg);
+  border-top: 1px solid var(--sv-border);
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--sv-text-muted);
 
   .donate-btn {
     background: none;
     border: none;
-    color: var(--accent-color);
+    color: var(--sv-accent);
     font-weight: 600;
     cursor: pointer;
     padding: 4px 6px;
     border-radius: 4px;
 
     &:hover {
-      background: var(--accent-light);
+      background: var(--sv-accent-light);
     }
   }
 }

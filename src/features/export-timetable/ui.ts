@@ -11,7 +11,7 @@ import {
 } from './semester-config';
 import { TimetableDiff } from './types';
 import { formatDateVN } from '../../utils/date';
-import styles from './style.module.scss';
+import './style.scss';
 
 // ============================================
 // Types
@@ -46,7 +46,7 @@ export interface UIRefs {
  */
 export function createExportTimetableUI(callbacks: UICallbacks): UIRefs {
     const container = document.createElement('div');
-    container.className = `svhaui-export-timetable ${styles.container}`;
+    container.className = 'svhaui-export-timetable';
 
     // Download split-button
     const downloadGroup = createDownloadSplitButton(

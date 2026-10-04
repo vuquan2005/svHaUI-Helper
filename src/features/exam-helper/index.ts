@@ -9,6 +9,7 @@
 
 import { Feature } from '@/core';
 import { observeDomUntil } from '@/utils/dom';
+import './style.scss';
 import { ExportExamStorage, ExamPlanEntry, ExamScheduleEntry } from './types';
 import {
     parseExamScheduleFromDOM,
