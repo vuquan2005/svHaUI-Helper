@@ -57,3 +57,53 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ steps.release.outputs.tag_name }} .output/*.zip
+
+      - name: Submit to Web Stores
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID || 'svhaui-helper@vuquan.dev' }}
+          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID || 'nfhfnkngbclhmcanckbnpdgghpogadmj' }}
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+        run: |
+          ARGS=()
+
+          # 1. Mozilla Firefox Add-ons (AMO)
+          if [ -n "$FIREFOX_JWT_ISSUER" ] && [ -n "$FIREFOX_JWT_SECRET" ]; then
+            echo "📦 Preparing submission for Firefox Add-ons..."
+            ARGS+=(
+              --firefox-extension-id "$FIREFOX_EXTENSION_ID"
+              --firefox-zip "$(ls .output/*-firefox.zip)"
+              --firefox-sources-zip "$(ls .output/*-sources.zip)"
+            )
+          fi
+
+          # 2. Google Chrome Web Store
+          if [ -n "$CHROME_EXTENSION_ID" ] && [ -n "$CHROME_CLIENT_ID" ] && [ -n "$CHROME_CLIENT_SECRET" ] && [ -n "$CHROME_REFRESH_TOKEN" ]; then
+            echo "📦 Preparing submission for Chrome Web Store..."
+            ARGS+=(
+              --chrome-extension-id "$CHROME_EXTENSION_ID"
+              --chrome-zip "$(ls .output/*-chrome.zip)"
+            )
+          fi
+
+          # 3. Microsoft Edge Add-ons
+          if [ -n "$EDGE_API_KEY" ] && [ -n "$EDGE_CLIENT_ID" ]; then
+            echo "📦 Preparing submission for Edge Add-ons..."
+            ARGS+=(
+              --edge-product-id "$EDGE_PRODUCT_ID"
+              --edge-zip "$(ls .output/*-chrome.zip)"
+            )
+          fi
+
+          if [ ${#ARGS[@]} -gt 0 ]; then
+            pnpm wxt submit "${ARGS[@]}"
+          else
+            echo "ℹ️ No store credentials configured in repository secrets. Skipping store submission."
+          fi
