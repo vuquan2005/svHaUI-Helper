@@ -8,7 +8,6 @@
 
 import { getExamCountdown } from '../time-utils';
 import { getBadgeClass, getRowClass } from './plan-table-view';
-import styles from '../style.module.scss';
 
 const COL_INDEX = 1;
 const COL_DATE = 3;
@@ -69,7 +68,7 @@ export function enhanceScheduleTable(tableEl: HTMLTableElement): void {
 
         // Add badge under date
         const badge = document.createElement('div');
-        badge.className = `${styles.badge} ${getBadgeClass(countdown.urgency)}`;
+        badge.className = `sv-exam-badge ${getBadgeClass(countdown.urgency)}`;
         badge.title = countdown.label;
         badge.textContent = countdown.shortLabel;
 

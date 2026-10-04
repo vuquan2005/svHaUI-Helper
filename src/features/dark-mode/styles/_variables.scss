@@ -1,0 +1,26 @@
+// =============================================================
+// Theme Variables (Slate System Palette mapped to Design System Tokens)
+// =============================================================
+$sv-dark-bg-base: var(--sv-bg-base, #0f172a); // Slate 900 - Body & Background
+$sv-dark-bg-surface: var(--sv-bg-surface, #1e293b); // Slate 800 - Header, Sidebar, Panels, Cards
+$sv-dark-bg-hover: var(--sv-bg-surface-hover, #243044); // Surface hover
+$sv-dark-bg-hover-subtle: var(--sv-bg-hover-subtle, #2e3d54); // Hover chip
+$sv-dark-bg-active: var(--sv-bg-surface-active, #182234); // Open / active items
+$sv-dark-bg-nested: var(--sv-bg-nested, #151d2c); // Submenus / nested sections
+$sv-dark-bg-alt: var(--sv-bg-alt, #172233); // Zebra table alternate rows
+
+$sv-dark-border: var(--sv-border, #334155); // Slate 700 - Standard border
+$sv-dark-border-hover: var(--sv-border-hover, #475569); // Slate 600 - Hover border
+$sv-dark-border-subtle: var(--sv-border-subtle, #243044); // Subtle dividers
+
+$sv-dark-text-main: var(--sv-text-main, #cbd5e1); // Slate 300 - Standard text
+$sv-dark-text-head: var(--sv-text-head, #f1f5f9); // Slate 100 - High contrast text & headings
+$sv-dark-text-white: #ffffff;
+$sv-dark-text-muted: var(--sv-text-muted, #94a3b8); // Slate 400 - Secondary text, captions
+$sv-dark-text-dim: var(--sv-text-dim, #64748b); // Slate 500 - Chevrons, icons, breadcrumbs
+
+$sv-dark-primary: var(--sv-primary, #3b82f6); // Blue 500 - Brand / accent
+$sv-dark-primary-hover: var(--sv-primary-hover, #2563eb); // Blue 600
+$sv-dark-primary-active: var(--sv-primary-active, #1d4ed8); // Blue 700
+$sv-dark-link: var(--sv-link, #60a5fa); // Blue 400 - Links
+$sv-dark-link-hover: var(--sv-link-hover, #93c5fd); // Blue 300

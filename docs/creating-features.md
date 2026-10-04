@@ -21,7 +21,7 @@ Mỗi feature trong dự án:
 src/features/
 └── my-feature/
     ├── index.ts
-    └── style.module.scss # Nếu cần CSS
+    └── style.scss # Nếu cần CSS
 ```
 
 ### 2. Tạo Feature class
@@ -29,7 +29,7 @@ src/features/
 ```typescript
 // src/features/my-feature/index.ts
 import { Feature } from '@/core';
-import styles from './style.module.scss';
+import './style.scss'; // Nếu cần CSS
 
 export class MyFeature extends Feature {
   constructor() {
@@ -45,8 +45,8 @@ export class MyFeature extends Feature {
     // this.log tự động có prefix [HaUI:My Feature]
     this.log.i('Đang khởi tạo...');
 
-    // Thêm class từ module CSS
-    document.body.classList.add(styles.myFeatureContainer);
+    // Thêm class từ file CSS (quy ước tiền tố sv-*)
+    document.body.classList.add('sv-my-feature');
 
     // Logic của bạn ở đây
   }

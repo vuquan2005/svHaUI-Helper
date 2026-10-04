@@ -1,0 +1,155 @@
+@use './variables' as *;
+
+@media screen {
+  html.sv-dark {
+    /* -------------------------------------------------------------
+     * 2. STUDENT DASHBOARD (CTTSV)
+     * ----------------------------------------------------------- */
+    .cttsv-dashboard {
+      color: $sv-dark-text-main !important;
+
+      /* Hero Section */
+      .cttsv-hero {
+        background: linear-gradient(135deg, #1e3a8a 0%, #0e7490 52%, #065f46 100%) !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+
+        h1 {
+          color: #ffffff !important;
+        }
+
+        .cttsv-avatar {
+          background: rgba(255, 255, 255, 0.12) !important;
+          border-color: rgba(255, 255, 255, 0.25) !important;
+        }
+
+        .cttsv-student-meta span {
+          background: rgba(255, 255, 255, 0.16) !important;
+          color: $sv-dark-text-head !important;
+        }
+
+        .cttsv-hero-actions {
+          .cttsv-btn-light {
+            background: rgba(255, 255, 255, 0.16) !important;
+            color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+
+            &:hover {
+              background: rgba(255, 255, 255, 0.25) !important;
+            }
+          }
+
+          .cttsv-btn-primary {
+            background: $sv-dark-primary !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+
+            &:hover {
+              background: $sv-dark-primary-hover !important;
+            }
+          }
+        }
+      }
+
+      /* KPI Cards */
+      .cttsv-kpi-grid .cttsv-kpi-card {
+        background: $sv-dark-bg-surface !important;
+        border-color: $sv-dark-border !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+
+        &:hover {
+          background: $sv-dark-bg-hover !important;
+          border-color: $sv-dark-primary !important;
+        }
+
+        .cttsv-kpi-body strong {
+          color: $sv-dark-text-head !important;
+        }
+
+        .cttsv-kpi-body em {
+          color: $sv-dark-text-muted !important;
+        }
+      }
+
+      /* Overview & Sections */
+      .cttsv-section,
+      .cttsv-panel {
+        background: $sv-dark-bg-surface !important;
+        border: 1px solid $sv-dark-border !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+
+        .cttsv-section-head h2,
+        .cttsv-panel-head h3 {
+          color: $sv-dark-text-head !important;
+        }
+      }
+
+      .cttsv-profile-card {
+        background: $sv-dark-bg-surface !important;
+        border: 1px solid $sv-dark-border !important;
+
+        .cttsv-data-list dt {
+          color: $sv-dark-text-muted !important;
+        }
+
+        .cttsv-data-list dd {
+          color: $sv-dark-text-head !important;
+        }
+      }
+
+      .cttsv-stat-grid .cttsv-stat-item {
+        background: $sv-dark-bg-base !important;
+        border: 1px solid $sv-dark-border !important;
+
+        strong {
+          color: $sv-dark-text-head !important;
+        }
+
+        em {
+          color: $sv-dark-text-muted !important;
+        }
+      }
+
+      /* Action Grid / Shortcuts */
+      .cttsv-action-grid .cttsv-action-card {
+        background: $sv-dark-bg-surface !important;
+        border: 1px solid $sv-dark-border !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+
+        &:hover {
+          background: $sv-dark-bg-hover !important;
+          border-color: $sv-dark-primary !important;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        strong {
+          color: $sv-dark-text-head !important;
+        }
+
+        em {
+          color: $sv-dark-text-muted !important;
+        }
+      }
+
+      /* Info Grid Tasks & Links */
+      .cttsv-task-list a,
+      .cttsv-link-list a {
+        background-color: transparent !important;
+        border-color: $sv-dark-border !important;
+        color: $sv-dark-text-main !important;
+
+        &:hover {
+          background-color: $sv-dark-bg-hover !important;
+          color: $sv-dark-link !important;
+        }
+
+        span {
+          color: $sv-dark-text-main !important;
+        }
+
+        strong {
+          color: $sv-dark-text-head !important;
+        }
+      }
+    }
+  }
+}

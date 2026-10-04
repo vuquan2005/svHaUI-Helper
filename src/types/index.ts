@@ -41,6 +41,7 @@ export interface StorageSchema {
     app_settings: AppSettings;
     grades: CourseGrade[];
     captcha_undo_telex: boolean;
+    dark_mode_system?: boolean;
 }
 
 // Utility types

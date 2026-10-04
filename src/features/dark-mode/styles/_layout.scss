@@ -1,0 +1,464 @@
+@use './variables' as *;
+
+@media screen {
+  html.sv-dark {
+    color-scheme: dark;
+    background-color: $sv-dark-bg-base !important;
+    color: $sv-dark-text-main !important;
+
+    body {
+      background-color: $sv-dark-bg-base !important;
+      color: $sv-dark-text-main !important;
+    }
+
+    /* -------------------------------------------------------------
+     * 1. BEAGLE TEMPLATE STRUCTURE (Admin Layout)
+     * ----------------------------------------------------------- */
+    .be-wrapper {
+      background-color: $sv-dark-bg-base !important;
+    }
+
+    .be-content,
+    .main-content,
+    .be-aside .main-content {
+      background-color: $sv-dark-bg-base !important;
+      color: $sv-dark-text-main !important;
+    }
+
+    /* Top Navigation Header */
+    .be-top-header {
+      background-color: $sv-dark-bg-surface !important;
+      border-bottom: 1px solid $sv-dark-border !important;
+
+      .navbar-header {
+        background-color: $sv-dark-bg-surface !important;
+      }
+
+      .be-user-nav > li.dropdown > a {
+        color: $sv-dark-text-head !important;
+
+        .user-name {
+          color: $sv-dark-text-head !important;
+        }
+
+        &:hover,
+        &:focus {
+          background-color: $sv-dark-bg-hover !important;
+        }
+      }
+
+      .be-icons-nav > li > a {
+        color: $sv-dark-text-muted !important;
+
+        &:hover,
+        &:focus {
+          color: $sv-dark-text-head !important;
+          background-color: $sv-dark-bg-hover !important;
+        }
+      }
+
+      /* Student User Chip in Header */
+      .stu-userchip {
+        background-color: $sv-dark-bg-hover !important;
+        border: 1px solid $sv-dark-border !important;
+        border-radius: 999px !important;
+        padding: 4px 12px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
+
+        &:hover {
+          background-color: $sv-dark-bg-hover-subtle !important;
+          border-color: $sv-dark-border-hover !important;
+        }
+
+        &__name {
+          color: #f8fafc !important;
+          font-weight: 700 !important;
+          font-size: 13px !important;
+        }
+
+        &__id {
+          color: $sv-dark-text-muted !important;
+          font-size: 11.5px !important;
+          font-weight: 500 !important;
+        }
+
+        &__avatar,
+        img {
+          border-radius: 50% !important;
+          border: 1px solid $sv-dark-border-hover !important;
+        }
+      }
+    }
+
+    /* -------------------------------------------------------------
+     * LEFT SIDEBAR (Modern .sb, #sbMain & Legacy Beagle elements)
+     * ----------------------------------------------------------- */
+    .left-sidebar-wrapper,
+    .be-left-sidebar,
+    .sb,
+    #sbMain {
+      background-color: $sv-dark-bg-surface !important;
+      border-right: 1px solid $sv-dark-border !important;
+      color: $sv-dark-text-main !important;
+    }
+
+    .sb__scroll,
+    .left-sidebar-content,
+    .left-sidebar-spacer {
+      background-color: $sv-dark-bg-surface !important;
+    }
+
+    /* Modern HaUI Sidebar (.sb) */
+    .sb {
+      &__group {
+        border-bottom: 1px solid $sv-dark-bg-hover !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 8px !important;
+
+        &-title {
+          color: $sv-dark-text-muted !important;
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.6px !important;
+          padding: 8px 16px 4px !important;
+        }
+      }
+
+      &__list {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      &__item {
+        margin: 1px 8px !important;
+      }
+
+      &__link {
+        color: $sv-dark-text-main !important;
+        background-color: transparent !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        text-decoration: none !important;
+        transition: all 0.15s ease !important;
+
+        &:hover,
+        &:focus {
+          color: #ffffff !important;
+          background-color: $sv-dark-bg-hover !important;
+          text-decoration: none !important;
+
+          .sb__ico,
+          .sb__ico svg {
+            color: $sv-dark-primary !important;
+            stroke: $sv-dark-primary !important;
+          }
+
+          .sb__chev svg {
+            stroke: #ffffff !important;
+          }
+        }
+
+        &.is-active,
+        &.active {
+          color: $sv-dark-primary !important;
+          background-color: $sv-dark-bg-hover !important;
+          font-weight: 600 !important;
+
+          .sb__ico,
+          .sb__ico svg {
+            color: $sv-dark-primary !important;
+            stroke: $sv-dark-primary !important;
+          }
+        }
+      }
+
+      &__ico {
+        color: $sv-dark-text-muted !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        svg {
+          stroke: $sv-dark-text-muted !important;
+          transition: stroke 0.15s ease !important;
+        }
+      }
+
+      &__label {
+        color: inherit !important;
+        flex: 1 !important;
+      }
+
+      &__chev {
+        color: $sv-dark-text-dim !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        transition: transform 0.2s ease !important;
+
+        svg {
+          stroke: $sv-dark-text-dim !important;
+        }
+      }
+
+      &__sub {
+        list-style: none !important;
+
+        li a {
+          display: block !important;
+          color: $sv-dark-text-muted !important;
+          padding: 6px 12px 6px 14px !important;
+          font-size: 13px !important;
+          text-decoration: none !important;
+          border-radius: 6px !important;
+          transition: all 0.15s ease !important;
+
+          &:hover,
+          &:focus {
+            color: #ffffff !important;
+            background-color: $sv-dark-bg-hover !important;
+            text-decoration: none !important;
+          }
+
+          &.is-active,
+          &.active {
+            color: $sv-dark-primary !important;
+            background-color: $sv-dark-bg-surface !important;
+            font-weight: 600 !important;
+          }
+        }
+      }
+
+      &__item.is-open > .sb__sub {
+        background-color: $sv-dark-bg-nested !important;
+        border-radius: 8px !important;
+        padding: 4px 0 !important;
+        margin: 4px 0 4px 16px !important;
+        border-left: 2px solid $sv-dark-border !important;
+      }
+
+      &__item:not(.is-open) > .sb__sub {
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      &__item.is-open > .sb__link {
+        color: $sv-dark-text-head !important;
+        background-color: $sv-dark-bg-active !important;
+
+        .sb__chev {
+          transform: rotate(180deg) !important;
+        }
+      }
+
+      /* Legacy nested items inside modern sidebar (e.g. "Hỗ trợ việc làm") */
+      &__list li.parent,
+      li.parent {
+        margin: 1px 8px !important;
+
+        > a {
+          color: $sv-dark-text-main !important;
+          background-color: transparent !important;
+          border-radius: 8px !important;
+          padding: 8px 12px !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          text-decoration: none !important;
+          transition: all 0.15s ease !important;
+
+          > i.icon,
+          > i.fa {
+            font-size: 16px !important;
+            width: 24px !important;
+            text-align: center !important;
+            color: $sv-dark-text-muted !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+
+          > span:not(.sb__chev) {
+            flex: 1 !important;
+            color: inherit !important;
+          }
+
+          .sb__chev {
+            color: $sv-dark-text-dim !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            transition: transform 0.2s ease !important;
+
+            svg {
+              stroke: $sv-dark-text-dim !important;
+            }
+          }
+
+          &:hover,
+          &:focus {
+            color: #ffffff !important;
+            background-color: $sv-dark-bg-hover !important;
+            text-decoration: none !important;
+
+            > i.icon,
+            > i.fa {
+              color: $sv-dark-primary !important;
+            }
+
+            .sb__chev svg {
+              stroke: #ffffff !important;
+            }
+          }
+        }
+
+        &.open > a,
+        &.is-open > a {
+          background-color: $sv-dark-bg-active !important;
+          color: $sv-dark-text-head !important;
+
+          .sb__chev {
+            transform: rotate(180deg) !important;
+          }
+        }
+
+        /* Ẩn triệt để khi đóng để không xuất hiện vạch đen */
+        &:not(.open):not(.is-open) > ul.sub-menu {
+          display: none !important;
+          height: 0 !important;
+          min-height: 0 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          border: none !important;
+          background: transparent !important;
+          overflow: hidden !important;
+        }
+
+        /* Khi mở */
+        &.open > ul.sub-menu,
+        &.is-open > ul.sub-menu {
+          display: block !important;
+          background-color: $sv-dark-bg-nested !important;
+          border-radius: 8px !important;
+          padding: 4px 0 !important;
+          margin: 4px 0 4px 16px !important;
+          border-left: 2px solid $sv-dark-border !important;
+          list-style: none !important;
+
+          li a {
+            display: block !important;
+            color: $sv-dark-text-muted !important;
+            padding: 6px 12px 6px 14px !important;
+            font-size: 13px !important;
+            text-decoration: none !important;
+            border-radius: 6px !important;
+            transition: all 0.15s ease !important;
+
+            &:hover,
+            &:focus {
+              color: #ffffff !important;
+              background-color: $sv-dark-bg-hover !important;
+              text-decoration: none !important;
+            }
+          }
+        }
+      }
+    }
+
+    /* Legacy Beagle Sidebar Elements */
+    .sidebar-elements {
+      .divider {
+        color: $sv-dark-text-dim !important;
+        border-color: $sv-dark-border !important;
+      }
+
+      > li > a {
+        color: $sv-dark-text-main !important;
+        background-color: transparent !important;
+
+        .icon {
+          color: $sv-dark-text-muted !important;
+        }
+
+        &:hover,
+        &:focus {
+          color: $sv-dark-primary !important;
+          background-color: $sv-dark-bg-hover !important;
+
+          .icon {
+            color: $sv-dark-primary !important;
+          }
+        }
+      }
+
+      > li.active > a {
+        color: $sv-dark-primary !important;
+        background-color: $sv-dark-bg-hover !important;
+
+        .icon {
+          color: $sv-dark-primary !important;
+        }
+      }
+
+      li.parent.open > a {
+        background-color: $sv-dark-bg-active !important;
+        color: $sv-dark-text-head !important;
+      }
+
+      ul.sub-menu {
+        background-color: $sv-dark-bg-nested !important;
+
+        > li > a {
+          color: $sv-dark-text-muted !important;
+
+          &:hover,
+          &:focus {
+            color: $sv-dark-primary !important;
+            background-color: $sv-dark-bg-hover !important;
+          }
+        }
+
+        > li.active > a {
+          color: $sv-dark-primary !important;
+        }
+      }
+    }
+
+    /* Page Head & Breadcrumb */
+    .page-head {
+      background-color: transparent !important;
+
+      h2,
+      .page-head-title {
+        color: $sv-dark-text-head !important;
+      }
+
+      .breadcrumb {
+        background-color: transparent !important;
+
+        > li > a {
+          color: $sv-dark-primary !important;
+        }
+
+        > .active {
+          color: $sv-dark-text-muted !important;
+        }
+
+        > li + li:before {
+          color: $sv-dark-text-dim !important;
+        }
+      }
+    }
+  }
+}

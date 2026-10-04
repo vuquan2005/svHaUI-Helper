@@ -1,9 +1,9 @@
 import { GradeStore } from './grade-store';
 import { GRADE_COLORS, CREDITS_COLORS, DEFAULT_NON_CREDIT_RULES_TEXT } from './config';
 import { analyzeRetakenCourses } from './grade-calculator';
-import styles from './style.module.scss';
+import './style.scss';
 
-const PREFIX = styles.cssPrefix;
+const PREFIX = 'sv-grade-pred';
 
 export class UIRenderer {
     private store: GradeStore;

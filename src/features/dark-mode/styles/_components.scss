@@ -1,0 +1,523 @@
+@use './variables' as *;
+
+@media screen {
+  html.sv-dark {
+    /* -------------------------------------------------------------
+     * 3. BOOTSTRAP 3 COMMON COMPONENTS
+     * ----------------------------------------------------------- */
+    /* Panels */
+    .panel,
+    .panel-default {
+      background-color: $sv-dark-bg-surface !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-main !important;
+
+      > .panel-heading {
+        background-color: $sv-dark-bg-base !important;
+        border-color: $sv-dark-border !important;
+        color: $sv-dark-text-head !important;
+
+        .panel-title {
+          color: $sv-dark-text-head !important;
+        }
+      }
+
+      > .panel-body {
+        background-color: $sv-dark-bg-surface !important;
+        color: $sv-dark-text-main !important;
+      }
+
+      > .panel-footer {
+        background-color: $sv-dark-bg-base !important;
+        border-color: $sv-dark-border !important;
+      }
+    }
+
+    /* Tables */
+    table,
+    .table,
+    .table-bordered,
+    .table-striped {
+      background-color: $sv-dark-bg-surface !important;
+      color: $sv-dark-text-main !important;
+      border-color: $sv-dark-border !important;
+
+      > thead > tr > th,
+      > tbody > tr > th,
+      > tfoot > tr > th {
+        background-color: $sv-dark-bg-base !important;
+        color: $sv-dark-text-head !important;
+        border-color: $sv-dark-border !important;
+      }
+
+      > thead > tr > td,
+      > tbody > tr > td,
+      > tfoot > tr > td {
+        border-color: $sv-dark-border !important;
+        color: $sv-dark-text-main !important;
+      }
+
+      > tbody > tr:nth-of-type(odd) {
+        background-color: $sv-dark-bg-alt !important;
+      }
+
+      > tbody > tr:nth-of-type(even) {
+        background-color: $sv-dark-bg-surface !important;
+      }
+
+      > tbody
+        > tr:not(.sv-grade-pred-row-selected):not(.sv-exam-row--urgent):not(
+          .sv-exam-row--warning
+        ):not(.rowUrgent):not(.rowWarning):hover
+        > td,
+      > tbody
+        > tr:not(.sv-grade-pred-row-selected):not(.sv-exam-row--urgent):not(
+          .sv-exam-row--warning
+        ):not(.rowUrgent):not(.rowWarning).hover
+        > td {
+        background-color: $sv-dark-bg-hover !important;
+      }
+
+      /* Group and section divider rows (colspan) */
+      > tbody > tr > td[colspan] {
+        background-color: $sv-dark-bg-nested !important;
+        color: $sv-dark-link !important;
+        border-color: $sv-dark-border !important;
+
+        strong {
+          color: $sv-dark-link !important;
+        }
+      }
+
+      a {
+        color: $sv-dark-link !important;
+
+        &:hover,
+        &:focus {
+          color: $sv-dark-link-hover !important;
+          text-decoration: underline !important;
+        }
+      }
+    }
+
+    /* Kendo Grids & Pagination */
+    .kGrid,
+    .k-grid {
+      background-color: $sv-dark-bg-surface !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-main !important;
+
+      table {
+        background-color: $sv-dark-bg-surface !important;
+        color: $sv-dark-text-main !important;
+      }
+    }
+
+    .Paging {
+      table > tbody > tr > td > a {
+        background-color: $sv-dark-bg-surface !important;
+        border-color: $sv-dark-border !important;
+        color: $sv-dark-link !important;
+
+        &:hover,
+        &:focus {
+          background-color: $sv-dark-bg-hover !important;
+          color: $sv-dark-link-hover !important;
+          border-color: $sv-dark-primary !important;
+        }
+      }
+
+      table > tbody > tr > td > span {
+        background-color: $sv-dark-bg-base !important;
+        border-color: $sv-dark-border !important;
+        color: $sv-dark-text-muted !important;
+      }
+    }
+
+    /* Kendo Specific Panels & Headers */
+    span.k-panel-header-text {
+      color: $sv-dark-text-head !important;
+    }
+
+    tr.k-table-head > th {
+      background-color: $sv-dark-bg-base !important;
+      color: $sv-dark-text-head !important;
+      border-color: $sv-dark-border !important;
+    }
+
+    div.k-panel-mc {
+      background-color: $sv-dark-bg-surface !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-main !important;
+    }
+
+    /* -------------------------------------------------------------
+     * ALERTS & NOTIFICATION MESSAGES
+     * ----------------------------------------------------------- */
+    .alert {
+      background-color: $sv-dark-bg-surface !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-main !important;
+
+      .message {
+        color: $sv-dark-text-head !important;
+        background-color: $sv-dark-bg-surface !important;
+      }
+
+      /* Alert with icon block (Beagle .alert-icon) */
+      &.alert-icon {
+        background-color: $sv-dark-bg-surface !important;
+        border: 1px solid $sv-dark-border !important;
+        border-radius: 6px !important;
+        overflow: hidden !important;
+
+        > .icon {
+          background-color: #991b1b !important;
+          color: #ffffff !important;
+          vertical-align: middle !important;
+          text-align: center !important;
+
+          &:after {
+            border-left-color: #991b1b !important;
+          }
+        }
+
+        > .message {
+          background-color: $sv-dark-bg-surface !important;
+          color: $sv-dark-text-head !important;
+          border: 1px solid $sv-dark-border !important;
+          border-left: none !important;
+          padding: 16px 20px !important;
+          line-height: 1.6 !important;
+        }
+
+        &.alert-warning {
+          border-color: #b45309 !important;
+
+          > .icon {
+            background-color: #b45309 !important;
+            &:after {
+              border-left-color: #b45309 !important;
+            }
+          }
+        }
+
+        &.alert-info,
+        &.alert-primary {
+          border-color: $sv-dark-primary-active !important;
+
+          > .icon {
+            background-color: $sv-dark-primary-active !important;
+            &:after {
+              border-left-color: $sv-dark-primary-active !important;
+            }
+          }
+        }
+
+        &.alert-success {
+          border-color: #047857 !important;
+
+          > .icon {
+            background-color: #047857 !important;
+            &:after {
+              border-left-color: #047857 !important;
+            }
+          }
+        }
+      }
+
+      /* Standard Bootstrap alerts */
+      &.alert-danger {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        border-color: rgba(239, 68, 68, 0.35) !important;
+        color: #fca5a5 !important;
+      }
+
+      &.alert-warning {
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        border-color: rgba(245, 158, 11, 0.35) !important;
+        color: #fcd34d !important;
+      }
+
+      &.alert-info {
+        background-color: rgba(59, 130, 246, 0.15) !important;
+        border-color: rgba(59, 130, 246, 0.35) !important;
+        color: $sv-dark-link-hover !important;
+      }
+
+      &.alert-success {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #6ee7b7 !important;
+      }
+    }
+
+    /* Form Controls & Inputs */
+    .form-control,
+    input[type='text'],
+    input[type='password'],
+    input[type='number'],
+    input[type='email'],
+    select,
+    textarea {
+      background-color: $sv-dark-bg-base !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-head !important;
+
+      &:focus {
+        border-color: $sv-dark-primary !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+        background-color: $sv-dark-bg-base !important;
+        color: #ffffff !important;
+      }
+
+      &::placeholder {
+        color: $sv-dark-text-dim !important;
+      }
+    }
+
+    .input-group-addon {
+      background-color: $sv-dark-bg-base !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-muted !important;
+    }
+
+    /* Buttons */
+    .btn-default {
+      background-color: $sv-dark-border !important;
+      border-color: $sv-dark-border-hover !important;
+      color: $sv-dark-text-head !important;
+
+      &:hover,
+      &:focus {
+        background-color: $sv-dark-border-hover !important;
+        border-color: $sv-dark-text-dim !important;
+        color: #ffffff !important;
+      }
+    }
+
+    .btn-primary {
+      background-color: $sv-dark-primary-hover !important;
+      border-color: $sv-dark-primary-active !important;
+      color: #ffffff !important;
+
+      &:hover,
+      &:focus {
+        background-color: $sv-dark-primary-active !important;
+        border-color: #1e40af !important;
+        color: #ffffff !important;
+      }
+    }
+
+    .btn-success {
+      background-color: #15803d !important;
+      border-color: #166534 !important;
+      color: #ffffff !important;
+
+      &:hover,
+      &:focus {
+        background-color: #16a34a !important;
+      }
+    }
+
+    .btn-warning {
+      background-color: #b45309 !important;
+      border-color: #92400e !important;
+      color: #ffffff !important;
+
+      &:hover,
+      &:focus {
+        background-color: #d97706 !important;
+      }
+    }
+
+    .btn-danger {
+      background-color: #b91c1c !important;
+      border-color: #991b1b !important;
+      color: #ffffff !important;
+
+      &:hover,
+      &:focus {
+        background-color: #dc2626 !important;
+      }
+    }
+
+    .btn-info {
+      background-color: #0369a1 !important;
+      border-color: #075985 !important;
+      color: #ffffff !important;
+
+      &:hover,
+      &:focus {
+        background-color: #0284c7 !important;
+      }
+    }
+
+    /* Modals & Dropdowns */
+    .modal-content {
+      background-color: $sv-dark-bg-surface !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-head !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .modal-header {
+      background-color: $sv-dark-bg-base !important;
+      border-bottom: 1px solid $sv-dark-border !important;
+
+      .close {
+        color: $sv-dark-text-muted !important;
+
+        &:hover {
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    .modal-footer {
+      background-color: $sv-dark-bg-base !important;
+      border-top: 1px solid $sv-dark-border !important;
+    }
+
+    .dropdown-menu {
+      background-color: $sv-dark-bg-surface !important;
+      border: 1px solid $sv-dark-border !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+
+      > li > a {
+        color: $sv-dark-text-main !important;
+
+        &:hover,
+        &:focus {
+          background-color: $sv-dark-bg-hover !important;
+          color: #ffffff !important;
+        }
+      }
+
+      > .active > a,
+      > .active > a:hover,
+      > .active > a:focus {
+        background-color: $sv-dark-primary-hover !important;
+        color: #ffffff !important;
+      }
+
+      .divider {
+        background-color: $sv-dark-border !important;
+      }
+
+      .caret {
+        border-top-color: currentColor !important;
+      }
+    }
+
+    /* Tabs & Wells */
+    .well {
+      background-color: $sv-dark-bg-base !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-main !important;
+    }
+
+    .tab-container {
+      background-color: transparent !important;
+      border-color: $sv-dark-border !important;
+
+      .nav-tabs {
+        background-color: $sv-dark-bg-base !important;
+        border-bottom: 1px solid $sv-dark-border !important;
+      }
+
+      .tab-content,
+      .tab-pane,
+      .cont {
+        background-color: $sv-dark-bg-surface !important;
+        border-color: $sv-dark-border !important;
+        color: $sv-dark-text-main !important;
+      }
+    }
+
+    .nav-tabs {
+      background-color: $sv-dark-bg-base !important;
+      border-color: $sv-dark-border !important;
+      border-bottom: 1px solid $sv-dark-border !important;
+
+      > li {
+        background-color: transparent !important;
+
+        > a {
+          color: $sv-dark-text-muted !important;
+          background-color: transparent !important;
+          border-color: transparent !important;
+
+          &:hover,
+          &:focus {
+            color: $sv-dark-text-head !important;
+            background-color: $sv-dark-bg-hover !important;
+            border-color: $sv-dark-border !important;
+          }
+
+          &[style*='red'],
+          &[style*='color: red'],
+          &[style*='color:red'] {
+            color: #f87171 !important;
+          }
+        }
+
+        &.active {
+          background-color: transparent !important;
+
+          > a,
+          > a:hover,
+          > a:focus {
+            color: $sv-dark-text-head !important;
+            background-color: $sv-dark-bg-surface !important;
+            border-color: $sv-dark-border $sv-dark-border transparent !important;
+            border-top: 2px solid $sv-dark-primary !important;
+
+            &[style*='red'],
+            &[style*='color: red'],
+            &[style*='color:red'] {
+              color: #f87171 !important;
+              border-top-color: #ef4444 !important;
+            }
+          }
+        }
+      }
+    }
+
+    /* Specific ID overrides for HaUI tabs and panes */
+    #tab0,
+    #tab1,
+    #tab2,
+    li[id^='tab'] {
+      background-color: transparent !important;
+
+      > a {
+        background-color: transparent !important;
+      }
+
+      &.active > a {
+        background-color: $sv-dark-bg-surface !important;
+        color: $sv-dark-text-head !important;
+      }
+    }
+
+    #tab0_data,
+    #tab1_data,
+    #tab2_data,
+    [id*='tab'][id*='data'],
+    .table-responsive.tab-pane {
+      background-color: $sv-dark-bg-surface !important;
+      color: $sv-dark-text-main !important;
+    }
+
+    .tab-content,
+    .tabcontent,
+    .tab-pane,
+    .tabbody,
+    .cont {
+      background-color: $sv-dark-bg-surface !important;
+      border-color: $sv-dark-border !important;
+      color: $sv-dark-text-main !important;
+    }
+  }
+}
