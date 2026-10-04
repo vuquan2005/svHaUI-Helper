@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.3.0...v3.4.0) (2026-10-04)
+
+
+### Features
+
+* **theme:** add native dark mode and refactor css architecture ([#129](https://github.com/vuquan2005/svHaUI-Helper/issues/129)) ([9fbf84d](https://github.com/vuquan2005/svHaUI-Helper/commit/9fbf84df377a7db7e1ba07d54db50e28e4dc70b1))
+
 ## [3.3.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.2.0...v3.3.0) (2026-09-19)
 
 
