@@ -33,12 +33,12 @@ input.#{$prefix}-inline-credit-input {
       color 0.15s ease;
 
     &-primary {
-      background: #3b82f6;
+      background: var(--sv-primary, #0054a6);
       color: #ffffff;
-      border-color: #2563eb;
+      border-color: var(--sv-primary-hover, #003e7d);
 
       &:hover {
-        background: #2563eb;
+        background: var(--sv-primary-hover, #003e7d);
         color: #ffffff;
       }
 
@@ -96,6 +96,25 @@ input.#{$prefix}-inline-credit-input {
     &:hover {
       transform: scale(1.04);
       filter: brightness(0.93);
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  &-grade-badge {
+    transition:
+      transform 0.15s ease,
+      filter 0.15s ease;
+
+    &:hover {
+      transform: scale(1.04);
+      filter: brightness(0.93);
+      position: relative;
+      z-index: 2;
+    }
+
+    &:focus {
+      transform: none !important;
     }
   }
 
@@ -120,6 +139,12 @@ input.#{$prefix}-inline-credit-input {
   &-score4-edited {
     background-color: #fef3c7 !important;
     color: #92400e !important;
+    font-weight: 700;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: #fde68a !important;
+    }
   }
 
   /* Retaken / Improved course styling */
@@ -168,9 +193,9 @@ input.#{$prefix}-inline-credit-input {
     overflow: hidden;
 
     &-header {
-      background: var(--sv-bg-surface, #1e293b);
-      border-bottom: 1px solid var(--sv-border, #334155);
-      color: var(--sv-text-head, #ffffff);
+      background: var(--sv-bg-surface, #ffffff);
+      border-bottom: 1px solid var(--sv-border, #e2e8f0);
+      color: var(--sv-text-head, #0f172a);
       padding: 10px 16px;
       display: flex;
       align-items: center;
@@ -193,7 +218,7 @@ input.#{$prefix}-inline-credit-input {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: var(--sv-text-head, #ffffff);
+      color: var(--sv-text-head, #0f172a);
     }
 
     &-actions {
@@ -415,9 +440,9 @@ input.#{$prefix}-inline-credit-input {
     font-family: inherit;
 
     &-header {
-      background: var(--sv-bg-surface, #1e293b);
-      border-bottom: 1px solid var(--sv-border, #334155);
-      color: var(--sv-text-head, #ffffff);
+      background: var(--sv-bg-surface, #ffffff);
+      border-bottom: 1px solid var(--sv-border, #e2e8f0);
+      color: var(--sv-text-head, #0f172a);
       padding: 12px 16px;
       display: flex;
       align-items: center;
@@ -430,7 +455,7 @@ input.#{$prefix}-inline-credit-input {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: var(--sv-text-head, #ffffff);
+      color: var(--sv-text-head, #0f172a);
     }
 
     &-close {
@@ -447,8 +472,8 @@ input.#{$prefix}-inline-credit-input {
         background-color 0.15s ease;
 
       &:hover {
-        color: var(--sv-text-head, #ffffff);
-        background-color: var(--sv-bg-hover-subtle, rgba(255, 255, 255, 0.1));
+        color: var(--sv-text-head, #0f172a);
+        background-color: var(--sv-bg-hover-subtle, #f1f5f9);
       }
     }
 
@@ -576,8 +601,13 @@ input.#{$prefix}-inline-credit-input {
     }
 
     .#{$prefix}-score4-edited {
-      background-color: rgba(245, 158, 11, 0.25) !important;
+      background-color: rgba(245, 158, 11, 0.3) !important;
       color: #fcd34d !important;
+      font-weight: 700;
+
+      &:hover {
+        background-color: rgba(245, 158, 11, 0.45) !important;
+      }
     }
 
     .#{$prefix}-cell-editable:focus {

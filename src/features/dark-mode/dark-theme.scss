@@ -13,3 +13,18 @@
 @use './styles/dashboard';
 @use './styles/components';
 @use './styles/pages';
+
+/* -------------------------------------------------------------
+ * Global Patches: Fix HaUI legacy sidebar artifacts on portal
+ * ----------------------------------------------------------- */
+.sb__list > li.parent:not(.open) > ul.sub-menu,
+.sb__list > li.parent:not(.open) > ul {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  overflow: hidden !important;
+}

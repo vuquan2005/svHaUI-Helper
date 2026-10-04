@@ -148,8 +148,7 @@ export function createStreamingPlanTable(
 
     const title = document.createElement('h3');
     const badgeSpan = document.createElement('span');
-    badgeSpan.className = 'badge';
-    badgeSpan.style.cssText = 'background: #eab308; color: #fff; margin-left: 6px;';
+    badgeSpan.className = 'badge sv-exam-panel-badge sv-exam-panel-badge--loading';
     badgeSpan.textContent = totalExpected > 0 ? `Đang tải (0/${totalExpected})...` : 'Đang tải...';
 
     title.innerHTML = '📋 Kế hoạch thi tổng hợp ';
@@ -203,7 +202,7 @@ export function createStreamingPlanTable(
 
     const setProgress = (loadedCount: number, totalCount: number): void => {
         badgeSpan.textContent = `Đang tải (${loadedCount}/${totalCount})...`;
-        badgeSpan.style.background = '#eab308';
+        badgeSpan.className = 'badge sv-exam-panel-badge sv-exam-panel-badge--loading';
     };
 
     const finalize = (allEntries: ExamPlanEntry[]): void => {
@@ -212,7 +211,7 @@ export function createStreamingPlanTable(
         renderTable(allCurrentEntries);
 
         badgeSpan.textContent = `${allEntries.length} môn`;
-        badgeSpan.style.background = '#0284c7';
+        badgeSpan.className = 'badge sv-exam-panel-badge sv-exam-panel-badge--done';
     };
 
     return {

@@ -544,8 +544,8 @@ export class UIRenderer {
             // 1. Credit cell & non-credit row dimming
             if (row.isNonCredit) {
                 row.element.style.opacity = '0.6';
-                row.creditCell.style.backgroundColor = '';
-                row.creditCell.style.color = '';
+                row.creditCell.style.removeProperty('background-color');
+                row.creditCell.style.removeProperty('color');
                 row.creditCell.style.fontWeight = '';
                 row.creditCell.title = 'Môn không tính GPA (nhấp để bật)';
             } else {
@@ -555,8 +555,8 @@ export class UIRenderer {
                     CREDITS_COLORS[creditKey] ||
                     CREDITS_COLORS[row.credits.toString()] ||
                     '#64748b';
-                row.creditCell.style.backgroundColor = creditColor;
-                row.creditCell.style.color = '#ffffff';
+                row.creditCell.style.setProperty('background-color', creditColor, 'important');
+                row.creditCell.style.setProperty('color', '#ffffff', 'important');
                 row.creditCell.style.fontWeight = 'bold';
                 row.creditCell.title = 'Môn tính GPA (nhấp để tắt)';
             }
@@ -567,12 +567,14 @@ export class UIRenderer {
 
                 const gradeColor = GRADE_COLORS[row.currentGrade];
                 if (gradeColor && !row.isNonCredit) {
-                    row.gradeCell.style.backgroundColor = gradeColor.bg;
-                    row.gradeCell.style.color = gradeColor.text;
+                    row.gradeCell.classList.add(`${PREFIX}-grade-badge`);
+                    row.gradeCell.style.setProperty('background-color', gradeColor.bg, 'important');
+                    row.gradeCell.style.setProperty('color', gradeColor.text, 'important');
                     row.gradeCell.style.fontWeight = 'bold';
                 } else {
-                    row.gradeCell.style.backgroundColor = '';
-                    row.gradeCell.style.color = '';
+                    row.gradeCell.classList.remove(`${PREFIX}-grade-badge`);
+                    row.gradeCell.style.removeProperty('background-color');
+                    row.gradeCell.style.removeProperty('color');
                     row.gradeCell.style.fontWeight = '';
                 }
 
@@ -583,8 +585,9 @@ export class UIRenderer {
                 }
             } else {
                 row.gradeCell.textContent = '';
-                row.gradeCell.style.backgroundColor = '';
-                row.gradeCell.style.color = '';
+                row.gradeCell.classList.remove(`${PREFIX}-grade-badge`);
+                row.gradeCell.style.removeProperty('background-color');
+                row.gradeCell.style.removeProperty('color');
                 row.gradeCell.style.fontWeight = '';
                 row.gradeCell.classList.remove(`${PREFIX}-grade-improved`);
             }

@@ -119,9 +119,30 @@ async function initPopup(): Promise<void> {
         });
     });
 
-    // 3. Donate button
-    document.getElementById('donate-btn')?.addEventListener('click', () => {
-        browser.tabs.create({ url: 'https://img.vietqr.io/image/TPB-07602987000-qr_only.png' });
+    // 3. Donate modal
+    const donateModal = document.getElementById('donate-modal');
+    const openDonateModal = () => {
+        donateModal?.classList.add('is-visible');
+    };
+    const closeDonateModal = () => {
+        donateModal?.classList.remove('is-visible');
+    };
+
+    document.getElementById('donate-btn')?.addEventListener('click', openDonateModal);
+    document.getElementById('donate-close-btn')?.addEventListener('click', closeDonateModal);
+    document.getElementById('donate-backdrop')?.addEventListener('click', closeDonateModal);
+
+    document.getElementById('copy-acc-btn')?.addEventListener('click', async (e) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        try {
+            await navigator.clipboard.writeText('07602987000');
+            btn.textContent = '✅';
+            setTimeout(() => {
+                btn.textContent = '📋';
+            }, 2000);
+        } catch {
+            // fallback
+        }
     });
 
     // 4. Upcoming Exam Widget

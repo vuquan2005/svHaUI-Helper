@@ -13,7 +13,6 @@ body {
   color: var(--sv-text-main);
   font-size: 13px;
   line-height: 1.4;
-  user-select: none;
 }
 
 /* Header */
@@ -29,6 +28,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    user-select: none;
 
     .logo-icon {
       width: 26px;
@@ -138,6 +138,7 @@ body {
     color: var(--sv-text-muted);
     letter-spacing: 0.5px;
     margin-bottom: 8px;
+    user-select: none;
   }
 }
 
@@ -161,6 +162,7 @@ body {
     cursor: pointer;
     transition: all 0.15s ease;
     text-align: left;
+    user-select: none;
 
     .nav-icon {
       font-size: 16px;
@@ -200,7 +202,7 @@ body {
     &.toggle-item-sub {
       padding-left: 22px;
       background-color: var(--sv-sub-item-bg);
-      border-left: 3px solid #3b82f6;
+      border-left: 3px solid var(--sv-primary);
     }
 
     &.is-disabled {
@@ -239,6 +241,7 @@ body {
   width: 36px;
   height: 20px;
   flex-shrink: 0;
+  user-select: none;
 
   input {
     opacity: 0;
@@ -251,7 +254,7 @@ body {
     cursor: pointer;
     inset: 0;
     background-color: var(--sv-slider-bg);
-    transition: 0.2s;
+    transition: background-color 0.2s ease;
     border-radius: 20px;
 
     &:before {
@@ -262,7 +265,7 @@ body {
       left: 2px;
       bottom: 2px;
       background-color: white;
-      transition: 0.2s;
+      transition: transform 0.2s ease;
       border-radius: 50%;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
     }
@@ -296,9 +299,168 @@ body {
     cursor: pointer;
     padding: 4px 6px;
     border-radius: 4px;
+    user-select: none;
 
     &:hover {
       background: var(--sv-accent-light);
     }
+  }
+}
+
+/* Donate Modal */
+.donate-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+
+  &.is-visible {
+    display: flex;
+  }
+
+  .donate-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+  }
+
+  .donate-modal-card {
+    position: relative;
+    background: var(--sv-card-bg);
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius-lg);
+    box-shadow: var(--sv-shadow-lg);
+    width: 100%;
+    max-width: 300px;
+    overflow: hidden;
+    animation: modal-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .donate-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--sv-header-bg);
+    border-bottom: 1px solid var(--sv-border);
+
+    .donate-modal-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sv-primary);
+    }
+
+    .donate-close-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      line-height: 1;
+      color: var(--sv-text-muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+
+      &:hover {
+        color: var(--sv-text-main);
+        background: var(--sv-bg-hover-subtle);
+      }
+    }
+  }
+
+  .donate-modal-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    .donate-qr-wrapper {
+      background: #ffffff;
+      padding: 8px;
+      border-radius: var(--sv-radius-md);
+      border: 1px solid var(--sv-border);
+      box-shadow: var(--sv-shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .donate-qr-img {
+        display: block;
+        width: 190px;
+        height: 190px;
+        object-fit: contain;
+      }
+    }
+
+    .donate-bank-info {
+      width: 100%;
+      background: var(--sv-bg-base);
+      border: 1px solid var(--sv-border);
+      border-radius: var(--sv-radius-sm);
+      padding: 8px 10px;
+      font-size: 11.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .bank-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .bank-label {
+          color: var(--sv-text-muted);
+        }
+
+        .bank-val-acc {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          strong {
+            font-family: monospace;
+            font-size: 12.5px;
+            color: var(--sv-text-head);
+          }
+
+          .copy-acc-btn {
+            background: none;
+            border: 1px solid var(--sv-border);
+            border-radius: 4px;
+            padding: 1px 4px;
+            font-size: 11px;
+            cursor: pointer;
+            line-height: 1.2;
+
+            &:hover {
+              background: var(--sv-card-bg);
+            }
+          }
+        }
+      }
+    }
+
+    .donate-thank-you {
+      font-size: 11px;
+      text-align: center;
+      color: var(--sv-text-muted);
+      margin: 0;
+      line-height: 1.35;
+    }
+  }
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
