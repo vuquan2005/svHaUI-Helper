@@ -277,7 +277,6 @@ function createSemesterDropdown(onSelect: (semesterValue: string) => void): HTML
     // Dropdown menu
     const menu = document.createElement('ul');
     menu.className = 'dropdown-menu dropdown-menu-right';
-    menu.style.cssText = 'max-height: 300px; overflow-y: auto;';
 
     let lastAcademicYear: number | null = null;
 

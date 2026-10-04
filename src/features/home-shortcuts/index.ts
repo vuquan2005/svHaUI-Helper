@@ -56,6 +56,7 @@ export class HomeShortcutsFeature extends Feature {
     }
 
     run(): void {
+        document.documentElement.classList.add('sv-shortcuts-enabled');
         this.abortController = new AbortController();
 
         observeDomUntil(
@@ -122,6 +123,8 @@ export class HomeShortcutsFeature extends Feature {
     }
 
     cleanup(): void {
+        document.documentElement.classList.remove('sv-shortcuts-enabled');
+
         if (this.abortController) {
             this.abortController.abort();
             this.abortController = null;

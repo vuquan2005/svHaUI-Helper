@@ -69,12 +69,16 @@
         > tr:not(.sv-grade-pred-row-selected):not(.sv-exam-row--urgent):not(
           .sv-exam-row--warning
         ):not(.rowUrgent):not(.rowWarning):hover
-        > td,
+        > td:not(.sv-grade-pred-credit-badge):not(.sv-grade-pred-grade-badge):not(
+          .sv-grade-pred-score4-edited
+        ),
       > tbody
         > tr:not(.sv-grade-pred-row-selected):not(.sv-exam-row--urgent):not(
           .sv-exam-row--warning
         ):not(.rowUrgent):not(.rowWarning).hover
-        > td {
+        > td:not(.sv-grade-pred-credit-badge):not(.sv-grade-pred-grade-badge):not(
+          .sv-grade-pred-score4-edited
+        ) {
         background-color: $sv-dark-bg-hover !important;
       }
 

@@ -21,6 +21,11 @@ $prefix: sv-exam;
     position: relative;
   }
 
+  &-status-text {
+    line-height: 30px;
+    margin-left: 5px;
+  }
+
   /* Countdown Badges */
   &-badge {
     display: inline-block;
@@ -69,15 +74,27 @@ $prefix: sv-exam;
   &-row {
     &--urgent {
       background-color: #fff1f2 !important;
+
+      td {
+        background-color: inherit !important;
+      }
     }
 
     &--warning {
       background-color: #fffbeb !important;
+
+      td {
+        background-color: inherit !important;
+      }
     }
 
     &--passed {
       opacity: 0.75;
       background-color: #f8fafc !important;
+
+      td {
+        background-color: inherit !important;
+      }
     }
   }
 
@@ -107,6 +124,19 @@ $prefix: sv-exam;
         display: flex;
         align-items: center;
         gap: 6px;
+      }
+
+      .#{$prefix}-panel-badge {
+        color: #ffffff;
+        margin-left: 6px;
+
+        &--loading {
+          background-color: #eab308;
+        }
+
+        &--done {
+          background-color: #0284c7;
+        }
       }
     }
 
@@ -164,6 +194,12 @@ $prefix: sv-exam;
         margin: 0;
       }
 
+      .#{$prefix}-widget-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
       .#{$prefix}-view-all {
         font-size: 12.5px;
         font-weight: 600;
@@ -186,7 +222,7 @@ $prefix: sv-exam;
       background: var(--sv-card-bg, #ffffff);
       padding: 12px 16px;
       border-radius: var(--sv-radius-lg, 14px);
-      border: 1px solid var(--sv-border, #fed7aa);
+      border: 1px solid #fed7aa;
       box-shadow: var(--sv-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.04));
       display: flex;
       flex-direction: column;
@@ -229,7 +265,7 @@ $prefix: sv-exam;
       background: var(--sv-card-bg, #ffffff);
       padding: 14px 18px;
       border-radius: var(--sv-radius-md, 12px);
-      border: 1px dashed var(--sv-border, #fdba74);
+      border: 1px dashed #fdba74;
       color: #9a3412;
       font-size: 13px;
       display: flex;
@@ -262,6 +298,7 @@ $prefix: sv-exam;
 
       .#{$prefix}-card {
         background: var(--sv-bg-base, #0f172a) !important;
+        border-color: var(--sv-border, #334155) !important;
 
         &:hover {
           border-color: var(--sv-accent, #f97316) !important;
@@ -275,6 +312,7 @@ $prefix: sv-exam;
 
       .#{$prefix}-empty-state {
         background: var(--sv-bg-base, #0f172a) !important;
+        border-color: var(--sv-border, #334155) !important;
         color: #fdba74 !important;
       }
     }
