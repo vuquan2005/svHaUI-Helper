@@ -85,6 +85,55 @@
       <button class="donate-btn" id="donate-btn">Ủng hộ ☕</button>
     </footer>
 
+    <!-- Donate Modal -->
+    <div class="donate-modal" id="donate-modal">
+      <div class="donate-modal-backdrop" id="donate-backdrop"></div>
+      <div class="donate-modal-card">
+        <div class="donate-modal-header">
+          <span class="donate-modal-title">Ủng hộ tác giả ☕</span>
+          <button type="button" class="donate-close-btn" id="donate-close-btn" title="Đóng">
+            &times;
+          </button>
+        </div>
+        <div class="donate-modal-body">
+          <div class="donate-qr-wrapper">
+            <img
+              src="/donation-qr.png"
+              alt="Mã QR chuyển khoản"
+              class="donate-qr-img"
+              width="190"
+              height="190"
+            />
+          </div>
+          <div class="donate-bank-info">
+            <div class="bank-row">
+              <span class="bank-label">Ngân hàng:</span>
+              <strong class="bank-val">TPBank</strong>
+            </div>
+            <div class="bank-row">
+              <span class="bank-label">Số TK:</span>
+              <span class="bank-val-acc">
+                <strong id="donate-acc-num">07602987000</strong>
+                <button
+                  type="button"
+                  class="copy-acc-btn"
+                  id="copy-acc-btn"
+                  title="Sao chép số tài khoản"
+                >
+                  📋
+                </button>
+              </span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-label">Chủ TK:</span>
+              <strong class="bank-val">VU QUAN</strong>
+            </div>
+          </div>
+          <p class="donate-thank-you">Cảm ơn bạn đã đồng hành và ủng hộ SV HaUI Helper! ❤️</p>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
