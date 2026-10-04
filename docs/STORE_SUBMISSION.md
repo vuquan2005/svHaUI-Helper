@@ -187,3 +187,30 @@ Enhance student productivity on the Hanoi University of Industry (HaUI) portal b
   - Tiện ích không sử dụng dữ liệu cho mục đích không liên quan đến chức năng cốt lõi.
   - Tiện ích không sử dụng dữ liệu để xác định khả năng tín dụng hoặc cho mục đích cho vay.
 - **URL Chính sách riêng tư**: `https://github.com/vuquan2005/svHaUI-Helper/blob/main/PRIVACY.md`
+
+---
+
+## 4. Tự động hóa phát hành qua GitHub Actions (CI/CD)
+
+Quy trình phát hành tự động được cấu hình trong [`.github/workflows/release.yml`](../.github/workflows/release.yml) thông qua lệnh `wxt submit`. Khi merge PR của **Release Please**, workflow sẽ tự động nộp tiện ích lên các store nếu Repository Secrets tương ứng được thiết lập:
+
+### 🔑 Danh sách GitHub Secrets cần cấu hình (`Settings -> Secrets and variables -> Actions`):
+
+#### 1. Mozilla Firefox (AMO)
+
+- `FIREFOX_JWT_ISSUER`: API Key Issuer từ [AMO API Keys](https://addons.mozilla.org/developers/addon/api/key/) (dạng `user:...`).
+- `FIREFOX_JWT_SECRET`: API Key Secret tương ứng.
+- `FIREFOX_EXTENSION_ID`: _(Tùy chọn, mặc định `svhaui-helper@vuquan.dev`)_.
+
+#### 2. Google Chrome Web Store
+
+- `CHROME_EXTENSION_ID`: ID 32 ký tự của extension trên Chrome Developer Dashboard.
+- `CHROME_CLIENT_ID`: OAuth 2.0 Client ID từ Google Cloud Console.
+- `CHROME_CLIENT_SECRET`: OAuth 2.0 Client Secret từ Google Cloud Console.
+- `CHROME_REFRESH_TOKEN`: Refresh token lấy qua Google OAuth Playground.
+
+#### 3. Microsoft Edge Add-ons
+
+- `EDGE_PRODUCT_ID`: _(Tùy chọn, mặc định `nfhfnkngbclhmcanckbnpdgghpogadmj`)_.
+- `EDGE_CLIENT_ID`: Client ID từ [Edge Publish API](https://partner.microsoft.com/en-us/dashboard/microsoftedge/publishapi).
+- `EDGE_API_KEY`: API Key từ Edge Publish API (lưu ý xoay vòng sau 72 ngày).
