@@ -11,6 +11,10 @@ updates:
       prefix: 'chore(deps):'
     labels:
       - 'dependencies'
+    cooldown:
+      default-days: 14
+      semver-minor-days: 14
+      semver-patch-days: 7
     groups:
       all-non-major:
         update-types:
@@ -27,6 +31,8 @@ updates:
       prefix: 'chore(ci):'
     labels:
       - 'ci'
+    cooldown:
+      default-days: 7
     groups:
       all-actions:
         update-types:
