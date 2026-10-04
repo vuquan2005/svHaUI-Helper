@@ -55,27 +55,6 @@
   --sv-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
   --sv-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   --sv-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-
-  /* Backward-compatible aliases */
-  --primary-color: var(--sv-primary);
-  --primary-hover: var(--sv-primary-hover);
-  --accent-color: var(--sv-accent);
-  --accent-light: var(--sv-accent-light);
-  --bg-color: var(--sv-bg-base);
-  --card-bg: var(--sv-card-bg);
-  --header-bg: var(--sv-header-bg);
-  --footer-bg: var(--sv-footer-bg);
-  --text-main: var(--sv-text-main);
-  --text-muted: var(--sv-text-muted);
-  --border-color: var(--sv-border);
-  --border-subtle: var(--sv-border-subtle);
-  --sub-item-bg: var(--sv-sub-item-bg);
-  --nav-hover-bg: var(--sv-nav-hover-bg);
-  --slider-bg: var(--sv-slider-bg);
-  --badge-bg: var(--sv-badge-bg);
-  --radius-sm: var(--sv-radius-sm);
-  --radius-md: var(--sv-radius-md);
-  --radius-lg: var(--sv-radius-lg);
 }
 
 @media screen {
@@ -126,19 +105,4 @@
     --sv-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
     --sv-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
   }
-}
-
-/* -------------------------------------------------------------
- * Global Patches: Fix HaUI legacy sidebar artifacts
- * ----------------------------------------------------------- */
-.sb__list > li.parent:not(.open) > ul.sub-menu,
-.sb__list > li.parent:not(.open) > ul {
-  display: none !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: none !important;
-  background: transparent !important;
-  overflow: hidden !important;
 }

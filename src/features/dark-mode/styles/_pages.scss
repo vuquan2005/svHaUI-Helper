@@ -179,18 +179,30 @@
      * 4. SCROLLBARS IN DARK MODE
      * ----------------------------------------------------------- */
     &::-webkit-scrollbar,
-    & *::-webkit-scrollbar {
+    .sb__scroll::-webkit-scrollbar,
+    .table-responsive::-webkit-scrollbar,
+    .k-window-content::-webkit-scrollbar,
+    textarea::-webkit-scrollbar,
+    .dropdown-menu::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
 
     &::-webkit-scrollbar-track,
-    & *::-webkit-scrollbar-track {
+    .sb__scroll::-webkit-scrollbar-track,
+    .table-responsive::-webkit-scrollbar-track,
+    .k-window-content::-webkit-scrollbar-track,
+    textarea::-webkit-scrollbar-track,
+    .dropdown-menu::-webkit-scrollbar-track {
       background: $sv-dark-bg-base;
     }
 
     &::-webkit-scrollbar-thumb,
-    & *::-webkit-scrollbar-thumb {
+    .sb__scroll::-webkit-scrollbar-thumb,
+    .table-responsive::-webkit-scrollbar-thumb,
+    .k-window-content::-webkit-scrollbar-thumb,
+    textarea::-webkit-scrollbar-thumb,
+    .dropdown-menu::-webkit-scrollbar-thumb {
       background: $sv-dark-border;
       border-radius: 4px;
 

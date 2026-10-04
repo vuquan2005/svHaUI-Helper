@@ -96,8 +96,7 @@ export function createHomeExamWidget(
     title.className = 'sv-exam-widget-title';
 
     const actions = document.createElement('div');
-    actions.className = 'widget-actions';
-    actions.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+    actions.className = 'widget-actions sv-exam-widget-actions';
 
     if (callbacks.onSyncClick) {
         const syncBtn = document.createElement('button');

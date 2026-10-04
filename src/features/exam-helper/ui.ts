@@ -54,8 +54,7 @@ export function createExamPlanUI(callbacks: ExamUICallbacks): ExamUIRefs {
     }
 
     const statusText = document.createElement('span');
-    statusText.className = 'text-muted small';
-    statusText.style.cssText = 'line-height: 30px; margin-left: 5px;';
+    statusText.className = 'text-muted small sv-exam-status-text';
     container.appendChild(statusText);
 
     return { container, downloadBtn, updateBtn, statusText };
@@ -73,8 +72,7 @@ export function createExamScheduleUI(callbacks: ExamUICallbacks): ExamUIRefs {
     container.appendChild(downloadBtn);
 
     const statusText = document.createElement('span');
-    statusText.className = 'text-muted small';
-    statusText.style.cssText = 'line-height: 30px; margin-left: 5px;';
+    statusText.className = 'text-muted small sv-exam-status-text';
     container.appendChild(statusText);
 
     return { container, downloadBtn, statusText };

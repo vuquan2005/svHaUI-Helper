@@ -4,4 +4,9 @@
   gap: 5px;
   margin-left: 5px;
   vertical-align: top;
+
+  .dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+  }
 }

@@ -18,11 +18,14 @@ $prefix: sv-grade-nav;
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
-    color: var(--sv-link, #1d4ed8);
-    background: var(--sv-bg-hover-subtle, #eff6ff);
-    border: 1px solid var(--sv-border, #bfdbfe);
+    color: #1d4ed8;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
 
-    transition: all 0.15s ease-in-out;
+    transition:
+      background-color 0.15s ease-in-out,
+      border-color 0.15s ease-in-out,
+      color 0.15s ease-in-out;
 
     &-label {
       @media (max-width: 520px) {
@@ -31,16 +34,16 @@ $prefix: sv-grade-nav;
     }
 
     &:hover {
-      background: var(--sv-primary, #1d4ed8);
+      background: var(--sv-primary, #0054a6);
       color: #ffffff;
-      border-color: var(--sv-primary, #1d4ed8);
+      border-color: var(--sv-primary, #0054a6);
       text-decoration: none;
     }
 
     &.active {
-      background: var(--sv-primary-active, #1d4ed8);
+      background: var(--sv-primary-active, #002d5b);
       color: #ffffff;
-      border-color: var(--sv-primary-active, #1d4ed8);
+      border-color: var(--sv-primary-active, #002d5b);
       pointer-events: none;
       cursor: default;
     }
@@ -52,8 +55,8 @@ $prefix: sv-grade-nav;
         color: var(--sv-link-hover, #93c5fd);
 
         &:hover {
-          background: var(--sv-primary, #2563eb);
-          border-color: var(--sv-primary, #2563eb);
+          background: var(--sv-primary, #3b82f6);
+          border-color: var(--sv-primary, #3b82f6);
           color: #ffffff;
         }
 
