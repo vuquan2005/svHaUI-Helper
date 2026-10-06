@@ -33,6 +33,8 @@ export interface CourseGrade {
 // Storage Schema
 // ============================================
 
+export type DarkModeTheme = 'slate' | 'midnight';
+
 /**
  * Define all keys and types in GM storage
  * Add new keys here for autocomplete and type safety
@@ -42,6 +44,7 @@ export interface StorageSchema {
     grades: CourseGrade[];
     captcha_undo_telex: boolean;
     dark_mode_system?: boolean;
+    dark_mode_theme?: DarkModeTheme;
 }
 
 // Utility types

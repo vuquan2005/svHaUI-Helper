@@ -9,6 +9,7 @@ interface FeatureDef {
     description: string;
     isSubSetting?: boolean;
     parentFeatureId?: string;
+    type?: 'switch' | 'theme-selector';
 }
 
 const FEATURES: FeatureDef[] = [
@@ -23,6 +24,14 @@ const FEATURES: FeatureDef[] = [
         description: 'Chỉ bật khi máy tính/điện thoại ở chế độ tối',
         isSubSetting: true,
         parentFeatureId: 'dark-mode',
+    },
+    {
+        id: 'dark_mode_theme',
+        name: 'Kiểu giao diện tối',
+        description: 'Tùy chọn sắc thái màu tối hiển thị',
+        isSubSetting: true,
+        parentFeatureId: 'dark-mode',
+        type: 'theme-selector',
     },
     {
         id: 'captcha-helper',
@@ -79,14 +88,23 @@ const FEATURES: FeatureDef[] = [
 ];
 
 async function syncPopupTheme(): Promise<void> {
-    const stored = await browser.storage.local.get(['app_settings', 'dark_mode_system']);
+    const stored = await browser.storage.local.get([
+        'app_settings',
+        'dark_mode_system',
+        'dark_mode_theme',
+    ]);
     const appSettings = stored.app_settings as { features?: Record<string, boolean> } | undefined;
     const isEnabled = appSettings?.features?.['dark-mode'] ?? false;
     const isSystem = Boolean(stored.dark_mode_system);
+    const themeVariant = (stored.dark_mode_theme as string) === 'midnight' ? 'midnight' : 'slate';
 
     const isDark =
         isEnabled && (!isSystem || window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.classList.toggle('sv-dark', isDark);
+    document.documentElement.classList.toggle(
+        'sv-dark-midnight',
+        isDark && themeVariant === 'midnight'
+    );
 }
 
 async function initPopup(): Promise<void> {
@@ -98,7 +116,10 @@ async function initPopup(): Promise<void> {
         .addEventListener('change', () => void syncPopupTheme());
 
     browser.storage.onChanged.addListener((changes, areaName) => {
-        if (areaName === 'local' && (changes.app_settings || changes.dark_mode_system)) {
+        if (
+            areaName === 'local' &&
+            (changes.app_settings || changes.dark_mode_system || changes.dark_mode_theme)
+        ) {
             void syncPopupTheme();
         }
     });
@@ -247,6 +268,7 @@ async function renderFeatureToggles(): Promise<void> {
         'app_settings',
         'captcha_undo_telex',
         'dark_mode_system',
+        'dark_mode_theme',
     ]);
     const appSettings = (stored.app_settings || {
         logLevel: 'warn',
@@ -271,6 +293,43 @@ async function renderFeatureToggles(): Promise<void> {
             if (!isParentEnabled) {
                 item.classList.add('is-disabled');
             }
+        }
+
+        if (feat.type === 'theme-selector') {
+            const currentTheme =
+                (stored.dark_mode_theme as string) === 'midnight' ? 'midnight' : 'slate';
+            item.innerHTML = `
+                <div class="toggle-info">
+                    <span class="toggle-title">${feat.name}</span>
+                    <span class="toggle-desc">${feat.description}</span>
+                </div>
+                <div class="theme-segmented">
+                    <button type="button" class="theme-btn ${currentTheme === 'slate' ? 'is-active' : ''}" data-theme="slate" ${!isParentEnabled ? 'disabled' : ''} title="Xanh than (Slate) - Dịu mắt">
+                        <span class="theme-dot dot-slate"></span>
+                        <span>Xanh than</span>
+                    </button>
+                    <button type="button" class="theme-btn ${currentTheme === 'midnight' ? 'is-active' : ''}" data-theme="midnight" ${!isParentEnabled ? 'disabled' : ''} title="Đen sâu (Midnight) - AMOLED">
+                        <span class="theme-dot dot-midnight"></span>
+                        <span>Đen sâu</span>
+                    </button>
+                </div>
+            `;
+
+            const themeBtns = item.querySelectorAll<HTMLButtonElement>('.theme-btn');
+            themeBtns.forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const theme = btn.dataset.theme as 'slate' | 'midnight';
+                    if (!theme || btn.classList.contains('is-active')) return;
+                    await browser.storage.local.set({ dark_mode_theme: theme });
+                    themeBtns.forEach((b) =>
+                        b.classList.toggle('is-active', b.dataset.theme === theme)
+                    );
+                    await syncPopupTheme();
+                });
+            });
+
+            listEl.appendChild(item);
+            continue;
         }
 
         let isChecked: boolean;
@@ -329,6 +388,11 @@ async function renderFeatureToggles(): Promise<void> {
                     if (childInput) {
                         childInput.disabled = !checked;
                     }
+                    const childButtons =
+                        childItem.querySelectorAll<HTMLButtonElement>('.theme-btn');
+                    childButtons.forEach((btn) => {
+                        btn.disabled = !checked;
+                    });
                 });
             }
         });

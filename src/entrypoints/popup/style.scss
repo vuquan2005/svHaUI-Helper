@@ -209,8 +209,65 @@ body {
       opacity: 0.45;
       cursor: not-allowed;
 
-      .switch {
+      .switch,
+      .theme-segmented {
         pointer-events: none;
+      }
+    }
+
+    .theme-segmented {
+      display: inline-flex;
+      background: var(--sv-bg-base);
+      border: 1px solid var(--sv-border);
+      border-radius: var(--sv-radius-sm);
+      padding: 2px;
+      gap: 2px;
+      flex-shrink: 0;
+
+      .theme-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 7px;
+        border: none;
+        background: transparent;
+        color: var(--sv-text-muted);
+        font-size: 11px;
+        font-weight: 500;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        user-select: none;
+
+        .theme-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+          flex-shrink: 0;
+        }
+
+        .dot-slate {
+          background-color: #334155;
+          border: 1px solid #64748b;
+        }
+
+        .dot-midnight {
+          background-color: #09090b;
+          border: 1px solid #52525b;
+        }
+
+        &:hover:not(.is-active) {
+          color: var(--sv-text-main);
+          background: var(--sv-bg-surface-hover);
+        }
+
+        &.is-active {
+          background: var(--sv-card-bg);
+          color: var(--sv-primary);
+          font-weight: 600;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+        }
       }
     }
 
