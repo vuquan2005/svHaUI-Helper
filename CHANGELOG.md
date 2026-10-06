@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.4.0...v3.5.0) (2026-10-06)
+
+
+### Features
+
+* **dark-mode:** add midnight deep dark theme variant and popup selector ([#136](https://github.com/vuquan2005/svHaUI-Helper/issues/136)) ([2b5f112](https://github.com/vuquan2005/svHaUI-Helper/commit/2b5f1125d946e7c1d6b58d04b3fa8b84a4739e21))
+
 ## [3.4.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.3.0...v3.4.0) (2026-10-04)
 
 
