@@ -25,26 +25,35 @@ export class DarkModeFeature extends Feature {
         this.log.d('Initializing Dark Mode feature...');
 
         const applyCurrentState = async () => {
-            const stored = await browser.storage.local.get(['app_settings', 'dark_mode_system']);
+            const stored = await browser.storage.local.get([
+                'app_settings',
+                'dark_mode_system',
+                'dark_mode_theme',
+            ]);
             const appSettings = stored.app_settings as
                 { features?: Record<string, boolean> } | undefined;
             const isEnabled = appSettings?.features?.['dark-mode'] ?? false;
             const isSystem = Boolean(stored.dark_mode_system);
+            const themeVariant =
+                (stored.dark_mode_theme as string) === 'midnight' ? 'midnight' : 'slate';
 
             this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
             const shouldBeDark = isEnabled && (!isSystem || this.mediaQuery.matches);
             document.documentElement.classList.toggle('sv-dark', shouldBeDark);
+            document.documentElement.classList.toggle(
+                'sv-dark-midnight',
+                shouldBeDark && themeVariant === 'midnight'
+            );
             this.log.i(
-                `Giao diện tối: ${shouldBeDark ? 'Đã bật' : 'Tắt (theo hệ thống đang ở giao diện sáng)'}`
+                `Giao diện tối: ${shouldBeDark ? `Đã bật (${themeVariant})` : 'Tắt (theo hệ thống đang ở giao diện sáng)'}`
             );
 
             // Listen for system changes if system mode is enabled
             if (isEnabled && isSystem) {
                 if (!this.mediaListener) {
-                    this.mediaListener = (e: MediaQueryListEvent) => {
-                        document.documentElement.classList.toggle('sv-dark', e.matches);
-                        this.log.d(`Hệ thống đổi theme: ${e.matches ? 'Dark' : 'Light'}`);
+                    this.mediaListener = () => {
+                        void applyCurrentState();
                     };
                     this.mediaQuery.addEventListener('change', this.mediaListener);
                 }
@@ -58,7 +67,10 @@ export class DarkModeFeature extends Feature {
 
         // Listen for changes to dark_mode settings
         this.storageListener = (changes, areaName) => {
-            if (areaName === 'local' && (changes.dark_mode_system || changes.app_settings)) {
+            if (
+                areaName === 'local' &&
+                (changes.dark_mode_system || changes.app_settings || changes.dark_mode_theme)
+            ) {
                 this.log.d('dark_mode settings changed, updating theme...');
                 void applyCurrentState();
             }
@@ -68,6 +80,7 @@ export class DarkModeFeature extends Feature {
 
     cleanup(): void {
         document.documentElement.classList.remove('sv-dark');
+        document.documentElement.classList.remove('sv-dark-midnight');
 
         if (this.mediaQuery && this.mediaListener) {
             this.mediaQuery.removeEventListener('change', this.mediaListener);

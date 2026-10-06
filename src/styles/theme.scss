@@ -105,4 +105,53 @@
     --sv-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
     --sv-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
   }
+
+  /* Midnight / Deep Dark (AMOLED / Neutral Zinc Preset) */
+  :root.sv-dark.sv-dark-midnight,
+  html.sv-dark.sv-dark-midnight {
+    /* Brand & Accent Colors */
+    --sv-primary: #3b82f6;
+    --sv-primary-hover: #60a5fa;
+    --sv-primary-active: #2563eb;
+    --sv-accent: #f97316;
+    --sv-accent-hover: #fb923c;
+    --sv-accent-light: rgba(249, 115, 22, 0.18);
+
+    /* Surfaces & Backgrounds */
+    --sv-bg-base: #09090b;
+    --sv-bg-surface: #141417;
+    --sv-bg-surface-hover: #1c1c21;
+    --sv-bg-surface-active: #23232a;
+    --sv-bg-nested: #0e0e11;
+    --sv-bg-alt: #16161a;
+    --sv-bg-hover-subtle: #222228;
+    --sv-card-bg: #141417;
+    --sv-header-bg: #121215;
+    --sv-footer-bg: #121215;
+    --sv-sub-item-bg: #101013;
+    --sv-nav-hover-bg: #1a1a20;
+
+    /* Typography / Text Colors */
+    --sv-text-main: #d4d4d8;
+    --sv-text-head: #fafafa;
+    --sv-text-muted: #a1a1aa;
+    --sv-text-dim: #71717a;
+    --sv-text-white: #ffffff;
+    --sv-link: #38bdf8;
+    --sv-link-hover: #7dd3fc;
+
+    /* Borders & Dividers */
+    --sv-border: #27272a;
+    --sv-border-subtle: #1c1c20;
+    --sv-border-hover: #3f3f46;
+
+    /* Component Tokens */
+    --sv-slider-bg: #3f3f46;
+    --sv-badge-bg: #27272a;
+
+    /* Shadows */
+    --sv-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --sv-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --sv-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+  }
 }
