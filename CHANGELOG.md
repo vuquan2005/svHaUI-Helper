@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.6.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.5.0...v3.6.0) (2026-10-08)
+
+
+### Features
+
+* **firefox:** add android compatibility and improve dev env workflow ([#141](https://github.com/vuquan2005/svHaUI-Helper/issues/141)) ([815867e](https://github.com/vuquan2005/svHaUI-Helper/commit/815867e793509c9068da22d6ccd6305fe715959a))
+* **thesis-registration:** add thesis and project topic lookup feature ([#138](https://github.com/vuquan2005/svHaUI-Helper/issues/138)) ([8f6c486](https://github.com/vuquan2005/svHaUI-Helper/commit/8f6c48645fddf57cb81352786065229ba1427d59))
+
 ## [3.5.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.4.0...v3.5.0) (2026-10-06)
 
 
