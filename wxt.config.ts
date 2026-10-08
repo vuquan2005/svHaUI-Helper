@@ -10,7 +10,14 @@ const buildTime: string = new Date()
 
 export default defineConfig({
     srcDir: 'src',
-    manifest: ({ browser }) => {
+    manifest: ({ browser, mode }) => {
+        const isDev = mode === 'development';
+        const geckoId =
+            process.env.FIREFOX_GECKO_ID ||
+            (isDev ? 'svhaui-helper-dev@vuquan.dev' : 'svhaui-helper@vuquan.dev');
+        const manifestVersion = isDev ? `${version}.1` : version;
+        const name = isDev ? '__MSG_extensionName__ [DEV]' : '__MSG_extensionName__';
+
         const permissions: string[] = ['storage'];
         // chrome.offscreen is Chromium specific
         if (browser !== 'firefox') {
@@ -18,14 +25,14 @@ export default defineConfig({
         }
 
         return {
-            name: '__MSG_extensionName__',
+            name,
             description: '__MSG_extensionDescription__',
             default_locale: 'vi',
-            version,
+            version: manifestVersion,
             permissions,
             host_permissions: ['https://sv.haui.edu.vn/*'],
             action: {
-                default_title: 'SV HaUI Helper',
+                default_title: isDev ? 'SV HaUI Helper [DEV]' : 'SV HaUI Helper',
                 default_icon: {
                     '16': 'icon/16.png',
                     '32': 'icon/32.png',
@@ -38,22 +45,32 @@ export default defineConfig({
             },
             browser_specific_settings: {
                 gecko: {
-                    id: 'svhaui-helper@vuquan.dev',
+                    id: geckoId,
                     strict_min_version: '109.0',
                     data_collection_permissions: {
                         required: ['none'],
                     },
                 },
+                gecko_android: {
+                    strict_min_version: '109.0',
+                },
             },
         };
     },
-    vite: () => ({
-        resolve: {
-            conditions: ['onnxruntime-web-use-extern-wasm'],
-        },
-        define: {
-            __APP_VERSION__: JSON.stringify(version),
-            __BUILD_TIME__: JSON.stringify(buildTime),
-        },
-    }),
+    vite: ({ mode }) => {
+        const isDev = mode === 'development';
+        return {
+            resolve: {
+                conditions: ['onnxruntime-web-use-extern-wasm'],
+            },
+            define: {
+                __APP_VERSION__: JSON.stringify(isDev ? `${version} (dev)` : version),
+                __BUILD_TIME__: JSON.stringify(buildTime),
+            },
+        };
+    },
+    webExt: {
+        disabled: process.env.NO_BROWSER === 'true',
+        startUrls: ['about:debugging#/runtime/this-firefox'],
+    },
 });
