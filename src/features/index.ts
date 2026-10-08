@@ -14,6 +14,7 @@ import { GradePredictionFeature } from './grade-prediction';
 import { HomeShortcutsFeature } from './home-shortcuts';
 import { ExamHelperFeature } from './exam-helper';
 import { DarkModeFeature } from './dark-mode';
+import { ThesisRegistrationFeature } from './thesis-registration';
 
 // Add new features here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,4 +29,5 @@ export const allFeatures: Feature<any>[] = [
     new ExportTimetableFeature(),
     new HomeShortcutsFeature(),
     new ExamHelperFeature(),
+    new ThesisRegistrationFeature(),
 ];

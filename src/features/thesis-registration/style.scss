@@ -1,0 +1,563 @@
+/**
+ * Thesis Registration Feature - Styles
+ * Flat, minimalist layout with subtle borders and clear hover highlights.
+ */
+
+.sv-thesis-card {
+  margin-top: 16px;
+  margin-bottom: 20px;
+  background-color: var(--sv-card-bg);
+  border: 1px solid var(--sv-border);
+  border-radius: var(--sv-radius-md);
+  box-shadow: var(--sv-shadow-sm);
+  color: var(--sv-text-main);
+  font-family: inherit;
+  overflow: hidden;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Edge-to-edge Flat Card Header */
+  &-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--sv-bg-surface);
+    border-bottom: 1px solid var(--sv-border);
+    color: var(--sv-text-head);
+  }
+
+  &-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  &-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--sv-text-head);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &-stats-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 2px 8px;
+    border-radius: var(--sv-radius-full);
+    color: var(--sv-text-muted);
+    background-color: var(--sv-bg-alt);
+    border: 1px solid var(--sv-border);
+    transition: all 0.15s ease;
+  }
+
+  &-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Card Body */
+  &-body {
+    padding: 16px;
+    background: var(--sv-card-bg);
+    color: var(--sv-text-main);
+  }
+
+  /* Progress Bar */
+  .sv-thesis-progress-container {
+    margin-bottom: 14px;
+    background: var(--sv-bg-base);
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius-sm);
+    padding: 8px 12px;
+
+    .sv-thesis-progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--sv-text-muted);
+      margin-bottom: 6px;
+    }
+
+    .sv-thesis-progress-bar {
+      height: 4px;
+      background: var(--sv-border);
+      border-radius: var(--sv-radius-full);
+      overflow: hidden;
+
+      .sv-thesis-progress-fill {
+        height: 100%;
+        background: var(--sv-primary);
+        border-radius: var(--sv-radius-full);
+        transition: width 0.3s ease;
+      }
+    }
+  }
+
+  /* Toolbar: Search, Filters, View Modes */
+  .sv-thesis-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+
+    .sv-thesis-search-wrap {
+      position: relative;
+      flex: 1 1 240px;
+      max-width: 340px;
+
+      .sv-thesis-search-input {
+        width: 100%;
+        padding: 6px 12px 6px 30px;
+        font-size: 12.5px;
+        border: 1px solid var(--sv-border);
+        border-radius: var(--sv-radius-sm);
+        background: var(--sv-bg-surface);
+        color: var(--sv-text-main);
+        outline: none;
+        transition:
+          border-color 0.15s ease,
+          background-color 0.15s ease;
+
+        &:hover {
+          border-color: var(--sv-border-hover);
+        }
+
+        &:focus {
+          border-color: var(--sv-primary);
+        }
+
+        &::placeholder {
+          color: var(--sv-text-dim);
+        }
+      }
+
+      .sv-thesis-search-icon {
+        position: absolute;
+        left: 9px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--sv-text-dim);
+        pointer-events: none;
+        font-size: 13px;
+      }
+
+      .sv-thesis-search-clear {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--sv-text-dim);
+        cursor: pointer;
+        padding: 2px 5px;
+        font-size: 13px;
+        border-radius: 50%;
+        transition: color 0.15s ease;
+
+        &:hover {
+          color: var(--sv-text-head);
+        }
+      }
+    }
+
+    .sv-thesis-filter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+
+      .sv-thesis-select-filter {
+        padding: 6px 10px;
+        font-size: 12.5px;
+        border: 1px solid var(--sv-border);
+        border-radius: var(--sv-radius-sm);
+        background: var(--sv-bg-surface);
+        color: var(--sv-text-main);
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.15s ease;
+
+        &:hover {
+          border-color: var(--sv-border-hover);
+        }
+
+        &:focus {
+          border-color: var(--sv-primary);
+        }
+      }
+
+      .sv-thesis-view-toggle {
+        display: inline-flex;
+        border: 1px solid var(--sv-border);
+        border-radius: var(--sv-radius-sm);
+        overflow: hidden;
+
+        .sv-thesis-toggle-btn {
+          background: var(--sv-bg-surface);
+          border: none;
+          padding: 5px 12px;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--sv-text-muted);
+          cursor: pointer;
+          transition:
+            background-color 0.15s ease,
+            color 0.15s ease;
+
+          &.active {
+            background: var(--sv-primary);
+            color: #ffffff;
+            font-weight: 600;
+          }
+
+          &:not(.active):hover {
+            background: var(--sv-bg-surface-hover);
+            color: var(--sv-text-head);
+          }
+        }
+      }
+    }
+  }
+
+  /* Table View */
+  .sv-thesis-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius-sm);
+
+    table.sv-thesis-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 0;
+
+      th {
+        background-color: var(--sv-bg-alt);
+        color: var(--sv-text-head);
+        font-weight: 600;
+        font-size: 12.5px;
+        padding: 9px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--sv-border);
+        white-space: nowrap;
+
+        &.col-stt {
+          width: 48px;
+          text-align: center;
+        }
+
+        &.col-lecturer {
+          width: 210px;
+        }
+
+        &.col-action {
+          width: 140px;
+          text-align: center;
+        }
+      }
+
+      td {
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--sv-border-subtle);
+        color: var(--sv-text-main);
+        vertical-align: middle;
+
+        &.col-stt {
+          text-align: center;
+          color: var(--sv-text-muted);
+          font-size: 12px;
+        }
+
+        &.col-lecturer {
+          font-weight: 600;
+          color: var(--sv-text-head);
+        }
+
+        &.col-topic {
+          font-weight: 400;
+          line-height: 1.4;
+        }
+
+        &.col-action {
+          text-align: center;
+          white-space: nowrap;
+
+          .sv-thesis-action-cell {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+          }
+        }
+      }
+
+      tbody tr {
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background-color: var(--sv-bg-surface-hover);
+        }
+
+        &:last-child td {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+
+  /* Grouped View (Lecturer Cards) */
+  .sv-thesis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+
+    .sv-thesis-lecturer-card {
+      background: var(--sv-bg-base);
+      border: 1px solid var(--sv-border);
+      border-radius: var(--sv-radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s ease;
+
+      .sv-thesis-lecturer-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--sv-border);
+
+        .sv-thesis-lecturer-card-name {
+          font-weight: 600;
+          font-size: 13.5px;
+          color: var(--sv-text-head);
+        }
+
+        .sv-thesis-lecturer-card-badge {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 2px 7px;
+          border-radius: var(--sv-radius-full);
+          background: var(--sv-bg-alt);
+          color: var(--sv-text-muted);
+          border: 1px solid var(--sv-border);
+
+          &.empty {
+            color: var(--sv-text-dim);
+          }
+        }
+      }
+
+      .sv-thesis-lecturer-card-topics {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+
+        .sv-thesis-card-topic-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+          background: var(--sv-card-bg);
+          border: 1px solid var(--sv-border);
+          border-radius: var(--sv-radius-sm);
+          padding: 6px 10px;
+          font-size: 12.5px;
+          line-height: 1.4;
+          transition:
+            background-color 0.15s ease,
+            border-color 0.15s ease;
+
+          &:hover {
+            background-color: var(--sv-bg-surface-hover);
+            border-color: var(--sv-border-hover);
+          }
+
+          .topic-text {
+            flex: 1;
+            overflow-wrap: break-word;
+          }
+
+          .sv-thesis-card-topic-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+          }
+        }
+
+        .empty-topics-msg {
+          font-size: 12px;
+          color: var(--sv-text-dim);
+          font-style: italic;
+          text-align: center;
+          padding: 10px 0;
+        }
+      }
+    }
+  }
+
+  /* Topic Member Badge */
+  .sv-topic-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 1px 6px;
+    border-radius: var(--sv-radius-full);
+    white-space: nowrap;
+    user-select: none;
+    letter-spacing: 0.2px;
+
+    /* Empty / Open (0/2, 0/3) */
+    &.sv-topic-badge--empty {
+      background-color: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+
+    /* Partial (1/3, 2/3) */
+    &.sv-topic-badge--partial {
+      background-color: #f0f9ff;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    /* Full (3/3, 2/2) */
+    &.sv-topic-badge--full {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      font-weight: 700;
+    }
+  }
+
+  /* Empty state */
+  .sv-thesis-empty {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--sv-text-muted);
+
+    .empty-icon {
+      font-size: 32px;
+      margin-bottom: 6px;
+    }
+
+    .empty-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sv-text-head);
+      margin-bottom: 4px;
+    }
+
+    .empty-desc {
+      font-size: 12.5px;
+    }
+  }
+}
+
+/* Dark Mode Overrides (chỉ dành cho các badge có màu đặc thù theo trạng thái, không nằm trong bộ design token chuẩn) */
+@media screen {
+  html.sv-dark {
+    .sv-topic-badge {
+      &.sv-topic-badge--empty {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border-color: rgba(16, 185, 129, 0.3);
+      }
+
+      &.sv-topic-badge--partial {
+        background-color: rgba(14, 165, 233, 0.15);
+        color: #38bdf8;
+        border-color: rgba(14, 165, 233, 0.3);
+      }
+
+      &.sv-topic-badge--full {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+    }
+  }
+}
+
+/* Toast Notification */
+.sv-thesis-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--sv-card-bg);
+  color: var(--sv-text-head);
+  border: 1px solid var(--sv-border);
+  padding: 10px 16px;
+  border-radius: var(--sv-radius-sm);
+  box-shadow: var(--sv-shadow-md);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 999999;
+  animation: sv-toast-slide-in 0.2s ease-out;
+
+  .toast-icon {
+    font-size: 15px;
+  }
+}
+
+@keyframes sv-toast-slide-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Pulse highlight on the registration panel after selecting */
+@keyframes sv-selection-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 84, 166, 0.5);
+    background-color: rgba(0, 84, 166, 0.08);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(0, 84, 166, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 84, 166, 0);
+    background-color: transparent;
+  }
+}
+
+.sv-highlight-selected {
+  animation: sv-selection-flash 1.2s ease-out;
+  border-radius: 6px;
+}
