@@ -1,4 +1,5 @@
 import '@/utils/log-banner';
+import '@/styles/buttons.scss';
 import { featureManager } from '@/core';
 import { allFeatures } from '@/features';
 import { log } from '@/core/logger';

@@ -88,7 +88,7 @@ export function createPlanTableRow(
         ${
             onDownloadSingle
                 ? `<td style="text-align: center;">
-                    <button type="button" class="btn btn-xs btn-default single-ics-btn" title="Tải file ICS cho môn này">📥</button>
+                    <button type="button" class="sv-btn sv-btn-secondary sv-btn-xs btn btn-xs btn-default single-ics-btn" title="Tải file ICS cho môn này">📥</button>
                    </td>`
                 : ''
         }

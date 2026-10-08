@@ -101,7 +101,8 @@ export function createHomeExamWidget(
     if (callbacks.onSyncClick) {
         const syncBtn = document.createElement('button');
         syncBtn.type = 'button';
-        syncBtn.className = 'btn btn-xs btn-default home-sync-btn';
+        syncBtn.className =
+            'sv-btn sv-btn-secondary sv-btn-xs btn btn-xs btn-default home-sync-btn';
         syncBtn.innerHTML = '🔄 Đồng bộ';
         syncBtn.title = 'Đồng bộ lại lịch thi và phòng thi mới nhất';
         syncBtn.addEventListener('click', (e) => {
@@ -114,7 +115,8 @@ export function createHomeExamWidget(
     if (callbacks.onDownloadClick) {
         const downloadBtn = document.createElement('button');
         downloadBtn.type = 'button';
-        downloadBtn.className = 'btn btn-xs btn-primary home-download-btn';
+        downloadBtn.className =
+            'sv-btn sv-btn-primary sv-btn-xs btn btn-xs btn-primary home-download-btn';
         downloadBtn.innerHTML = '📥 Tải lịch';
         downloadBtn.title = 'Tải file ICS cho lịch thi sắp tới';
         downloadBtn.addEventListener('click', (e) => {

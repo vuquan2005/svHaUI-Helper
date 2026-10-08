@@ -13,15 +13,13 @@ $prefix: sv-grade-nav;
     align-items: center;
     gap: 6px;
     padding: 4px 12px;
-    border-radius: var(--sv-radius-sm, 6px);
-
+    border-radius: var(--sv-radius-sm);
     text-decoration: none;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 500;
-    color: #1d4ed8;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-
+    color: var(--sv-text-main);
+    background: var(--sv-bg-surface-hover);
+    border: 1px solid var(--sv-border);
     transition:
       background-color 0.15s ease-in-out,
       border-color 0.15s ease-in-out,
@@ -34,38 +32,19 @@ $prefix: sv-grade-nav;
     }
 
     &:hover {
-      background: var(--sv-primary, #0054a6);
-      color: #ffffff;
-      border-color: var(--sv-primary, #0054a6);
+      background: var(--sv-bg-surface-active);
+      border-color: var(--sv-border-hover);
+      color: var(--sv-text-head);
       text-decoration: none;
     }
 
     &.active {
-      background: var(--sv-primary-active, #002d5b);
+      background: var(--sv-primary);
       color: #ffffff;
-      border-color: var(--sv-primary-active, #002d5b);
+      border-color: var(--sv-primary);
+      font-weight: 600;
       pointer-events: none;
       cursor: default;
-    }
-
-    @media screen {
-      html.sv-dark & {
-        background: var(--sv-bg-surface, #1e293b);
-        border-color: var(--sv-border, #334155);
-        color: var(--sv-link-hover, #93c5fd);
-
-        &:hover {
-          background: var(--sv-primary, #3b82f6);
-          border-color: var(--sv-primary, #3b82f6);
-          color: #ffffff;
-        }
-
-        &.active {
-          background: var(--sv-primary-active, #1d4ed8);
-          border-color: var(--sv-primary, #3b82f6);
-          color: #ffffff;
-        }
-      }
     }
   }
 }
