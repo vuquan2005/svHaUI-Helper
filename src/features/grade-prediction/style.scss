@@ -23,22 +23,27 @@ input.#{$prefix}-inline-credit-input {
     align-items: center;
     gap: 6px;
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius: var(--sv-radius-sm);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     border: 1px solid transparent;
     transition:
       background-color 0.15s ease,
-      color 0.15s ease;
+      color 0.15s ease,
+      border-color 0.15s ease;
+
+    &[hidden] {
+      display: none !important;
+    }
 
     &-primary {
-      background: var(--sv-primary, #0054a6);
+      background: var(--sv-primary);
       color: #ffffff;
-      border-color: var(--sv-primary-hover, #003e7d);
+      border-color: var(--sv-primary-hover);
 
       &:hover {
-        background: var(--sv-primary-hover, #003e7d);
+        background: var(--sv-primary-hover);
         color: #ffffff;
       }
 
@@ -50,20 +55,21 @@ input.#{$prefix}-inline-credit-input {
     }
 
     &-secondary {
-      background: #334155;
-      color: #f1f5f9;
-      border-color: #475569;
+      background: var(--sv-bg-surface-hover);
+      color: var(--sv-text-main);
+      border-color: var(--sv-border);
 
       &:hover {
-        background: #475569;
-        color: #ffffff;
+        background: var(--sv-bg-surface-active);
+        border-color: var(--sv-border-hover);
+        color: var(--sv-text-head);
       }
     }
 
     &-sm {
       padding: 4px 10px;
       font-size: 11px;
-      border-radius: 5px;
+      border-radius: var(--sv-radius-sm);
     }
   }
 
@@ -74,7 +80,7 @@ input.#{$prefix}-inline-credit-input {
     transition: background-color 0.15s ease;
 
     &:hover {
-      background-color: #e0e7ff !important;
+      background-color: var(--sv-bg-surface-hover) !important;
     }
   }
 
@@ -128,10 +134,10 @@ input.#{$prefix}-inline-credit-input {
     }
 
     &:focus {
-      outline: 2px solid #3b82f6 !important;
+      outline: 2px solid var(--sv-primary) !important;
       outline-offset: -2px !important;
-      background-color: #ffffff !important;
-      color: var(--sv-bg-base, #0f172a) !important;
+      background-color: var(--sv-bg-surface) !important;
+      color: var(--sv-text-head) !important;
       text-decoration: none !important;
     }
   }
@@ -148,6 +154,10 @@ input.#{$prefix}-inline-credit-input {
   }
 
   /* Retaken / Improved course styling */
+  &-row-non-credit {
+    opacity: 0.6;
+  }
+
   &-row-superseded {
     // Keep tr opacity at 1 to prevent breaking table cell borders in border-collapse: collapse
     color: #64748b;
@@ -186,16 +196,16 @@ input.#{$prefix}-inline-credit-input {
   &-card {
     margin-top: 16px;
     margin-bottom: 20px;
-    background: var(--sv-card-bg, #ffffff);
-    border: 1px solid var(--sv-border, #e2e8f0);
-    border-radius: var(--sv-radius-md, 8px);
-    box-shadow: var(--sv-shadow-md, 0 2px 4px rgba(0, 0, 0, 0.05));
+    background: var(--sv-card-bg);
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius-md);
+    box-shadow: var(--sv-shadow-sm);
     overflow: hidden;
 
     &-header {
-      background: var(--sv-bg-surface, #ffffff);
-      border-bottom: 1px solid var(--sv-border, #e2e8f0);
-      color: var(--sv-text-head, #0f172a);
+      background: var(--sv-bg-surface);
+      border-bottom: 1px solid var(--sv-border);
+      color: var(--sv-text-head);
       padding: 10px 16px;
       display: flex;
       align-items: center;
@@ -213,12 +223,12 @@ input.#{$prefix}-inline-credit-input {
 
     &-title {
       margin: 0;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
-      color: var(--sv-text-head, #0f172a);
+      color: var(--sv-text-head);
     }
 
     &-actions {
@@ -229,8 +239,8 @@ input.#{$prefix}-inline-credit-input {
     }
 
     &-body {
-      background: var(--sv-card-bg, #ffffff);
-      color: var(--sv-text-main, #1e293b);
+      background: var(--sv-card-bg);
+      color: var(--sv-text-main);
       padding: 16px;
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -240,6 +250,37 @@ input.#{$prefix}-inline-credit-input {
         grid-template-columns: 1fr;
       }
     }
+  }
+
+  /* Status Badge */
+  &-status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 2px 8px;
+    border-radius: var(--sv-radius-full);
+    transition: all 0.15s ease;
+
+    &--simulated {
+      color: #d97706;
+      background-color: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    &--original {
+      color: var(--sv-text-muted);
+      background-color: var(--sv-bg-alt);
+      border: 1px solid var(--sv-border);
+    }
+  }
+
+  &-credit-separator {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--sv-text-dim);
+    user-select: none;
   }
 
   &-section {
@@ -252,9 +293,9 @@ input.#{$prefix}-inline-credit-input {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--sv-text-muted, #64748b);
+      color: var(--sv-text-muted);
       margin: 0;
-      border-bottom: 1px solid var(--sv-border, #e2e8f0);
+      border-bottom: 1px solid var(--sv-border);
       padding-bottom: 4px;
     }
   }
@@ -270,9 +311,9 @@ input.#{$prefix}-inline-credit-input {
   }
 
   &-stat-item {
-    background: var(--sv-bg-base, #f8fafc);
-    border: 1px solid var(--sv-border, #e2e8f0);
-    border-radius: var(--sv-radius-sm, 6px);
+    background: var(--sv-bg-base);
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius-sm);
     padding: 8px 12px;
     display: flex;
     flex-direction: column;
@@ -281,7 +322,7 @@ input.#{$prefix}-inline-credit-input {
 
     &-label {
       font-size: 11px;
-      color: var(--sv-text-muted, #64748b);
+      color: var(--sv-text-muted);
       margin-bottom: 2px;
       font-weight: 600;
     }
@@ -289,12 +330,12 @@ input.#{$prefix}-inline-credit-input {
     &-value {
       font-size: 18px;
       font-weight: 700;
-      color: var(--sv-text-head, #0f172a);
+      color: var(--sv-text-head);
       display: flex;
       align-items: center;
 
       &.highlight {
-        color: var(--sv-link, #2563eb);
+        color: var(--sv-link);
       }
 
       &.simulated {
@@ -306,7 +347,7 @@ input.#{$prefix}-inline-credit-input {
       }
 
       &.empty {
-        color: var(--sv-text-dim, #94a3b8);
+        color: var(--sv-text-dim);
         font-size: 16px;
         font-weight: 600;
       }
@@ -314,7 +355,7 @@ input.#{$prefix}-inline-credit-input {
 
     &-sub {
       font-size: 11px;
-      color: var(--sv-text-muted, #475569);
+      color: var(--sv-text-muted);
       margin-top: 2px;
       white-space: nowrap;
       overflow: hidden;
@@ -326,27 +367,27 @@ input.#{$prefix}-inline-credit-input {
     width: 48px;
     padding: 1px 3px;
     margin-left: 4px;
-    border: 1px dashed var(--sv-border-hover, #cbd5e1);
-    border-radius: var(--sv-radius-sm, 4px);
-    background: var(--sv-card-bg, #ffffff);
+    border: 1px dashed var(--sv-border-hover);
+    border-radius: var(--sv-radius-sm);
+    background: var(--sv-card-bg);
     text-align: center;
     font-size: 14px;
     font-weight: 700;
-    color: var(--sv-text-head, #334155);
+    color: var(--sv-text-head);
     cursor: pointer;
 
     &:hover {
-      border-color: var(--sv-primary, #3b82f6);
-      background: var(--sv-bg-hover-subtle, #f0fdf4);
-      color: var(--sv-primary, #2563eb);
+      border-color: var(--sv-primary);
+      background: var(--sv-bg-hover-subtle);
+      color: var(--sv-primary);
     }
 
     &:focus {
       outline: none;
       border-style: solid;
-      border-color: var(--sv-primary, #3b82f6);
-      background: var(--sv-card-bg, #ffffff);
-      color: var(--sv-text-head, #0f172a);
+      border-color: var(--sv-primary);
+      background: var(--sv-card-bg);
+      color: var(--sv-text-head);
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
     }
   }
@@ -362,14 +403,14 @@ input.#{$prefix}-inline-credit-input {
     align-items: center;
     justify-content: space-between;
     padding: 6px 12px;
-    border-radius: var(--sv-radius-sm, 6px);
-    background: var(--sv-bg-base, #f8fafc);
-    border: 1px solid var(--sv-border, #e2e8f0);
+    border-radius: var(--sv-radius-sm);
+    background: var(--sv-bg-base);
+    border: 1px solid var(--sv-border);
 
     &-name {
       font-size: 13px;
       font-weight: 500;
-      color: var(--sv-text-main, #334155);
+      color: var(--sv-text-main);
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -378,17 +419,17 @@ input.#{$prefix}-inline-credit-input {
     &-input {
       width: 48px;
       padding: 2px 4px;
-      border: 1px solid var(--sv-border-hover, #cbd5e1);
-      border-radius: var(--sv-radius-sm, 4px);
+      border: 1px solid var(--sv-border-hover);
+      border-radius: var(--sv-radius-sm);
       text-align: center;
       font-weight: 600;
       font-size: 12px;
-      color: var(--sv-text-head, #0f172a);
-      background: var(--sv-card-bg, #ffffff);
+      color: var(--sv-text-head);
+      background: var(--sv-card-bg);
 
       &:focus {
         outline: none;
-        border-color: var(--sv-primary, #3b82f6);
+        border-color: var(--sv-primary);
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
       }
     }
@@ -422,11 +463,15 @@ input.#{$prefix}-inline-credit-input {
     align-items: center;
     justify-content: center;
     padding: 16px;
+
+    &[hidden] {
+      display: none !important;
+    }
   }
 
   &-modal {
-    background: var(--sv-card-bg, #ffffff);
-    border-radius: var(--sv-radius-md, 10px);
+    background: var(--sv-card-bg);
+    border-radius: var(--sv-radius-md);
     width: 100%;
     max-width: 560px;
     max-height: 90vh;
@@ -435,14 +480,14 @@ input.#{$prefix}-inline-credit-input {
     box-shadow:
       0 20px 25px -5px rgba(0, 0, 0, 0.2),
       0 8px 10px -6px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--sv-border, #cbd5e1);
+    border: 1px solid var(--sv-border);
     overflow: hidden;
     font-family: inherit;
 
     &-header {
-      background: var(--sv-bg-surface, #ffffff);
-      border-bottom: 1px solid var(--sv-border, #e2e8f0);
-      color: var(--sv-text-head, #0f172a);
+      background: var(--sv-bg-surface);
+      border-bottom: 1px solid var(--sv-border);
+      color: var(--sv-text-head);
       padding: 12px 16px;
       display: flex;
       align-items: center;
@@ -455,13 +500,13 @@ input.#{$prefix}-inline-credit-input {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: var(--sv-text-head, #0f172a);
+      color: var(--sv-text-head);
     }
 
     &-close {
       background: transparent;
       border: none;
-      color: var(--sv-text-muted, #94a3b8);
+      color: var(--sv-text-muted);
       font-size: 16px;
       line-height: 1;
       cursor: pointer;
@@ -472,8 +517,8 @@ input.#{$prefix}-inline-credit-input {
         background-color 0.15s ease;
 
       &:hover {
-        color: var(--sv-text-head, #0f172a);
-        background-color: var(--sv-bg-hover-subtle, #f1f5f9);
+        color: var(--sv-text-head);
+        background-color: var(--sv-bg-hover-subtle);
       }
     }
 
@@ -486,17 +531,17 @@ input.#{$prefix}-inline-credit-input {
     }
 
     &-guide {
-      background: var(--sv-bg-base, #f8fafc);
-      border: 1px solid var(--sv-border, #e2e8f0);
-      border-radius: var(--sv-radius-sm, 6px);
+      background: var(--sv-bg-base);
+      border: 1px solid var(--sv-border);
+      border-radius: var(--sv-radius-sm);
       padding: 10px 12px;
       font-size: 12px;
-      color: var(--sv-text-main, #475569);
+      color: var(--sv-text-main);
 
       &-title {
         font-weight: 700;
         margin-bottom: 4px;
-        color: var(--sv-text-head, #334155);
+        color: var(--sv-text-head);
       }
 
       &-list {
@@ -510,8 +555,8 @@ input.#{$prefix}-inline-credit-input {
           line-height: 1.4;
 
           code {
-            background: var(--sv-border-subtle, #e2e8f0);
-            color: var(--sv-text-head, #0f172a);
+            background: var(--sv-border-subtle);
+            color: var(--sv-text-head);
             padding: 1px 4px;
             border-radius: 3px;
             font-family: monospace;
@@ -530,24 +575,24 @@ input.#{$prefix}-inline-credit-input {
       font-size: 13px;
       line-height: 1.5;
       padding: 10px 12px;
-      border: 1px solid var(--sv-border-hover, #cbd5e1);
-      border-radius: var(--sv-radius-sm, 6px);
+      border: 1px solid var(--sv-border);
+      border-radius: var(--sv-radius-sm);
       resize: vertical;
       box-sizing: border-box;
-      background: var(--sv-bg-base, #ffffff);
-      color: var(--sv-text-head, #0f172a);
+      background: var(--sv-bg-surface);
+      color: var(--sv-text-head);
 
       &:focus {
         outline: none;
-        border-color: var(--sv-primary, #3b82f6);
+        border-color: var(--sv-primary);
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
       }
     }
 
     &-footer {
       padding: 12px 16px;
-      background: var(--sv-bg-base, #f8fafc);
-      border-top: 1px solid var(--sv-border, #e2e8f0);
+      background: var(--sv-bg-base);
+      border-top: 1px solid var(--sv-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -563,7 +608,7 @@ input.#{$prefix}-inline-credit-input {
 }
 
 // ============================================
-// Dark Theme Overrides
+// Dark Theme Overrides (Chỉ dành cho các trạng thái tính toán / dự đoán có màu đặc thù)
 // ============================================
 
 @media screen {
@@ -596,10 +641,6 @@ input.#{$prefix}-inline-credit-input {
       }
     }
 
-    .#{$prefix}-index-cell:hover {
-      background-color: var(--sv-bg-surface-hover, #243044) !important;
-    }
-
     .#{$prefix}-score4-edited {
       background-color: rgba(245, 158, 11, 0.3) !important;
       color: #fcd34d !important;
@@ -610,9 +651,10 @@ input.#{$prefix}-inline-credit-input {
       }
     }
 
-    .#{$prefix}-cell-editable:focus {
-      background-color: var(--sv-bg-base, #0f172a) !important;
-      color: #ffffff !important;
+    .#{$prefix}-status-badge--simulated {
+      color: #fbbf24;
+      background-color: rgba(245, 158, 11, 0.2);
+      border-color: rgba(245, 158, 11, 0.4);
     }
   }
 }

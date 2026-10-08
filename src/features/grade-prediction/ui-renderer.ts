@@ -62,19 +62,19 @@ export class UIRenderer {
                     <span id="prediction-status-badge"></span>
                 </div>
                 <div class="${PREFIX}-card-actions">
-                    <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-primary" id="btn-toggle-edit" title="Bật/Tắt chế độ sửa điểm giả lập">
+                    <button type="button" class="sv-btn sv-btn-primary ${PREFIX}-btn ${PREFIX}-btn-primary" id="btn-toggle-edit" title="Bật/Tắt chế độ sửa điểm giả lập">
                         <span id="btn-edit-icon">✏️</span>
                         <span id="btn-edit-text">Giả lập</span>
                     </button>
-                    <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="btn-open-rules-modal" title="Cấu hình danh sách môn không tính điểm (Non-credit)">
+                    <button type="button" class="sv-btn sv-btn-secondary ${PREFIX}-btn ${PREFIX}-btn-secondary" id="btn-open-rules-modal" title="Cấu hình danh sách môn không tính điểm (Non-credit)">
                         <span>⚙️</span>
                         <span>Môn loại trừ</span>
                     </button>
-                    <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="btn-reset-edits" style="display: none;" title="Khôi phục toàn bộ điểm gốc">
+                    <button type="button" class="sv-btn sv-btn-secondary ${PREFIX}-btn ${PREFIX}-btn-secondary" id="btn-reset-edits" hidden title="Khôi phục toàn bộ điểm gốc">
                         <span>↺</span>
                         <span>Khôi phục</span>
                     </button>
-                    <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="btn-clear-selection" style="display: none;" title="Bỏ chọn các môn đang chọn">
+                    <button type="button" class="sv-btn sv-btn-secondary ${PREFIX}-btn ${PREFIX}-btn-secondary" id="btn-clear-selection" hidden title="Bỏ chọn các môn đang chọn">
                         <span>✕</span>
                         <span id="btn-clear-selection-text">Bỏ chọn</span>
                     </button>
@@ -139,7 +139,7 @@ export class UIRenderer {
         }
 
         if (this.modalEl) {
-            this.modalEl.style.display = 'flex';
+            this.modalEl.hidden = false;
             setTimeout(() => {
                 textarea?.focus();
             }, 50);
@@ -154,7 +154,7 @@ export class UIRenderer {
 
         const modalBackdrop = document.createElement('div');
         modalBackdrop.className = `${PREFIX}-modal-backdrop`;
-        modalBackdrop.style.display = 'none';
+        modalBackdrop.hidden = true;
 
         modalBackdrop.innerHTML = `
             <div class="${PREFIX}-modal">
@@ -179,12 +179,12 @@ export class UIRenderer {
                     <textarea class="${PREFIX}-modal-textarea" id="${PREFIX}-textarea-rules" rows="12" spellcheck="false" placeholder="Nhập các quy tắc mã môn..."></textarea>
                 </div>
                 <div class="${PREFIX}-modal-footer">
-                    <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="${PREFIX}-btn-reset-rules" title="Khôi phục danh sách mặc định">
+                    <button type="button" class="sv-btn sv-btn-secondary ${PREFIX}-btn ${PREFIX}-btn-secondary" id="${PREFIX}-btn-reset-rules" title="Khôi phục danh sách mặc định">
                         <span>↺ Mặc định</span>
                     </button>
                     <div class="${PREFIX}-modal-footer-actions">
-                        <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-secondary" id="${PREFIX}-btn-cancel-rules">Hủy</button>
-                        <button type="button" class="${PREFIX}-btn ${PREFIX}-btn-primary" id="${PREFIX}-btn-save-rules">
+                        <button type="button" class="sv-btn sv-btn-secondary ${PREFIX}-btn ${PREFIX}-btn-secondary" id="${PREFIX}-btn-cancel-rules">Hủy</button>
+                        <button type="button" class="sv-btn sv-btn-primary ${PREFIX}-btn ${PREFIX}-btn-primary" id="${PREFIX}-btn-save-rules">
                             <span>💾 Lưu cấu hình</span>
                         </button>
                     </div>
@@ -204,7 +204,7 @@ export class UIRenderer {
         const btnReset = modalBackdrop.querySelector(`#${PREFIX}-btn-reset-rules`) as HTMLElement;
 
         const closeModal = () => {
-            modalBackdrop.style.display = 'none';
+            modalBackdrop.hidden = true;
         };
 
         btnClose.addEventListener('click', closeModal);
@@ -265,11 +265,11 @@ export class UIRenderer {
         }
 
         if (btnReset) {
-            btnReset.style.display = this.store.isEdited ? 'inline-flex' : 'none';
+            btnReset.hidden = !this.store.isEdited;
         }
 
         if (btnClearSelection) {
-            btnClearSelection.style.display = this.store.hasSelection ? 'inline-flex' : 'none';
+            btnClearSelection.hidden = !this.store.hasSelection;
             if (btnClearText) {
                 btnClearText.textContent = `Bỏ chọn (${this.store.selectedCount})`;
             }
@@ -277,9 +277,9 @@ export class UIRenderer {
 
         if (statusBadge) {
             if (prediction.isEdited) {
-                statusBadge.innerHTML = `<span style="font-size: 11px; font-weight: 600; color: #f59e0b; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 4px;" title="Dữ liệu đang được giả lập">⚡ Giả lập</span>`;
+                statusBadge.innerHTML = `<span class="${PREFIX}-status-badge ${PREFIX}-status-badge--simulated" title="Dữ liệu đang được giả lập">⚡ Giả lập</span>`;
             } else {
-                statusBadge.innerHTML = `<span style="font-size: 11px; font-weight: 500; color: #94a3b8;" title="Dữ liệu gốc từ trường">✓ Gốc</span>`;
+                statusBadge.innerHTML = `<span class="${PREFIX}-status-badge ${PREFIX}-status-badge--original" title="Dữ liệu gốc từ trường">✓ Gốc</span>`;
             }
         }
 
@@ -293,7 +293,7 @@ export class UIRenderer {
             const currentAccCredits = prediction.isEdited
                 ? prediction.simulatedSummary.totalAccumulatedCredits
                 : prediction.originalSummary.totalAccumulatedCredits;
-            const creditsValue = `${currentAccCredits} <span style="font-size: 14px; font-weight: normal; color: #94a3b8;">/</span> <input type="number" id="input-target-credits" class="${PREFIX}-inline-credit-input" min="50" max="250" value="${prediction.totalTargetCredits}" title="Tổng số tín chỉ CTĐT (nhấp để sửa)">`;
+            const creditsValue = `${currentAccCredits} <span class="${PREFIX}-credit-separator">/</span> <input type="number" id="input-target-credits" class="${PREFIX}-inline-credit-input" min="50" max="250" value="${prediction.totalTargetCredits}" title="Tổng số tín chỉ CTĐT (nhấp để sửa)">`;
             const creditsSub = `Còn lại: <strong>${prediction.remainingCredits}</strong> tín`;
 
             // 3. GPA Giả lập
@@ -543,13 +543,13 @@ export class UIRenderer {
 
             // 1. Credit cell & non-credit row dimming
             if (row.isNonCredit) {
-                row.element.style.opacity = '0.6';
+                row.element.classList.add(`${PREFIX}-row-non-credit`);
                 row.creditCell.style.removeProperty('background-color');
                 row.creditCell.style.removeProperty('color');
                 row.creditCell.style.fontWeight = '';
                 row.creditCell.title = 'Môn không tính GPA (nhấp để bật)';
             } else {
-                row.element.style.opacity = '';
+                row.element.classList.remove(`${PREFIX}-row-non-credit`);
                 const creditKey = row.credits.toFixed(1);
                 const creditColor =
                     CREDITS_COLORS[creditKey] ||

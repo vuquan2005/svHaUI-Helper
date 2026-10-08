@@ -85,7 +85,7 @@ function createDownloadSplitButton(
     // Main button — download currently displayed timetable
     const mainBtn = document.createElement('button');
     mainBtn.type = 'button';
-    mainBtn.className = 'btn btn-success';
+    mainBtn.className = 'sv-btn sv-btn-success btn btn-success';
     mainBtn.innerHTML = '📅 Tải lịch hiển thị';
     mainBtn.title = 'Xuất lịch đang hiển thị bên dưới thành file ICS';
     mainBtn.addEventListener('click', onDownloadCurrent);
@@ -93,7 +93,7 @@ function createDownloadSplitButton(
     // Dropdown toggle
     const toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
-    toggleBtn.className = 'btn btn-success dropdown-toggle';
+    toggleBtn.className = 'sv-btn sv-btn-success dropdown-toggle btn btn-success';
     toggleBtn.setAttribute('data-toggle', 'dropdown');
     toggleBtn.setAttribute('aria-haspopup', 'true');
     toggleBtn.setAttribute('aria-expanded', 'false');
@@ -109,7 +109,6 @@ function createDownloadSplitButton(
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.href = '#';
-    a.style.cursor = 'pointer';
     a.textContent = '📥 Tải TKB kỳ này';
     a.title = 'Tự động tải toàn bộ thời khóa biểu kỳ hiện tại';
     a.addEventListener('click', (e) => {
@@ -137,7 +136,7 @@ function createDownloadSplitButton(
 function createCheckUpdateButton(onClick: () => void): HTMLButtonElement {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'btn btn-warning';
+    btn.className = 'sv-btn sv-btn-warning btn btn-warning';
     btn.innerHTML = '🔄 Kiểm tra cập nhật';
     btn.title = 'Kiểm tra xem thời khóa biểu có thay đổi không';
     btn.addEventListener('click', onClick);
@@ -153,26 +152,37 @@ export function setCheckButtonState(
     lastCheckTime?: string
 ): void {
     // Reset classes
-    btn.classList.remove('btn-warning', 'btn-danger', 'btn-info', 'btn-default', 'btn-success');
+    btn.classList.remove(
+        'btn-warning',
+        'btn-danger',
+        'btn-info',
+        'btn-default',
+        'btn-success',
+        'sv-btn-warning',
+        'sv-btn-danger',
+        'sv-btn-info',
+        'sv-btn-secondary',
+        'sv-btn-success'
+    );
 
     switch (state) {
         case 'checking':
-            btn.classList.add('btn-info');
+            btn.classList.add('btn-info', 'sv-btn-info');
             btn.innerHTML = '⏳ Đang kiểm tra...';
             btn.disabled = true;
             break;
         case 'has-update':
-            btn.classList.add('btn-danger');
+            btn.classList.add('btn-danger', 'sv-btn-danger');
             btn.innerHTML = '🔄 Có thay đổi!';
             btn.disabled = false;
             break;
         case 'not-downloaded':
-            btn.classList.add('btn-success');
+            btn.classList.add('btn-success', 'sv-btn-success');
             btn.innerHTML = '📥 Chưa tải TKB';
             btn.disabled = false;
             break;
         case 'no-update':
-            btn.classList.add('btn-default');
+            btn.classList.add('btn-default', 'sv-btn-secondary');
             btn.innerHTML = '✅ Không có thay đổi';
             btn.disabled = false;
             // Reset back to normal after 3s
@@ -180,7 +190,7 @@ export function setCheckButtonState(
             break;
         case 'normal':
         default:
-            btn.classList.add('btn-warning');
+            btn.classList.add('btn-warning', 'sv-btn-warning');
             btn.innerHTML = '🔄 Kiểm tra cập nhật';
             btn.disabled = false;
             break;
@@ -257,7 +267,7 @@ function createSemesterDropdown(onSelect: (semesterValue: string) => void): HTML
     // Main button — click = select current semester
     const mainBtn = document.createElement('button');
     mainBtn.type = 'button';
-    mainBtn.className = 'btn btn-info';
+    mainBtn.className = 'sv-btn sv-btn-info btn btn-info';
     mainBtn.textContent = currentOption ? `📋 ${currentOption.label}` : '📋 Xem kỳ';
     mainBtn.title = 'Chọn kỳ hiện tại';
     mainBtn.addEventListener('click', () => onSelect(currentValue));
@@ -265,7 +275,7 @@ function createSemesterDropdown(onSelect: (semesterValue: string) => void): HTML
     // Dropdown toggle (caret)
     const toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
-    toggleBtn.className = 'btn btn-info dropdown-toggle';
+    toggleBtn.className = 'sv-btn sv-btn-info dropdown-toggle btn btn-info';
     toggleBtn.setAttribute('data-toggle', 'dropdown');
     toggleBtn.setAttribute('aria-haspopup', 'true');
     toggleBtn.setAttribute('aria-expanded', 'false');
@@ -293,7 +303,6 @@ function createSemesterDropdown(onSelect: (semesterValue: string) => void): HTML
         const li = document.createElement('li');
         const a = document.createElement('a');
         a.href = '#';
-        a.style.cursor = 'pointer';
         a.textContent = option.label;
 
         // Mark current semester

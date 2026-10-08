@@ -88,7 +88,7 @@ export function createExamScheduleUI(callbacks: ExamUICallbacks): ExamUIRefs {
 function createDownloadButton(onClick: () => void): HTMLButtonElement {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'btn btn-primary btn-sm';
+    btn.className = 'sv-btn sv-btn-primary sv-btn-sm btn btn-primary btn-sm';
     btn.innerHTML = '📥 Tải lịch thi';
     btn.addEventListener('click', onClick);
     return btn;
@@ -100,7 +100,7 @@ function createDownloadButton(onClick: () => void): HTMLButtonElement {
 function createUpdateButton(onClick: () => void): HTMLButtonElement {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'btn btn-default btn-sm';
+    btn.className = 'sv-btn sv-btn-secondary sv-btn-sm btn btn-default btn-sm';
     btn.innerHTML = '🔄 Cập nhật dữ liệu';
     btn.addEventListener('click', onClick);
     return btn;
@@ -119,19 +119,19 @@ export function setDownloadBtnState(btn: HTMLButtonElement, state: DownloadBtnSt
     switch (state) {
         case 'ready':
             btn.innerHTML = '📥 Tải lịch thi';
-            btn.className = 'btn btn-primary btn-sm';
+            btn.className = 'sv-btn sv-btn-primary sv-btn-sm btn btn-primary btn-sm';
             break;
         case 'loading':
             btn.innerHTML = '⏳ Đang tải dữ liệu...';
-            btn.className = 'btn btn-default btn-sm';
+            btn.className = 'sv-btn sv-btn-secondary sv-btn-sm btn btn-default btn-sm';
             break;
         case 'no-data':
             btn.innerHTML = '📥 Tải lịch thi (cần cập nhật)';
-            btn.className = 'btn btn-warning btn-sm';
+            btn.className = 'sv-btn sv-btn-warning sv-btn-sm btn btn-warning btn-sm';
             break;
         case 'downloading':
             btn.innerHTML = '⏳ Đang tạo file...';
-            btn.className = 'btn btn-default btn-sm';
+            btn.className = 'sv-btn sv-btn-secondary sv-btn-sm btn btn-default btn-sm';
             break;
     }
 }
@@ -145,19 +145,19 @@ export function setUpdateBtnState(btn: HTMLButtonElement, state: UpdateBtnState)
     switch (state) {
         case 'ready':
             btn.innerHTML = '🔄 Cập nhật dữ liệu';
-            btn.className = 'btn btn-default btn-sm';
+            btn.className = 'sv-btn sv-btn-secondary sv-btn-sm btn btn-default btn-sm';
             break;
         case 'updating':
             btn.innerHTML = '⏳ Đang cập nhật...';
-            btn.className = 'btn btn-default btn-sm';
+            btn.className = 'sv-btn sv-btn-secondary sv-btn-sm btn btn-default btn-sm';
             break;
         case 'done':
             btn.innerHTML = '✅ Đã cập nhật';
-            btn.className = 'btn btn-success btn-sm';
+            btn.className = 'sv-btn sv-btn-success sv-btn-sm btn btn-success btn-sm';
             break;
         case 'error':
             btn.innerHTML = '❌ Lỗi cập nhật';
-            btn.className = 'btn btn-danger btn-sm';
+            btn.className = 'sv-btn sv-btn-danger sv-btn-sm btn btn-danger btn-sm';
             break;
     }
 }
