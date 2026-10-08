@@ -81,6 +81,11 @@ const FEATURES: FeatureDef[] = [
         description: 'Tự động trả lời nhanh các câu hỏi khảo sát học kỳ',
     },
     {
+        id: 'thesis-registration',
+        name: 'Tra cứu Đề tài ĐA/KLTN',
+        description: 'Hiển thị danh sách đề tài của tất cả giảng viên mà không cần tải lại trang',
+    },
+    {
         id: 'remove-snowfall',
         name: 'Tắt hiệu ứng tuyết rơi',
         description: 'Loại bỏ script tuyết rơi trang trí gây chậm trang web',
