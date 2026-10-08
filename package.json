@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
+    "dev:firefox:no-browser": "NO_BROWSER=true wxt -b firefox",
+    "dev:firefox:open": "firefox \"about:debugging#/runtime/this-firefox\" & NO_BROWSER=true wxt -b firefox",
     "run:android": "web-ext run -s .output/firefox-mv2-dev -t firefox-android --firefox-apk org.mozilla.fenix --android-device $(adb get-serialno)",
     "build": "wxt build",
     "build:firefox": "wxt build -b firefox",
