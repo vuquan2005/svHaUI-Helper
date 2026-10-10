@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.6.0...v3.6.1) (2026-10-10)
+
+
+### Bug Fixes
+
+* **theme:** allow legacy sidebar dropdowns toggled with is-open class ([#142](https://github.com/vuquan2005/svHaUI-Helper/issues/142)) ([41d5118](https://github.com/vuquan2005/svHaUI-Helper/commit/41d5118fff6319a09243c8fe957a7dbdeb7c98d8))
+
 ## [3.6.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.5.0...v3.6.0) (2026-10-08)
 
 
