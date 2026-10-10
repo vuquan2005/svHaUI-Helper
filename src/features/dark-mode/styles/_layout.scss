@@ -349,6 +349,9 @@
         &.open > ul.sub-menu,
         &.is-open > ul.sub-menu {
           display: block !important;
+          height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
           background-color: $sv-dark-bg-nested !important;
           border-radius: 8px !important;
           padding: 4px 0 !important;
