@@ -220,6 +220,42 @@ describe('Grade Calculator', () => {
             expect(results[0].requiredAverage).toBe(0);
         });
 
+        it('should correctly handle remainingCredits <= 0 when target is already achieved and when not achieved', () => {
+            // Student finished all 142 credits with GPA 2.83 (simulated from 2.69)
+            const targets = [
+                { targetGPA: 3.6, label: 'Xuất sắc (3.6)' },
+                { targetGPA: 3.2, label: 'Giỏi (3.2)' },
+                { targetGPA: 2.5, label: 'Khá (2.5)' },
+            ];
+
+            const results = calculateTargets(2.83, 142, 142, { targets });
+
+            // Xuất sắc (3.6): not achieved and no credits remaining
+            expect(results[0].status).toBe('no_remaining_credits');
+            expect(results[0].requiredAverage).toBeNull();
+
+            // Giỏi (3.2): not achieved and no credits remaining
+            expect(results[1].status).toBe('no_remaining_credits');
+            expect(results[1].requiredAverage).toBeNull();
+
+            // Khá (2.5): already achieved (2.83 >= 2.5), requiredAverage must be 0 (not null/undefined)
+            expect(results[2].status).toBe('achievable');
+            expect(results[2].requiredAverage).toBe(0);
+        });
+
+        it('should handle currentAccumulatedCredits exceeding totalTargetCredits gracefully', () => {
+            const targets = [
+                { targetGPA: 2.5, label: 'Khá (2.5)' },
+                { targetGPA: 3.2, label: 'Giỏi (3.2)' },
+            ];
+            // Student took 145 credits, but target was 142
+            const results = calculateTargets(2.8, 145, 142, { targets });
+            expect(results[0].status).toBe('achievable');
+            expect(results[0].requiredAverage).toBe(0);
+            expect(results[1].status).toBe('no_remaining_credits');
+            expect(results[1].requiredAverage).toBeNull();
+        });
+
         it('should compute customTargetGPA correctly when provided', () => {
             const targets = [{ targetGPA: 3.2, label: 'Giỏi' }];
             // GPA 3.0 with 100/140 credits, custom target 3.5:
