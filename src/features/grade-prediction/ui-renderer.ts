@@ -302,11 +302,17 @@ export class UIRenderer {
             let simClass = 'empty';
             let simTooltip = 'GPA sau giả lập và số môn đã sửa điểm';
 
-            if (prediction.isEdited && prediction.editedOnlySummary) {
+            if (prediction.isEdited) {
                 simValue = prediction.simulatedSummary.gpa.toFixed(2);
-                simSub = `${prediction.editedOnlySummary.courseCount} môn (${prediction.editedOnlySummary.totalAccumulatedCredits} tín) • ${prediction.simulatedSummary.classification}`;
                 simClass = 'simulated';
-                simTooltip = `GPA sau giả lập: ${prediction.simulatedSummary.gpa.toFixed(2)} | Đã sửa: ${prediction.editedOnlySummary.courseCount} môn (${prediction.editedOnlySummary.totalAccumulatedCredits} tín) | ĐTB môn sửa: ${prediction.editedOnlySummary.gpa.toFixed(2)}`;
+                if (prediction.editedOnlySummary) {
+                    simSub = `${prediction.editedOnlySummary.courseCount} môn (${prediction.editedOnlySummary.totalAccumulatedCredits} tín) • ${prediction.simulatedSummary.classification}`;
+                    simTooltip = `GPA sau giả lập: ${prediction.simulatedSummary.gpa.toFixed(2)} | Đã sửa: ${prediction.editedOnlySummary.courseCount} môn (${prediction.editedOnlySummary.totalAccumulatedCredits} tín) | ĐTB môn sửa: ${prediction.editedOnlySummary.gpa.toFixed(2)}`;
+                } else {
+                    const editedCount = this.store.rows.filter((r) => r.isEdited).length;
+                    simSub = `${editedCount} môn đã đổi • ${prediction.simulatedSummary.classification}`;
+                    simTooltip = `GPA sau giả lập: ${prediction.simulatedSummary.gpa.toFixed(2)} (${prediction.simulatedSummary.classification})`;
+                }
             }
 
             // 4. Môn đã chọn
@@ -370,6 +376,8 @@ export class UIRenderer {
                     const val = parseInt(inputCredits.value, 10);
                     if (!isNaN(val) && val > 0) {
                         this.store.setTotalTargetCredits(val);
+                    } else {
+                        inputCredits.value = this.store.totalTargetCredits.toString();
                     }
                 });
                 inputCredits.addEventListener('click', (e) => e.stopPropagation());
@@ -380,28 +388,52 @@ export class UIRenderer {
         }
 
         if (targetList) {
+            const currentActiveGPA = prediction.isEdited
+                ? prediction.simulatedSummary.gpa
+                : prediction.originalSummary.gpa;
+
             targetList.innerHTML = prediction.targets
                 .map((t) => {
                     let valDisplay: string;
                     let valClass: string;
+                    let itemTooltip: string;
 
                     if (t.status === 'no_remaining_credits') {
                         valDisplay = 'Hết tín chỉ';
                         valClass = 'impossible';
+                        itemTooltip = `Đã hoàn thành toàn bộ tín chỉ CTĐT (${prediction.totalTargetCredits} tín). Không còn tín chỉ tương lai để kéo GPA lên ${t.targetGPA.toFixed(2)}.`;
                     } else if (t.status === 'impossible') {
                         valDisplay = `Không khả thi (≥ ${t.requiredAverage?.toFixed(2)})`;
                         valClass = 'impossible';
-                    } else if (t.requiredAverage === 0) {
+                        itemTooltip = `Để đạt mục tiêu GPA ${t.targetGPA.toFixed(2)}, cần ĐTB ≥ ${t.requiredAverage?.toFixed(2)} ở ${prediction.remainingCredits} tín chỉ còn lại (vượt mức tối đa 4.0).`;
+                    } else if (
+                        t.status === 'exceeded' ||
+                        t.requiredAverage === 0 ||
+                        (t.status === 'achievable' &&
+                            (t.requiredAverage === null || t.requiredAverage <= 0))
+                    ) {
                         valDisplay = '✓ Đã đạt';
                         valClass = 'exceeded';
-                    } else {
-                        valDisplay = `Cần TB ≥ ${t.requiredAverage?.toFixed(2)}`;
+                        itemTooltip =
+                            prediction.remainingCredits === 0
+                                ? `Đã tốt nghiệp đạt mức GPA này (${currentActiveGPA.toFixed(2)} ≥ ${t.targetGPA.toFixed(2)}).`
+                                : `Đã chắc chắn đạt mục tiêu GPA ${t.targetGPA.toFixed(2)} kể cả khi các tín chỉ còn lại đạt điểm tối thiểu.`;
+                    } else if (typeof t.requiredAverage === 'number' && !isNaN(t.requiredAverage)) {
+                        valDisplay = `Cần TB ≥ ${t.requiredAverage.toFixed(2)}`;
                         valClass = 'achievable';
+                        itemTooltip =
+                            currentActiveGPA >= t.targetGPA
+                                ? `Hiện tại bạn đang ở mức này (${currentActiveGPA.toFixed(2)}), cần duy trì ĐTB ≥ ${t.requiredAverage.toFixed(2)} ở ${prediction.remainingCredits} tín chỉ còn lại.`
+                                : `Cần đạt ĐTB ≥ ${t.requiredAverage.toFixed(2)} ở ${prediction.remainingCredits} tín chỉ còn lại để tốt nghiệp mức này.`;
+                    } else {
+                        valDisplay = '✓ Đã đạt';
+                        valClass = 'exceeded';
+                        itemTooltip = `Mục tiêu GPA: ${t.targetGPA.toFixed(2)}`;
                     }
 
                     if (t.isCustom) {
                         return `
-                            <div class="${PREFIX}-target-item" title="GPA mục tiêu tùy chỉnh">
+                            <div class="${PREFIX}-target-item" title="${itemTooltip}">
                                 <span class="${PREFIX}-target-item-name">
                                     <span>🎯 Tùy chỉnh:</span>
                                     <input type="number" step="0.05" min="1.0" max="4.0" id="input-custom-target" class="${PREFIX}-target-item-input" value="${this.store.customTargetGPA.toFixed(2)}" title="Nhập GPA mục tiêu (1.0 - 4.0)">
@@ -412,7 +444,7 @@ export class UIRenderer {
                     }
 
                     return `
-                        <div class="${PREFIX}-target-item" title="Mục tiêu tốt nghiệp loại ${t.label}">
+                        <div class="${PREFIX}-target-item" title="${itemTooltip}">
                             <span class="${PREFIX}-target-item-name">${t.label}</span>
                             <span class="${PREFIX}-target-item-val ${valClass}">${valDisplay}</span>
                         </div>
@@ -429,6 +461,8 @@ export class UIRenderer {
                     const val = parseFloat(inputCustom.value);
                     if (!isNaN(val) && val >= 0 && val <= 4.0) {
                         this.store.setCustomTargetGPA(val);
+                    } else {
+                        inputCustom.value = this.store.customTargetGPA.toFixed(2);
                     }
                 });
                 inputCustom.addEventListener('click', (e) => e.stopPropagation());

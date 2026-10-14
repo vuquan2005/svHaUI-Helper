@@ -327,7 +327,8 @@ export function calculateTargets(
     totalTargetCredits: number,
     options?: CalculateTargetsOptions
 ): TargetGPAResult[] {
-    const remainingCredits = Math.max(0, totalTargetCredits - currentAccumulatedCredits);
+    const effectiveTotalCredits = Math.max(totalTargetCredits, currentAccumulatedCredits);
+    const remainingCredits = Math.max(0, effectiveTotalCredits - currentAccumulatedCredits);
     const customTargetGPA = options?.customTargetGPA;
     const baseTargets = options?.targets || TARGET_GPA_CONFIGS;
 
@@ -347,7 +348,7 @@ export function calculateTargets(
                 return {
                     targetGPA,
                     label,
-                    requiredAverage: null,
+                    requiredAverage: 0,
                     status: 'achievable',
                     isCustom,
                 };
@@ -362,7 +363,7 @@ export function calculateTargets(
         }
 
         const required =
-            (targetGPA * totalTargetCredits - currentGPA * currentAccumulatedCredits) /
+            (targetGPA * effectiveTotalCredits - currentGPA * currentAccumulatedCredits) /
             remainingCredits;
 
         if (required <= 0) {
