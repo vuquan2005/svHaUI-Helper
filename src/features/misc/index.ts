@@ -3,3 +3,4 @@
  */
 
 export { RemoveSnowfallFeature } from './remove-snowfall';
+export { MobileSidebarFeature } from './mobile-sidebar';

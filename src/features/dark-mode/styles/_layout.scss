@@ -111,41 +111,41 @@
       background-color: $sv-dark-bg-surface !important;
     }
 
-    /* Modern HaUI Sidebar (.sb) */
+    /* Modern HaUI Sidebar (.sb): preserve the portal's original spacing. */
     .sb {
       &__group {
+        background: $sv-dark-bg-surface !important;
+        border-color: $sv-dark-border !important;
         border-bottom: 1px solid $sv-dark-bg-hover !important;
-        padding-bottom: 8px !important;
-        margin-bottom: 8px !important;
 
         &-title {
+          background: $sv-dark-bg-surface !important;
+          border-color: $sv-dark-border !important;
           color: $sv-dark-text-muted !important;
           font-size: 11px !important;
           font-weight: 700 !important;
           text-transform: uppercase !important;
           letter-spacing: 0.6px !important;
-          padding: 8px 16px 4px !important;
+
+          &:hover,
+          &:focus-visible {
+            background: $sv-dark-bg-hover !important;
+            color: $sv-dark-text-head !important;
+          }
         }
       }
 
       &__list {
+        border-color: $sv-dark-border !important;
         list-style: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-
-      &__item {
-        margin: 1px 8px !important;
       }
 
       &__link {
         color: $sv-dark-text-main !important;
         background-color: transparent !important;
         border-radius: 8px !important;
-        padding: 8px 12px !important;
         display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
         text-decoration: none !important;
         transition: all 0.15s ease !important;
 
@@ -214,7 +214,6 @@
         li a {
           display: block !important;
           color: $sv-dark-text-muted !important;
-          padding: 6px 12px 6px 14px !important;
           font-size: 13px !important;
           text-decoration: none !important;
           border-radius: 6px !important;
@@ -239,8 +238,6 @@
       &__item.is-open > .sb__sub {
         background-color: $sv-dark-bg-nested !important;
         border-radius: 8px !important;
-        padding: 4px 0 !important;
-        margin: 4px 0 4px 16px !important;
         border-left: 2px solid $sv-dark-border !important;
       }
 
@@ -266,16 +263,12 @@
       /* Legacy nested items inside modern sidebar (e.g. "Hỗ trợ việc làm") */
       &__list li.parent,
       li.parent {
-        margin: 1px 8px !important;
-
         > a {
           color: $sv-dark-text-main !important;
           background-color: transparent !important;
           border-radius: 8px !important;
-          padding: 8px 12px !important;
           display: flex !important;
           align-items: center !important;
-          gap: 10px !important;
           text-decoration: none !important;
           transition: all 0.15s ease !important;
 
@@ -354,15 +347,12 @@
           overflow: visible !important;
           background-color: $sv-dark-bg-nested !important;
           border-radius: 8px !important;
-          padding: 4px 0 !important;
-          margin: 4px 0 4px 16px !important;
           border-left: 2px solid $sv-dark-border !important;
           list-style: none !important;
 
           li a {
             display: block !important;
             color: $sv-dark-text-muted !important;
-            padding: 6px 12px 6px 14px !important;
             font-size: 13px !important;
             text-decoration: none !important;
             border-radius: 6px !important;

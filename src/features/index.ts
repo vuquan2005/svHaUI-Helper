@@ -8,7 +8,7 @@ import { DynamicTitleFeature } from './dynamic-title';
 import { CaptchaHelperFeature } from './captcha-helper';
 import { GradeNavigationFeature } from './grade-navigation';
 import { SurveyAutofillFeature } from './survey-autofill';
-import { RemoveSnowfallFeature } from './misc';
+import { RemoveSnowfallFeature, MobileSidebarFeature } from './misc';
 import { ExportTimetableFeature } from './export-timetable';
 import { GradePredictionFeature } from './grade-prediction';
 import { HomeShortcutsFeature } from './home-shortcuts';
@@ -26,6 +26,7 @@ export const allFeatures: Feature<any>[] = [
     new GradePredictionFeature(),
     new SurveyAutofillFeature(),
     new RemoveSnowfallFeature(),
+    new MobileSidebarFeature(),
     new ExportTimetableFeature(),
     new HomeShortcutsFeature(),
     new ExamHelperFeature(),
