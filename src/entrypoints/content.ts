@@ -3,11 +3,13 @@ import '@/styles/buttons.scss';
 import { featureManager } from '@/core';
 import { allFeatures } from '@/features';
 import { log } from '@/core/logger';
+import { mountPortalSettings } from '@/ui/settings/portal';
 
 export default defineContentScript({
     matches: ['https://sv.haui.edu.vn/*'],
     runAt: 'document_end',
-    async main() {
+    async main(ctx) {
+        ctx.onInvalidated(mountPortalSettings());
         log.i('Initializing SV HaUI Helper...');
 
         // Register all features
