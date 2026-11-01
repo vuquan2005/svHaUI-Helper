@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.7.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.6.2...v3.7.0) (2026-11-01)
+
+
+### Features
+
+* add portal settings panel with extension logo launcher ([#151](https://github.com/vuquan2005/svHaUI-Helper/issues/151)) ([f8e4fb1](https://github.com/vuquan2005/svHaUI-Helper/commit/f8e4fb14d7cfa130bd6ceed62411136107720a1d))
+
+
+### Bug Fixes
+
+* improve mobile sidebar and dashboard layouts ([#153](https://github.com/vuquan2005/svHaUI-Helper/issues/153)) ([d2f219d](https://github.com/vuquan2005/svHaUI-Helper/commit/d2f219d63849d280fbeee28a4a7ea87190cda09f))
+
 ## [3.6.2](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.6.1...v3.6.2) (2026-10-14)
 
 
