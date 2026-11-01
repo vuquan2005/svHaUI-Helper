@@ -1,0 +1,140 @@
+@use './controls';
+
+:host {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--sv-text-main);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.launcher,
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--sv-text-main);
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background: var(--sv-bg-surface-hover);
+  }
+}
+
+button:focus-visible,
+.switch:has(input:focus-visible) {
+  outline: 2px solid var(--sv-primary);
+  outline-offset: 2px;
+}
+
+.launcher img {
+  display: block;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 30%);
+}
+
+.panel {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--sv-bg-base);
+  box-shadow: var(--sv-shadow-lg);
+  animation: settings-enter 0.18s ease-out;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--sv-border);
+    background: var(--sv-header-bg);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 17px;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: var(--sv-text-muted);
+  }
+}
+
+.close {
+  flex-shrink: 0;
+  font-size: 26px;
+}
+
+.panel-content {
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+}
+
+.status {
+  padding: 16px;
+}
+
+.toggle-item {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toggle-info {
+  flex: 1 1 180px;
+}
+
+@keyframes settings-enter {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}
+
+@media print {
+  .overlay,
+  .launcher {
+    display: none;
+  }
+}

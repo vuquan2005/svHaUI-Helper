@@ -31,6 +31,12 @@ export default defineConfig({
             version: manifestVersion,
             permissions,
             host_permissions: ['https://sv.haui.edu.vn/*'],
+            web_accessible_resources: [
+                {
+                    resources: ['icon/32.png'],
+                    matches: ['https://sv.haui.edu.vn/*'],
+                },
+            ],
             action: {
                 default_title: isDev ? 'SV HaUI Helper [DEV]' : 'SV HaUI Helper',
                 default_icon: {
