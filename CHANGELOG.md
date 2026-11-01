@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.2](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.6.1...v3.6.2) (2026-10-14)
+
+
+### Bug Fixes
+
+* **grade-prediction:** fix undefined target when remaining credits is 0 ([#146](https://github.com/vuquan2005/svHaUI-Helper/issues/146)) ([1af1a06](https://github.com/vuquan2005/svHaUI-Helper/commit/1af1a06aa040feef346eb5d4b18b26daffbab231))
+
 ## [3.6.1](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.6.0...v3.6.1) (2026-10-10)
 
 
