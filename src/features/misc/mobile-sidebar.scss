@@ -1,0 +1,15 @@
+@media screen and (max-width: 767px) {
+  .be-wrapper .be-left-sidebar[data-sv-mobile-sidebar]:not(.is-mobile-menu-hidden) {
+    position: fixed !important;
+    inset: var(--sv-mobile-sidebar-top) 0 0 !important;
+    z-index: 1029;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - var(--sv-mobile-sidebar-top)) !important;
+    max-height: calc(100dvh - var(--sv-mobile-sidebar-top)) !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+  }
+}
