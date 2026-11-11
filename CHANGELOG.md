@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.7.0...v3.8.0) (2026-11-11)
+
+
+### Features
+
+* add optional chat widget blocking ([#156](https://github.com/vuquan2005/svHaUI-Helper/issues/156)) ([10a65da](https://github.com/vuquan2005/svHaUI-Helper/commit/10a65da2657603d038360619ba7c06e62d5c0da8))
+
 ## [3.7.0](https://github.com/vuquan2005/svHaUI-Helper/compare/v3.6.2...v3.7.0) (2026-11-01)
 
 
