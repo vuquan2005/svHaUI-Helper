@@ -1,4 +1,5 @@
 import { browser } from 'wxt/browser';
+import { initChatBlocking } from '@/features/block-chat/background';
 
 // Polyfill browser.commands for Firefox Android (where browser.commands is undefined)
 // to prevent WXT dev reload shortcut listener from crashing background initialization.
@@ -31,6 +32,7 @@ try {
 }
 
 export default defineBackground(() => {
+    initChatBlocking();
     console.log('ℹ️ [HaUI:Background] Background script initialized successfully');
     async function ensureOffscreenDocument(): Promise<void> {
         if (typeof chrome === 'undefined' || !chrome.offscreen) return;

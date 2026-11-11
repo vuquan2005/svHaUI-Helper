@@ -18,7 +18,7 @@ export default defineConfig({
         const manifestVersion = isDev ? `${version}.1` : version;
         const name = isDev ? '__MSG_extensionName__ [DEV]' : '__MSG_extensionName__';
 
-        const permissions: string[] = ['storage'];
+        const permissions: string[] = ['storage', 'declarativeNetRequest'];
         // chrome.offscreen is Chromium specific
         if (browser !== 'firefox') {
             permissions.push('offscreen');
@@ -30,6 +30,11 @@ export default defineConfig({
             default_locale: 'vi',
             version: manifestVersion,
             permissions,
+            declarative_net_request: {
+                rule_resources: [
+                    { id: 'block-chat', enabled: false, path: 'rules/block-chat.json' },
+                ],
+            },
             host_permissions: ['https://sv.haui.edu.vn/*'],
             web_accessible_resources: [
                 {
@@ -52,13 +57,13 @@ export default defineConfig({
             browser_specific_settings: {
                 gecko: {
                     id: geckoId,
-                    strict_min_version: '109.0',
+                    strict_min_version: '113.0',
                     data_collection_permissions: {
                         required: ['none'],
                     },
                 },
                 gecko_android: {
-                    strict_min_version: '109.0',
+                    strict_min_version: '113.0',
                 },
             },
         };
