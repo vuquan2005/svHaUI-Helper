@@ -34,6 +34,7 @@ _(Hỗ trợ Markdown - copy toàn bộ khung bên dưới)_:
 - 📆 **Xuất Thời khóa biểu tuần**: Tự động trích xuất lịch học cả học kỳ ra file lịch chuẩn `.ics`.
 - 📊 **Dự đoán GPA & Tính điểm học kỳ**: Cho phép sinh viên tự nhập điểm thi kết thúc học phần để mô phỏng GPA, CPA tức thì.
 - 🎛️ **Giao diện Popup trực quan**: Dễ dàng bật/tắt từng tính năng theo nhu cầu cá nhân.
+- 💬 **Tùy chọn chặn widget chat**: Chặn script chat.1102.vn trên cổng sinh viên, mặc định tắt. Tải lại trang sau khi bật/tắt.
 
 ### 🔒 Quyền riêng tư & Bảo mật:
 
@@ -86,6 +87,8 @@ Testing instructions:
 
 Security & Policy notes:
 
+    Chat blocking: Optional, disabled by default. Uses a bundled declarativeNetRequest ruleset to block only https://chat.1102.vn/embed.min.js (including query parameters), for script requests initiated by sv.haui.edu.vn. Toggle in settings and reload the portal to test. No request contents are inspected or collected. Requires Firefox 113 or newer.
+
     Data Collection: The extension operates 100% client-side and does NOT collect or transmit any user data.
 
     innerHTML usage: Used strictly for rendering static UI components derived from the university portal's local DOM. No unsanitized remote data is evaluated.
@@ -117,6 +120,7 @@ Thank you very much for your time and assistance!
   - **Ảnh chụp màn hình (Screenshots)**: `assets/screenshot-1-home-page.png`, `assets/screenshot-2-studyresults.png`, `assets/screenshot-3-timetable.png`, `assets/screenshot-4-exam-plan.png` _(1280 x 800 px, tối thiểu 1 ảnh)_
 - **Giải trình quyền (Permission justifications)** khi Edge hỏi:
   - `storage`: _"Used to store user preferences and feature toggle states locally on the device."_
+  - `declarativeNetRequest`: _"Used for an optional, disabled-by-default setting that blocks only the chat.1102.vn embed script on sv.haui.edu.vn using a bundled ruleset, without inspecting request contents."_
   - `offscreen`: _"Used to run Canvas 2D operations and ONNX Runtime WebAssembly model locally for offline Captcha OCR recognition."_
 - **URL chính sách riêng tư**: `https://github.com/vuquan2005/svHaUI-Helper/blob/main/PRIVACY.md`
 - **URL trang web hỗ trợ**: `https://github.com/vuquan2005/svHaUI-Helper/issues`
@@ -169,6 +173,10 @@ Enhance student productivity on the Hanoi University of Industry (HaUI) portal b
 - **`storage`**:
   ```text
   Used to store user feature preferences (such as enabling/disabling exam countdown or auto-fill) locally on the user's browser.
+  ```
+- **`declarativeNetRequest`**:
+  ```text
+  Used for an optional, disabled-by-default setting that blocks only the chat.1102.vn embed script on sv.haui.edu.vn using a bundled ruleset. Request contents are not inspected or collected.
   ```
 - **`offscreen`**:
   ```text

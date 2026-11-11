@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "regexFilter": "^https://chat[.]1102[.]vn/embed[.]min[.]js([?].*)?$",
+      "initiatorDomains": ["sv.haui.edu.vn"],
+      "resourceTypes": ["script"]
+    }
+  }
+]

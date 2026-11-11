@@ -84,6 +84,11 @@ const FEATURES: FeatureDef[] = [
         description: 'Hiển thị danh sách đề tài của tất cả giảng viên mà không cần tải lại trang',
     },
     {
+        id: 'block-chat',
+        name: 'Chặn widget chat',
+        description: 'Chặn script chat.1102.vn trên cổng sinh viên. Tải lại trang sau khi thay đổi',
+    },
+    {
         id: 'remove-snowfall',
         name: 'Tắt hiệu ứng tuyết rơi',
         description: 'Loại bỏ script tuyết rơi trang trí gây chậm trang web',
@@ -186,7 +191,7 @@ export async function renderFeatureToggles(listEl: HTMLElement): Promise<void> {
             isChecked = undoTelex;
         } else if (feat.id === 'dark_mode_system') {
             isChecked = darkModeSystem;
-        } else if (feat.id === 'dark-mode') {
+        } else if (feat.id === 'dark-mode' || feat.id === 'block-chat') {
             isChecked = appSettings.features?.[feat.id] ?? false;
         } else {
             isChecked = appSettings.features?.[feat.id] ?? true;
